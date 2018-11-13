@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <libgen.h>
 #ifdef _WIN32
     #include <winsock2.h>
 #else
