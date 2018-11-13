@@ -1,0 +1,686 @@
+# lbmct API - Connected Topics for Ultra Messaging
+
+## API Introduction
+
+### Publisher API Intro
+
+A publisher of a connected topic needs to perform the following:
+
+* Create a context object with the normal API:
+[lbm_context_create()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a8058947690bd0995bc2c59d4a61b462f).
+
+* Create a CT object with the CT API:
+[lbmct_create()](#lbmct_create).
+This CT object is associated with a context and should be thought of as
+analogous to a context.
+For example, one CT object can host any number of CT Sources (and CT Receivers).
+
+* Create a CT Source object with a CT API:
+[lbmct_src_create()](#lbmct_src_create).
+Note that the normal source APIs involve allocating a source topic,
+and then creating the source object.
+The CT API combines those two operations into a single API.
+Also, the publisher provides two application callback functions
+that the CT Source executes as connections are established and closed.
+
+* Get the underlying UM Source object with the CT API:
+[lbmct_src_get_um_src()](#lbmct_src_get_um_src).
+
+* Optionally wait for a connection to be created.
+This is signaled by the CT Source executing the connection creation application
+callback function.
+
+* Send messages with the normal API:
+[lbm_src_send()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a91f4b9cb04fe1323ec56833211cc5cb7)
+(or other normal UM send methods).
+
+* Delete a CT Source object with a CT API:
+[lbmct_src_delete()](#lbmct_src_delete).
+This API will gracefully close any open connections associated with that
+source.
+
+* Optionally wait for any open connections to be deleted.
+This is signaled by the CT Source executing the connection deletion application
+callback function.
+
+* Delete the CT object with the CT API:
+[lbmct_delete()](#lbmct_delete).
+Note that if there are still existing CT Sources (or Receivers),
+or if CT connections are still in the process of gracefully closing,
+the call to delete will fail,
+requiring the application to wait and re-try.
+
+* Delete the context with the normal API:
+[lbm_context_delete()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a962bfceb336c65191ba08497ac70602b).
+
+---
+
+### Subscriber API Intro
+
+A subscriber of a connected topic needs to perform the following:
+
+* Create a context object with the normal API:
+[lbm_context_create()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a8058947690bd0995bc2c59d4a61b462f).
+
+* Create a CT object with the CT API:
+[lbmct_create()](#lbmct_create).
+This CT object is associated with a context and should be thought of as
+analogous to a context.
+For example, one CT object can host any number of CT Receivers (and CT Sources).
+
+* Create a CT Receiver object with a CT API:
+[lbmct_rcv_create()](#lbmct_rcv_create).
+Note that the normal receiver APIs involve looking up a receiver topic,
+and then creating the receiver object.
+The CT API combines those two operations into a single API.
+Also, the subscriber provides two application callback functions
+that the CT Receiver executes as connections are established and closed.
+
+* As the CT Receiver discovers and connects to CT Sources,
+it executes the connection creation application callback function.
+
+* As messages are received, the CT Receiver calls the receiver
+application callback function.
+
+* Delete a CT Receiver object with a CT API:
+[lbmct_rcv_delete()](#lbmct_rcv_delete).
+This API will gracefully close any open connections associated with that
+receiver.
+
+* Optionally wait for any open connections to be deleted.
+This is signaled by the CT Source executing the connection deletion application
+callback function.
+
+* Delete the CT object with the CT API:
+[lbmct_delete()](#lbmct_delete).
+Note that if there are still existing CT Receivers (or Sources),
+or if CT connections are still in the process of gracefully closing,
+the call to delete will fail,
+requiring the application to wait and re-try.
+
+* Delete the context with the normal API:
+[lbm_context_delete()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a962bfceb336c65191ba08497ac70602b).
+
+---
+
+## Application Metadata
+
+When a publisher or subscriber create a CT object
+(with [lbmct_create()](#lbmct_create)),
+the application can optionally pass in a block of binary application metadata.
+This block of data is delivered to the connected peer in its connection
+create application callback.
+This is done symmetrically: publisher metadata is delivered to subscriber,
+and subscriber metadata is delivered to publisher.
+Application would normally provide some sort of application-specific
+identification information so that each application knows "who" the peer is.
+
+No attempt is made to interpret this data.
+Many applications supply a simple string.
+If C binary structures are supplied, be aware that the fields will not be
+marshalled; if platforms of different "endian" are used,
+it is the application's responsibility to convert between host and network
+order.
+
+---
+
+## API Reference
+
+
+### lbmct_create
+
+```
+int lbmct_create(lbmct_t **ctp, lbm_context_t *ctx, lbmct_config_t *config,
+  const char *metadata, size_t metadata_sz);
+```
+
+Create a CT object, associating it with a context.
+A CT object uses an internal thread to manage the connections.
+
+**Parameters**
+
+* **`ctp`** - A pointer to a pointer to a CT object.
+Will be filled in by this function to point to the newly created
+lbmct_t object.
+
+* **`ctx`** - A normal UM context object.
+Only one CT object may be associated with a given context object.
+
+* **`config`** - Pointer to configuration structure.
+Pass NULL for defaults.
+See [lbmct_config_t](#lbmct_config_t).
+
+* **`metadata`** - An optional pointer to a block of application
+identification information.
+The information will be copied.
+If no metadata is desired, pass NULL.
+
+* **`metadata_sz`** - Number of bytes pointed to by `metadata`.
+If no metadata is desired, pass zero.
+
+**Returns**
+
+0 for Success and -1 for Failure.
+On Failure, use
+[lbm_errmsg()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a22a4650d3a5b649c84a0c05adedcc055)
+to obtain a pointer to an ASCII string containing the error message.
+
+
+### lbmct_delete
+
+```
+int lbmct_delete(lbmct_t *ct);
+```
+
+Deletes a CT object.
+It is the application's responsibility to first delete all CT Sources and
+receivers and wait for their graceful deletions to complete.
+
+**Parameters:**
+
+* **`ct`** - A pointer to a CT object.
+
+**Returns**
+
+0 for Success and -1 for Failure.
+On Failure, use
+[lbm_errmsg()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a22a4650d3a5b649c84a0c05adedcc055)
+to obtain a pointer to an ASCII string containing the error message.
+
+
+### lbmct_src_create
+
+```
+int lbmct_src_create(lbmct_src_t **ct_srcp, lbmct_t *ct, const char *topic_str,
+  lbm_src_topic_attr_t *src_attr,
+  lbm_src_cb_proc src_cb,
+  lbmct_src_conn_create_function_cb src_conn_create_cb,
+  lbmct_src_conn_delete_function_cb src_conn_delete_cb,
+  void *clientd);
+```
+
+Creates a CT Source object.
+
+**Parameters:**
+
+* **`ct_srcp`** - A pointer to a pointer to a CT Source object.
+Will be filled in by this function to point to the newly created
+lbmct_src_t object.
+
+* **`ct`** - A pointer to a CT object.
+
+* **`topic_str`** - The topic string.
+Topic strings should be limited in length to 246 characters
+(not including the final null).
+
+* **`src_attr`** - Pointer to a Src Topic attribute object for passing in
+options.
+This is the same attribute object that is used with normal source creation.
+See [lbm_src_topic_attr_create()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#ad6ed0c9ec2565764a31f2db09a0e43c3).
+
+* **`src_cb`** - Pointer to application callback function.
+The underlying UM source calls this function in response to events related
+to the source.
+If NULL, source events are not delivered.
+See [lbm_src_cb_proc](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a0fe745a748ae36759c312737d9f127f7).
+
+* **`src_conn_create_cb`** - Pointer to application callback function.
+The CT Source calls this function each time a new connection is established
+for this topic.
+See [lbmct_src_conn_create_function_cb](#lbmct_src_conn_create_function_cb).
+
+* **`src_conn_delete_cb`** - Pointer to application callback function.
+The CT Source calls this function each time an existing function is closed
+on this topic.
+See [lbmct_src_conn_delete_function_cb](#lbmct_src_conn_delete_function_cb).
+
+* **`clientd`** - A pointer to client (application) state data.
+This pointer is not dereferenced by CT.
+Rather, it is simply passed through to the src_cb, src_conn_create_cb,
+and src_conn_delete_cb application callback functions.
+
+**Returns**
+
+0 for Success and -1 for Failure.
+On Failure, use
+[lbm_errmsg()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a22a4650d3a5b649c84a0c05adedcc055)
+to obtain a pointer to an ASCII string containing the error message.
+
+
+### lbmct_src_conn_create_function_cb
+
+```
+typedef void *(*lbmct_src_conn_create_function_cb)(lbmct_src_conn_t *src_conn,
+  lbmct_peer_info_t *peer_info, void *clientd);
+```
+
+Function pointer for connection creation.
+The CT Source calls this application callback when a new connection is
+established.
+The function should return a pointer to its own connection-specific state,
+or NULL if no state is needed.
+See [lbmct_src_create()](#lbmct_src_create)
+
+**Parameters:**
+
+* **`src_conn`** - A pointer to a CT connection object.
+This object is not created directly by the application, but rather is
+created and managed by the CT Source.
+
+* **`peer_info`** - A pointer to a structure containing information about
+the connecting CT Receiver.
+See [lbmct_peer_info_t](#lbmct_peer_info_t).
+
+* **`clientd`** - A pointer to application state.
+This is a copy of the clientd pointer passed to
+[lbmct_src_create()](#lbmct_src_create).
+
+**Returns**
+
+Pointer to application's connection-specific state information, or NULL
+if not needed.
+This pointer is passed to the
+[lbmct_src_conn_delete_function_cb](#lbmct_src_conn_delete_function_cb]
+application callback when the connection is closed.
+
+
+### lbmct_src_conn_delete_function_cb
+
+```
+typedef void *(*lbmct_src_conn_delete_function_cb)(lbmct_src_conn_t *src_conn,
+  lbmct_peer_info_t *peer_info, void *clientd, void *conn_clientd);
+```
+
+Function pointer for connection deletion.
+The CT Source calls this application callback when a new connection is
+closed.
+See [lbmct_src_create()](#lbmct_src_create)
+
+**Parameters:**
+
+* **`src_conn`** - A pointer to a CT connection object.
+This object is not created directly by the application, but rather is
+created and managed by the CT Source.
+
+* **`peer_info`** - A pointer to a structure containing information about
+the connecting CT Receiver.
+See [lbmct_peer_info_t](#lbmct_peer_info_t).
+
+* **`clientd`** - A pointer to application state.
+This is a copy of the clientd pointer passed to
+[lbmct_src_create()](#lbmct_src_create).
+
+* **`conn_clientd`** - A pointer to application state.
+This is a copy of the pointer returned by
+[lbmct_src_conn_create_function_cb][#lbmct_src_conn_create_function_cb]
+at connection creation time.
+
+**Returns**
+
+0 for Success and -1 for Failure.
+On Failure, use
+[lbm_errmsg()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a22a4650d3a5b649c84a0c05adedcc055)
+to obtain a pointer to an ASCII string containing the error message.
+
+
+## lbmct_src_get_um_src
+
+```
+lbm_src_t *lbmct_src_get_um_src(lbmct_src_t *ct_src);
+```
+
+Function to get the underlying UM Source object associated with a CT Source.
+That UM Source object is needed for sending messages.
+
+**Parameters:**
+
+* **`ct_src`** - A pointer to a CT Source object.
+
+**Returns**
+
+UM Source object pointer.
+
+
+### lbmct_src_delete
+
+```
+int lbmct_src_delete(lbmct_src_t *ct_src);
+```
+
+Initiates deletion of a CT Source object.
+Any open connections associated with the Source are gracefully closed.
+
+**Parameters:**
+
+* **`ct_src`** - A pointer to a CT Source object.
+
+**Returns**
+
+0 for Success and -1 for Failure.
+On Failure, use
+[lbm_errmsg()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a22a4650d3a5b649c84a0c05adedcc055)
+to obtain a pointer to an ASCII string containing the error message.
+
+
+### lbmct_rcv_create
+
+```
+int lbmct_rcv_create(lbmct_rcv_t **ct_rcvp, lbmct_t *ct, const char *topic_str,
+  lbm_rcv_topic_attr_t *rcv_attr,
+  lbm_rcv_cb_proc rcv_cb,
+  lbmct_rcv_conn_create_function_cb rcv_conn_create_cb,
+  lbmct_rcv_conn_delete_function_cb rcv_conn_delete_cb,
+  void *clientd);
+```
+
+Creates a CT Receiver object.
+
+**Parameters:**
+
+* **`ct_rcvp`** - A pointer to a pointer to a CT Receiver object.
+Will be filled in by this function to point to the newly created
+lbmct_rcv_t object.
+
+* **`ct`** - A pointer to a CT object.
+
+* **`topic_str`** - The topic string.
+Topic strings should be limited in length to 246 characters
+(not including the final null).
+
+* **`rcv_attr`** - Pointer to a Src Topic attribute object for passing in
+options.
+This is the same attribute object that is used with normal receiver creation.
+See [lbm_rcv_topic_attr_create()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#ad6ed0c9ec2565764a31f2db09a0e43c3).
+
+* **`rcv_cb`** - Pointer to application callback function.
+The underlying UM Receiver calls this function in response to events related
+to the receiver.
+See [lbm_rcv_cb_proc](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a0fe745a748ae36759c312737d9f127f7).
+
+* **`rcv_conn_create_cb`** - Pointer to application callback function.
+The CT Receiver calls this function each time a new connection is established
+for this topic.
+See [lbmct_rcv_conn_create_function_cb](#lbmct_rcv_conn_create_function_cb).
+
+* **`rcv_conn_delete_cb`** - Pointer to application callback function.
+The CT Receiver calls this function each time an existing function is closed
+on this topic.
+See [lbmct_rcv_conn_delete_function_cb](#lbmct_rcv_conn_delete_function_cb).
+
+* **`clientd`** - A pointer to client (application) state data.
+This pointer is not dereferenced by CT.
+Rather, it is simply passed through to the rcv_cb, rcv_conn_create_cb,
+and rcv_conn_delete_cb application callback functions.
+
+**Returns**
+
+0 for Success and -1 for Failure.
+On Failure, use
+[lbm_errmsg()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a22a4650d3a5b649c84a0c05adedcc055)
+to obtain a pointer to an ASCII string containing the error message.
+
+
+### lbmct_rcv_conn_create_function_cb
+
+```
+typedef void *(*lbmct_rcv_conn_create_function_cb)(lbmct_rcv_conn_t *rcv_conn,
+  lbmct_peer_info_t *peer_info, void *clientd);
+```
+
+Function pointer for connection creation.
+The CT Receiver calls this application callback when a new connection is
+established.
+The function should return a pointer to its own connection-specific state,
+or NULL if no state is needed.
+See [lbmct_rcv_create()](#lbmct_rcv_create)
+
+**Parameters:**
+
+* **`rcv_conn`** - A pointer to a CT connection object.
+This object is not created directly by the application, but rather is
+created and managed by the CT Receiver.
+
+* **`peer_info`** - A pointer to a structure containing information about
+the connecting CT Source.
+See [lbmct_peer_info_t](#lbmct_peer_info_t).
+
+* **`clientd`** - A pointer to application state.
+This is a copy of the clientd pointer passed to
+[lbmct_rcv_create()](#lbmct_rcv_create).
+
+**Returns**
+
+Pointer to application's connection-specific state information, or NULL
+if not needed.
+This pointer is passed to the receiver callback (rcv_cb) in the
+[lbm_msg_t](https://ultramessaging.github.io/currdoc/doc/API/structlbm__msg__t__stct.html)
+structure field `source_clientd`.
+It is also passed to the
+[lbmct_rcv_conn_delete_function_cb](#lbmct_rcv_conn_delete_function_cb]
+application callback when the connection is closed.
+
+
+### lbmct_rcv_conn_delete_function_cb
+
+```
+typedef void *(*lbmct_rcv_conn_delete_function_cb)(lbmct_rcv_conn_t *rcv_conn,
+  lbmct_peer_info_t *peer_info, void *clientd, void *conn_clientd);
+```
+
+Function pointer for connection deletion.
+The CT Receiver calls this application callback when a new connection is
+closed.
+See [lbmct_rcv_create()](#lbmct_rcv_create)
+
+**Parameters:**
+
+* **`rcv_conn`** - A pointer to a CT connection object.
+This object is not created directly by the application, but rather is
+created and managed by the CT Receiver.
+
+* **`peer_info`** - A pointer to a structure containing information about
+the connecting CT Source.
+See [lbmct_peer_info_t](#lbmct_peer_info_t).
+
+* **`clientd`** - A pointer to application state.
+This is a copy of the clientd pointer passed to
+[lbmct_rcv_create()](#lbmct_rcv_create).
+
+* **`conn_clientd`** - A pointer to application state.
+This is a copy of the pointer returned by
+[lbmct_rcv_conn_create_function_cb][#lbmct_rcv_conn_create_function_cb]
+at connection creation time.
+
+**Returns**
+
+0 for Success and -1 for Failure.
+On Failure, use
+[lbm_errmsg()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a22a4650d3a5b649c84a0c05adedcc055)
+to obtain a pointer to an ASCII string containing the error message.
+
+
+### lbmct_rcv_delete
+
+```
+int lbmct_rcv_delete(lbmct_rcv_t *ct_rcv);
+```
+
+Initiates deletion of a CT Receiver object.
+Any open connections associated with the Receiver are gracefully closed.
+
+**Parameters:**
+
+* **`ct_rcv`** - A pointer to a CT Receiver object.
+
+**Returns**
+
+0 for Success and -1 for Failure.
+On Failure, use
+[lbm_errmsg()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a22a4650d3a5b649c84a0c05adedcc055)
+to obtain a pointer to an ASCII string containing the error message.
+
+
+### lbmct_debug_dump
+
+```
+void lbmct_debug_dump(lbmct_t *ct, const char *msg);
+```
+
+Write UM log messages containing diagnostic information about the CT object,
+including a list of recent events.
+See [Internal_Design.md#recent-events](Internal_Design.md#recent-events).
+
+**Parameters:**
+
+* **`ct`** - A pointer to a CT object.
+
+* **`msg`** - A pointer to an ASCII string to be printed with the diagnostic
+information.
+
+**Returns**
+
+none.
+
+
+### lbmct_peer_info_t
+
+```
+typedef struct {
+  int status;  /* LBMCT_CONN_STATUS_* */
+  lbm_uint32_t flags;  /* Bitmap of LBMCT_PEER_INFO_FLAGS_* */
+  char *src_metadata;
+  size_t src_metadata_len;
+  char *rcv_metadata;
+  size_t rcv_metadata_len;
+  char rcv_source_name[LBM_MSG_MAX_SOURCE_LEN+1];  /* Not very useful to app. */
+  lbm_uint_t rcv_start_seq_num;  /* Receive-side sequence number of CRSP. */
+  lbm_uint_t rcv_end_seq_num;  /* Receive-side sequence number or DRSP. */
+} lbmct_peer_info_t;
+```
+
+This structure is supplied to the application by the connection create and
+delete application callbacks.
+It contains information about both the CT Source and CT Receiver.
+
+Note that there are circumstances where not all of the information is
+available when the structure is passed to the application.
+For example, the connection create callback does not yet know what the
+`rcv_end_seq_num` will be, since that information is determined when
+the connection is closed.
+
+The `flags` field is a bitmap indicating which of the subsequent fields are
+valid.
+The bits are:
+```
+#define LBMCT_PEER_INFO_FLAGS_SRC_METADATA 0x1
+#define LBMCT_PEER_INFO_FLAGS_SRC_METADATA_LEN 0x2
+#define LBMCT_PEER_INFO_FLAGS_RCV_METADATA 0x4
+#define LBMCT_PEER_INFO_FLAGS_RCV_METADATA_LEN 0x8
+#define LBMCT_PEER_INFO_FLAGS_RCV_SOURCE_NAME 0x10
+#define LBMCT_PEER_INFO_FLAGS_RCV_START_SEQ_NUM 0x20
+#define LBMCT_PEER_INFO_FLAGS_RCV_END_SEQ_NUM 0x40
+```
+
+**Fields**
+
+* **`status`** - Indicates health of the connection at that point in time.
+Possible values: LBMCT_CONN_STATUS_OK, LBMCT_CONN_STATUS_BAD_CLOSE.
+
+* **`flags`** - Bitmap indicating which subsequent fields are set.
+
+* **`src_metadata`** - Pointer to the CT Source's application metadata
+supplied in the publisher's call to [lbmct_create()][#lbmct_create].
+If the publisher did not supply metadata,
+the LBMCT_PEER_INFO_FLAGS_SRC_METADATA bit will be zero in the `flags` field.
+
+* **`src_metadata_len` - Number of bytes of metadata pointed to by
+`rcv_metadata`.
+
+* **`rcv_metadata`** - Pointer to the CT Receiver's applicaiton metadata
+supplied in the subscriber's call to [lbmct_create()][#lbmct_create].
+If the subscriber did not supply metadata,
+the LBMCT_PEER_INFO_FLAGS_SRC_METADATA bit will be zero in the `flags` field.
+
+* **`src_metadata_len` - Number of bytes of metadata pointed to by
+`src_metadata`.
+
+* **`rcv_source_name`** - Source "name" as seen by receiver.
+This field is only filled in on the subscriber side.
+Note that especially in a DRO environment, different subscribers can
+see different source names for the same actual source.
+The IP and Port will be that of the DRO's proxy source, not the
+originating source's IP and Port.
+
+* **`rcv_start_seq_num`** - Topic-level sequence number of the CRSP handshake
+received by the subscriber which established the connection.
+
+* **`rcv_end_seq_num`** - Topic-level sequence number of the DRSP handsnake
+received by the subscriber which closed the connection.
+
+
+### lbmct_config_t
+
+```
+typedef struct lbmct_config_t_stct {
+  lbm_uint32_t flags;  /* LBMCT_CONFIG_FLAGS_... */
+  lbm_uint32_t test_bits;  /* Set bits for internal testing. */
+  int domain_id;   /* Domain ID for context passed into lbmct_create(). */
+  int delay_creq;  /* Time (in ms) to delay sending initial CREQ handshake. */
+  int retry_ivl;   /* Timeout to retry a handshake. */
+  int max_tries;   /* Give up after this many handshake tries. */
+} lbmct_config_t;
+```
+
+This structure is set by the application and passed in at CT object
+creation time.
+The application can selectively set as many or as few fields as desired.
+For fields that are not set, the default values used by CT are as follows:
+
+The default values for the fields are:
+```
+#define LBMCT_CT_CONFIG_DEFAULT_TEST_BITS  0x00000000
+#define LBMCT_CT_CONFIG_DEFAULT_DOMAIN_ID  0
+#define LBMCT_CT_CONFIG_DEFAULT_DELAY_CREQ 10    /* 10 ms */
+#define LBMCT_CT_CONFIG_DEFAULT_RETRY_IVL  1000  /* 1 sec */
+#define LBMCT_CT_CONFIG_DEFAULT_MAX_TRIES  5
+```
+
+The `flags` field is a bitmap indicating which of the subsequent fields are
+valid.
+The application must "OR" together the bits corresponding to the fields that
+it has set.
+The bits are:
+```
+#define LBMCT_CT_CONFIG_FLAGS_TEST_BITS  0x00000001
+#define LBMCT_CT_CONFIG_FLAGS_DOMAIN_ID  0x00000002
+#define LBMCT_CT_CONFIG_FLAGS_DELAY_CREQ 0x00000004
+#define LBMCT_CT_CONFIG_FLAGS_RETRY_IVL  0x00000008
+#define LBMCT_CT_CONFIG_FLAGS_MAX_TRIES  0x00000010
+```
+
+**Fields**
+
+* **`flags`** - Bitmap indicating which subsequent fields are set
+by the application
+
+* **`test_bits`** - Bitmap used to control internal behavior for unit testing.
+Not for normal use.
+
+* **`domain_id`** - For DRO environments,
+the publisher should set this to the Domain ID for this application.
+For non-DRO environments, this can be left at its default value of 0.
+
+* **`delay_creq`** - When a receiver discovers a source, it delays sending its
+connect request message.
+This is to avoid "head loss" on the source's transport session.
+
+* **`retry_ivl`** - The CT layer uses handshake control messages to
+manage connections.
+There are situations where these messages can be lost,
+so a retry mechanism is used to recover lost handshake control messages.
+The `retry_ivl` field indicates the time interval used for retries.
+NOTE: this retry mechanism is for the opening and closing of connections.
+They are not a keepalive mechanism to detect failure of an active connection.
+
+* **`max_tries`** - Maximum number of attempts to exchange a given
+handshake control message before CT gives up and deletes the connection.
