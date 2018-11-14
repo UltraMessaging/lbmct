@@ -61,7 +61,7 @@ void *lbmct_src_notif_create_cb(const char *source_name, void *clientd)
   if (source_name_len >= sizeof(rcv_conn_create->source_name)) {
     lbm_logf(LBM_LOG_ERR,
       "Error at %s:%d, source_name too long (%s)\n",
-      basename(__FILE__), __LINE__, source_name);
+      BASENAME(__FILE__), __LINE__, source_name);
     return NULL;
   }
 
@@ -228,7 +228,7 @@ int lbmct_rcv_handle_handshake_crsp(lbmct_rcv_conn_t *rcv_conn, lbm_msg_t *msg)
       if (err != LBM_OK) {
         lbm_logf(LBM_LOG_ERR,
           "Error at %s:%d, could not submit send c_ok\n",
-          basename(__FILE__), __LINE__);
+          BASENAME(__FILE__), __LINE__);
       }
     }
     rcv_conn->pending_tmr_id = -1;  /* Not expecting a tick. */
@@ -351,13 +351,13 @@ int lbmct_rcv_handle_handshake_drsp(lbmct_rcv_conn_t *rcv_conn, lbm_msg_t *msg)
         if (err != LBM_OK) {
           lbm_logf(LBM_LOG_ERR,
             "Error at %s:%d, could not submit send c_ok\n",
-            basename(__FILE__), __LINE__);
+            BASENAME(__FILE__), __LINE__);
         }
       }
     }  /* if state = starting, running, time_wait */
     else {
       lbm_logf(LBM_LOG_ERR, "Warning at %s:%d, received DRSP handshake when rcv_conn in state %d\n",
-        basename(__FILE__), __LINE__, (int)rcv_conn->state);
+        BASENAME(__FILE__), __LINE__, (int)rcv_conn->state);
     }
     rcv_conn->pending_tmr_id = -1;  /* Not expecting a tick. */
 
@@ -394,7 +394,7 @@ int lbmct_rcv_side_msg_rcv_cb(lbm_rcv_t *rcv, lbm_msg_t *msg, void *clientd)
   if (starting_state == LBMCT_CONN_STATE_PRE_CREATED) {
     lbm_logf(LBM_LOG_INFO,
       "%s:%d, Received UM event type %d on pre-created connection; ignoring\n",
-      basename(__FILE__), __LINE__, msg->type);
+      BASENAME(__FILE__), __LINE__, msg->type);
     return LBM_OK;
   }
 
@@ -632,7 +632,7 @@ int lbmct_handshake_send_creq(lbmct_rcv_conn_t *rcv_conn)
     if (err != LBM_OK) {
       lbm_logf(LBM_LOG_NOTICE,
         "%s:%d, error sending CREQ to %s: '%s'\n",
-        basename(__FILE__), __LINE__, dest_addr, lbm_errmsg());
+        BASENAME(__FILE__), __LINE__, dest_addr, lbm_errmsg());
 
       rcv_conn->state = LBMCT_CONN_STATE_TIME_WAIT;
 
@@ -644,7 +644,7 @@ int lbmct_handshake_send_creq(lbmct_rcv_conn_t *rcv_conn)
   else {
     lbm_logf(LBM_LOG_NOTICE,
       "LBMCT_TEST_BITS_NO_CREQ at %s:%d, skipping send of '%s' to %s\n",
-      basename(__FILE__), __LINE__, creq_msg, dest_addr);
+      BASENAME(__FILE__), __LINE__, creq_msg, dest_addr);
   }
 
   return LBM_OK;
@@ -692,7 +692,7 @@ int lbmct_handshake_send_dreq(lbmct_rcv_conn_t *rcv_conn)
   else {
     lbm_logf(LBM_LOG_NOTICE,
       "LBMCT_TEST_BITS_NO_DREQ at %s:%d, skipping send of '%s' to %s\n",
-      basename(__FILE__), __LINE__, dreq_msg, rcv_conn->src_uim_addr);
+      BASENAME(__FILE__), __LINE__, dreq_msg, rcv_conn->src_uim_addr);
   }
 
   return LBM_OK;
@@ -781,7 +781,7 @@ int lbmct_ctrlr_cmd_rcv_conn_tick(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
         rcv_conn->curr_creq_timeout = ct->active_config.retry_ivl;
       }
     }
-lbm_logf(LBM_LOG_NOTICE, "DEBUG at %s:%d, curr_creq_timeout=%d, retry_ivl=%d, try_cnt=%d\n", basename(__FILE__), __LINE__, rcv_conn->curr_creq_timeout, rcv_conn->ct->active_config.retry_ivl, rcv_conn->try_cnt);
+lbm_logf(LBM_LOG_NOTICE, "DEBUG at %s:%d, curr_creq_timeout=%d, retry_ivl=%d, try_cnt=%d\n", BASENAME(__FILE__), __LINE__, rcv_conn->curr_creq_timeout, rcv_conn->ct->active_config.retry_ivl, rcv_conn->try_cnt);
 
     if (rcv_conn->try_cnt < ct->active_config.max_tries) {
       /* (Re-)try the CREQ. */
@@ -800,7 +800,7 @@ lbm_logf(LBM_LOG_NOTICE, "DEBUG at %s:%d, curr_creq_timeout=%d, retry_ivl=%d, tr
       /* Too many retries, force-delete the conn.  No need to call user's
        * conn delete callback because we never got any response and did not
        * call the user's conn create callback. */
-      lbm_logf(LBM_LOG_WARNING, "Warning at %s:%d, giving up connecting to source '%s' for topic '%s'\n", basename(__FILE__), __LINE__, rcv_conn->peer_info.rcv_source_name, ct_rcv->topic_str);
+      lbm_logf(LBM_LOG_WARNING, "Warning at %s:%d, giving up connecting to source '%s' for topic '%s'\n", BASENAME(__FILE__), __LINE__, rcv_conn->peer_info.rcv_source_name, ct_rcv->topic_str);
 
       /* Postpone final deletion until per-source clientd deletion.
        * But do tell the user the connection is down.
@@ -828,7 +828,7 @@ lbm_logf(LBM_LOG_NOTICE, "DEBUG at %s:%d, curr_creq_timeout=%d, retry_ivl=%d, tr
     }
     else {
       /* Too many retries, force-delete the connection. */
-      lbm_logf(LBM_LOG_WARNING, "Warning at %s:%d, giving up closing connection to source '%s' for topic '%s'\n", basename(__FILE__), __LINE__, rcv_conn->peer_info.rcv_source_name, ct_rcv->topic_str);
+      lbm_logf(LBM_LOG_WARNING, "Warning at %s:%d, giving up closing connection to source '%s' for topic '%s'\n", BASENAME(__FILE__), __LINE__, rcv_conn->peer_info.rcv_source_name, ct_rcv->topic_str);
       rcv_conn->peer_info.status = LBMCT_CONN_STATUS_BAD_CLOSE;
 
       /* Postpone final deletion until per-source clientd deletion.
@@ -861,7 +861,7 @@ lbm_logf(LBM_LOG_NOTICE, "DEBUG at %s:%d, curr_creq_timeout=%d, retry_ivl=%d, tr
      * is enqueued.
      */
     lbm_logf(LBM_LOG_INFO, "Info at %s:%d, received timeout when rcv_conn in state %d\n",
-      basename(__FILE__), __LINE__, (int)rcv_conn->state);
+      BASENAME(__FILE__), __LINE__, (int)rcv_conn->state);
   }
 
   return LBM_OK;
@@ -1083,7 +1083,7 @@ int lbmct_ctrlr_cmd_ct_rcv_delete(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
 
       lbm_logf(LBM_LOG_NOTICE,
         "%s:%d, deleting conn in state %d, skipping DREQ\n",
-        basename(__FILE__), __LINE__, rcv_conn->state);
+        BASENAME(__FILE__), __LINE__, rcv_conn->state);
     }
 
     rcv_conn = rcv_conn->conn_list_next;
@@ -1184,7 +1184,7 @@ int lbmct_ctrlr_cmd_rcv_send_c_ok(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
   else {
     lbm_logf(LBM_LOG_NOTICE,
       "LBMCT_TEST_BITS_NO_C_OK at %s:%d, skipping send of '%s' to %s\n",
-      basename(__FILE__), __LINE__, c_ok_msg, rcv_conn->src_uim_addr);
+      BASENAME(__FILE__), __LINE__, c_ok_msg, rcv_conn->src_uim_addr);
   }
   free(c_ok_msg);
 
@@ -1234,7 +1234,7 @@ int lbmct_ctrlr_cmd_rcv_send_d_ok(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
   else {
     lbm_logf(LBM_LOG_NOTICE,
       "LBMCT_TEST_BITS_NO_D_OK at %s:%d, skipping send of '%s' to %s\n",
-      basename(__FILE__), __LINE__, d_ok_msg, rcv_conn->src_uim_addr);
+      BASENAME(__FILE__), __LINE__, d_ok_msg, rcv_conn->src_uim_addr);
   }
 
   return LBM_OK;
