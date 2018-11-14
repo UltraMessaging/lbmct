@@ -4,6 +4,8 @@ This page explains how to write Connected Topic application
 
 ## Publisher Code Outline
 
+See [min_ct_src.c](min_ct_src.c) for a compilable example.
+
 A publisher of a connected topic needs to perform the following:
 
 **Initialization**
@@ -62,6 +64,8 @@ requiring the application to wait and re-try.
 ---
 
 ## Subscriber Code Outline
+
+See [min_ct_rcv.c](min_ct_rcv.c) for a compilable example.
 
 A subscriber of a connected topic needs to perform the following:
 
