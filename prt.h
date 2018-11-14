@@ -158,7 +158,7 @@ typedef CRITICAL_SECTION prt_mutex_t;
 typedef HANDLE prt_sem_t;
 #define PRT_SEM_INIT(_s, _i) _s = CreateSemaphore(NULL, _i, INT_MAX, NULL)
 #define PRT_SEM_DELETE(_s) CloseHandle(_s)
-#define PRT_SEM_POST(_s) ReleaseSemaphore(&s, 1, NULL)
+#define PRT_SEM_POST(_s) ReleaseSemaphore(&_s, 1, NULL)
 #define PRT_SEM_WAIT(_s) WaitForSingleObject(_s, INFINITE)
 
 typedef HANDLE prt_thread_t;

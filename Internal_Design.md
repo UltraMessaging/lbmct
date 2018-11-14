@@ -1,5 +1,7 @@
 # lbmct - Internal Design
 
+This page provides details on the CT implementation.
+
 ### Recent Events
 
 There is a circular recording of recent "events" stored with the ct_t structure

@@ -26,15 +26,17 @@ deliver deletion events.
 
 The rest of this page provides a high-level description of the CT package.
 You can also jump to other pages:
-* [API.md](API.md)
-* [Internal_Design.md](Internal_Design.md)
+* [User Guide](Userguide.md) - explains how to write connected applications.
+* [API Reference](API.md) - details on each API.
+* [Internal Design](Internal_Design.md) - details of the CT implementation.
 
 ---
 
 ## Features
 
-* Publishing and subscribing applications can provide a block of metadata which
-will be delivered to the connection peer via the connection create callback.
+* Publishing and subscribing applications can provide a block of user-defined
+metadata which will be delivered to the connection peer via the connection
+create callback.  This is typically used for identification.
 
 * As part of connection creation and deletion, both the publisher and
 subscriber are informed of the first and last topic sequence numbers
@@ -62,12 +64,15 @@ so CT does require at least UM version 6.10.
 Users are invited to improve CT and submit pull requests.
 
 * Both normal and Connected Sources and Receivers can share the same
-context, and even the same transport sessions.
+UM context, and even the same transport sessions.
 But see [Interoperability](#interoperability).
 
 ---
 
-## Limitations
+## Opportunities and Limitations
+
+Most of the limitations that follow could be implemented,
+with varying degrees of effort.
 
 * CT is not compatible with UM’s queuing features, including ULB.
 
@@ -92,6 +97,11 @@ create and donate its thread.
 
 * CT does not yet have Java and .NET wrappers.
 
+* Do we need a "Force Quit" flag for connection and CT objectd?
+
+* In a DRO environment, you need to configure CT what the domain ID is.
+CT does not discover the domain ID dynamically.
+
 ---
 
 ## Caveats
@@ -100,10 +110,10 @@ create and donate its thread.
 the thousands.
 
 * CT is not officially part of the UM product family.
-Support for CT will take a back seat to product support,
+Support for CT may not be as rapid as product support,
 but we are committed to maintaining all of the code in the UM Github,
 including CT.
-However, note that:
+Note that:
 
    * Informatica does not include CT in its QA testing.
 Note however that CT includes a reasonably extensive automated self-test.
@@ -111,7 +121,7 @@ Note however that CT includes a reasonably extensive automated self-test.
    * Informatica does not commit to ensuring that future UM development will
 be compatible with CT.
 Note however that CT was developed with knowledge of the current UM roadmap,
-and every effort has been taken to make it forwards compatible with known
+and every effort has been taken to make it forward compatible with known
 product evolution directions.
 
 * The receiver-side BOS/EOS events are suppressed.
@@ -164,7 +174,7 @@ a CT Source, as “observers” (see next item).
 * A CT Source can be subscribed by a non-CT Receiver.
 This is a valid “observer” use case and will not trigger any CT-oriented
 activities on the source.
-Note that the source will be completely unaware of non-CT Receivers and will
+Note that the source will be nominally unaware of non-CT Receivers and will
 not be able to issue any kind of warning if this use case is not desired.
 
 * A CT Receiver subscribing to a non-CT Source is not supported.
@@ -180,5 +190,7 @@ although the SmartSource code could be conditionally compiled.
 ---
 
 You can now jump to other pages:
-* [API.md](API.md)
-* [Internal_Design.md](Internal_Design.md)
+* [User Guide](Userguide.md) - explains how to write Connected
+Topic applications.
+* [API Reference](API.md) - details on each API function and structure.
+* [Internal Design](Internal_Design.md) - details of the CT implementation.

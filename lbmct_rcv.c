@@ -356,7 +356,7 @@ int lbmct_rcv_handle_handshake_drsp(lbmct_rcv_conn_t *rcv_conn, lbm_msg_t *msg)
       }
     }  /* if state = starting, running, time_wait */
     else {
-      lbm_logf(LBM_LOG_ERR, "Warning at %s:%d, received DRSP handshake when rcv_conn in state %d\n",
+      lbm_logf(LBM_LOG_WARNING, "Warning at %s:%d, received DRSP handshake when rcv_conn in state %d\n",
         BASENAME(__FILE__), __LINE__, (int)rcv_conn->state);
     }
     rcv_conn->pending_tmr_id = -1;  /* Not expecting a tick. */
@@ -786,7 +786,6 @@ int lbmct_ctrlr_cmd_rcv_conn_tick(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
         rcv_conn->curr_creq_timeout = ct->active_config.retry_ivl;
       }
     }
-lbm_logf(LBM_LOG_NOTICE, "DEBUG at %s:%d, curr_creq_timeout=%d, retry_ivl=%d, try_cnt=%d\n", BASENAME(__FILE__), __LINE__, rcv_conn->curr_creq_timeout, rcv_conn->ct->active_config.retry_ivl, rcv_conn->try_cnt);
 
     if (rcv_conn->try_cnt < ct->active_config.max_tries) {
       /* (Re-)try the CREQ. */

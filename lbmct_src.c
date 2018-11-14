@@ -479,7 +479,7 @@ int lbmct_src_handle_handshake_creq(lbmct_t *ct,
     if (err != LBM_OK) E_RTN(lbm_errmsg(), -1);
   }
   else {
-    lbm_logf(LBM_LOG_ERR, "Warning at %s:%d, received CREQ handshake when src_conn in state %d\n",
+    lbm_logf(LBM_LOG_WARNING, "Warning at %s:%d, received CREQ handshake when src_conn in state %d\n",
       BASENAME(__FILE__), __LINE__, (int)src_conn->state);
   }
 
@@ -594,12 +594,12 @@ int lbmct_src_handle_handshake_c_ok(lbmct_t *ct,
     }  /* if state == starting */
     else {  /* state == running */
       /* Would not normally happen except in a retry. */
-      lbm_logf(LBM_LOG_ERR, "Warning at %s:%d, received C_OK handshake when src_conn in state %d\n",
+      lbm_logf(LBM_LOG_INFO, "Info at %s:%d, received C_OK handshake when src_conn in state %d\n",
         BASENAME(__FILE__), __LINE__, (int)src_conn->state);
     }
   }  /* if state = starting or running */
   else {
-    lbm_logf(LBM_LOG_ERR, "Warning at %s:%d, received C_OK handshake when src_conn in state %d\n",
+    lbm_logf(LBM_LOG_WARNING, "Warning at %s:%d, received C_OK handshake when src_conn in state %d\n",
       BASENAME(__FILE__), __LINE__, (int)src_conn->state);
   }
 
@@ -689,7 +689,7 @@ int lbmct_src_handle_handshake_dreq(lbmct_t *ct,
     if (err != LBM_OK) E_RTN(lbm_errmsg(), -1);
   }
   else {
-    lbm_logf(LBM_LOG_ERR, "Warning at %s:%d, received DREQ handshake when src_conn in state %d\n",
+    lbm_logf(LBM_LOG_WARNING, "Warning at %s:%d, received DREQ handshake when src_conn in state %d\n",
       BASENAME(__FILE__), __LINE__, (int)src_conn->state);
   }
 
@@ -761,7 +761,7 @@ int lbmct_src_handle_handshake_d_ok(lbmct_t *ct,
   src_conn->peer_info.flags |= LBMCT_PEER_INFO_FLAGS_RCV_END_SEQ_NUM;
 
   if (src_conn->state != LBMCT_CONN_STATE_ENDING) {
-    lbm_logf(LBM_LOG_ERR, "Warning at %s:%d, received D_OK handshake when src_conn in state %d\n",
+    lbm_logf(LBM_LOG_WARNING, "Warning at %s:%d, received D_OK handshake when src_conn in state %d\n",
       BASENAME(__FILE__), __LINE__, (int)src_conn->state);
   }
 
@@ -969,7 +969,7 @@ int lbmct_ctrlr_cmd_src_conn_tick(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
   }
 
   else {
-    lbm_logf(LBM_LOG_ERR, "Warning at %s:%d, received timeout when src_conn in state %d\n",
+    lbm_logf(LBM_LOG_WARNING, "Warning at %s:%d, received timeout when src_conn in state %d\n",
       BASENAME(__FILE__), __LINE__, (int)src_conn->state);
   }
 

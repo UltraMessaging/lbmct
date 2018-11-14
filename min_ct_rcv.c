@@ -120,6 +120,12 @@ int main(int argc, char **argv) {
   lbmct_rcv_t *ct_rcv;
   int err;
 
+  /* If config file supplied, read it. */
+  if (argc > 1) {
+    err = lbm_config(argv[1]);
+    LBM_ERR(err);
+  }
+
   /* Create context, making sure "response_tcp_nodelay" is set.
    */
   err = lbm_context_attr_create(&ctx_attr);
