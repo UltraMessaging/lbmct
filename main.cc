@@ -560,6 +560,8 @@ TEST(Ct,CtCreateDeleteTest) {
   ct_config.flags |= LBMCT_CT_CONFIG_FLAGS_MAX_TRIES;
   ct_config.test_bits = 4;
   ct_config.flags |= LBMCT_CT_CONFIG_FLAGS_TEST_BITS;
+  ct_config.delay_creq = 5;
+  ct_config.flags |= LBMCT_CT_CONFIG_FLAGS_DELAY_CREQ;
 
   /* Test ct creation and deletion. */
   err = lbmct_create(&ct, ctx1, &ct_config, "Hi", 3);  /* Metadata is "Hi". */
@@ -569,6 +571,7 @@ TEST(Ct,CtCreateDeleteTest) {
   ASSERT_EQ(2000, ct->active_config.retry_ivl);
   ASSERT_EQ(3, ct->active_config.max_tries);
   ASSERT_EQ(4, ct->active_config.test_bits);
+  ASSERT_EQ(5, ct->active_config.delay_creq);
 
   /* Ready to create source. */
 

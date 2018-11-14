@@ -1,4 +1,4 @@
-/* minsrc.c - Connected Topics minimal example publisher
+/* min_ct_src.c - Connected Topics minimal example publisher
  *
  * See https://github.com/UltraMessaging/lbmct
  *
@@ -61,8 +61,11 @@ void *minsrc_src_conn_create_cb(lbmct_src_conn_t *src_conn,
 {
   char *s;
 
+  /* As an example, capture the receiver's metadata and use it as the
+   * connection state.
+   */
   if (peer_info->flags & LBMCT_PEER_INFO_FLAGS_SRC_METADATA) {
-    s = strdup(peer_info->src_metadata);
+    s = strdup(peer_info->rcv_metadata);
   }
   else {
     s = strdup("no metadata");

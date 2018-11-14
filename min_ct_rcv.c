@@ -1,4 +1,4 @@
-/* minrcv.c - Connected Topics minimal example subscriber
+/* min_ct_rcv.c - Connected Topics minimal example subscriber
  *
  * See https://github.com/UltraMessaging/lbmct
  *
@@ -61,7 +61,11 @@ void *minrcv_rcv_conn_create_cb(lbmct_rcv_conn_t *rcv_conn,
 {
   char *s;
 
+  /* As an example, capture the source's metadata and use it as the
+   * connection state.
+   */
   if (peer_info->flags & LBMCT_PEER_INFO_FLAGS_SRC_METADATA) {
+    /* This is the receiver; print the source's metadata. */
     s = strdup(peer_info->src_metadata);
   }
   else {
