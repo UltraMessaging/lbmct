@@ -2,6 +2,151 @@
 
 This page provides details on the CT implementation.
 
+## Files
+
+Here are the main files for CT:
+* **[lbmct.h](lbmct.h)** - Public API definitions.
+Should be include by applications.
+* **[lbmct_private.h](lbmct_private.h)** - Private definitions used internally
+by CT.
+* **[prt.h](prt.h)** - Portability definitions.
+Helps support CT across different platforms, especially Unix and Windows.
+* **[lbm_internal.h](lbm_internal.h)** - Definitions for UM internal
+functionalty used by CT.
+These are used in spite of them not being official UM APIs.
+Informatica will support their use within the UM GitHub version of CT.
+* **[tmr.h](tmr.h)** - Public API definitions for a small wrapper around UM
+timers to make them easier to manage.
+This wrapper will be made available separately on GitHub as a UM example.
+
+* **[lbmct.c](lbmct.c)** - Code common between sources and receivers.
+Contains the main CT controller thread.
+* **[lbmct_rcv.c](lbmct_rcv.c)** - Code specific to CT receivers.
+* **[lbmct_src.c](lbmct_src.c)** - Code specific to CT sources.
+* **[tmr.c](tmr.c)** - Code for the small wrapper around UM timers.
+* **[main.cc](main.cc)** - Google Test file.
+
+* **[min_ct_src.c](min_ct_src.c)** - Minimal example of a CT publisher.
+* **[min_ct_rcv.c](min_ct_rcv.c)** - Minimal example of a CT subscriber.
+
+## Handshake Operation
+
+### Connection Creation:
+
+A CT Receiver discovers a CT Source and sends it a UIM handshake:
+* CREQ - Connect Request.
+The CT Source responds by sending:
+* CRSP - Connect Response (contains publisher's metadata).
+It sends CRSP over the normal data transport.
+If the transport is taking an unusually long time to fully connect, that CRSP
+handshake will be lost due to "head loss".
+The CT Receiver will time it out and retry its CREQ.
+When the CT Recever does get the CRSP,
+it calls the subscriber's connection create callback,
+delivers the CRSP handshake to the subscriber,
+and it replies back to the Source with a UIM handshake:
+* C_OK - Connect OK (contains subscribe's metadata).
+The CT Source will also time out and retry until it gets a C_OK,
+at which it will call the publisher's connection create callback,
+signalling to the publisher that the receiver is ready to receive handshake.
+
+### Connection Deletion:
+
+A normal "graceful" connection deletion starts with either the Source
+or the Receiver deletes its CT source/receiver object.
+Let's say the Receiver starts the process:
+
+A CT Receiver is deleted and sends it a UIM handshake:
+* DREQ - Disconnect Request.
+The CT Source responds by sending:
+* DRSP - Disconnect Response.
+It sends DRSP over the normal data transport.
+The CT Receiver delivers the DRSP handshake to the subscriber,
+calls the subscriber's connection delete callback,
+and it replies back to the Source with a UIM handshake:
+* D_OK - Disconnect OK (contains subscribe's metadata).
+When the CT source gets a D_OK,
+it calls the publisher's connection delete callback.
+
+## Software Architecture
+
+### CT Controller Thread
+Central to CT is a main CT controller thread in [lbmct.c](lbmct.c):
+```
+PRT_THREAD_ENTRYPOINT lbmct_ctrlr(void *arg)
+```
+
+This thread waits on a work queue for commands:
+```
+err = lbm_tl_queue_dequeue(ct->ctrlr_cmd_work_tlq, (void **)&cmd, 1);
+```
+
+The primary purpose of this thread and work queue is to serialize most of
+non-message-path work to implement CT.
+Commands structures are enqueued with the information needed to
+execute the command.
+Results are optionally retuned via the same command structure.
+
+Here is an example flow of execution that illustrates the work flow and also
+the naming conventions.
+Starting in file [lbmct_src.c](lbmct_src.c):
+
+```
+int lbmct_src_create(lbmct_src_t **ct_srcp, ...
+...
+{
+  lbmct_ctrlr_cmd_ct_src_create_t ct_src_create;
+...
+  ct_src_create.topic_str = topic_str;
+...
+    /* Waits for the ct control thread to complete the operation. */
+  err = lbmct_ctrlr_cmd_submit_and_wait(ct,
+    LBMCT_CTRLR_CMD_TYPE_CT_SRC_CREATE, &ct_src_create);
+```
+The `lbmct_ctrlr_cmd_submit_and_wait()` function enqueues the command
+structure and waits on a semaphore for the command thread to execute
+the command and signal completion.
+The result is returned in the same command structure:
+```
+  *ct_srcp = ct_src_create.ct_src;
+...
+}  /* lbmct_src_create */
+```
+
+Note the naming conventions with the command.
+The command is "ct_src_create".
+The command structure name is constructed around it as
+"`lbmct_ctrlr_cmd_ct_src_create_t`", and a command type is
+constructed as "`LBMCT_CTRLR_CMD_TYPE_CT_SRC_CREATE`".
+
+Continuing in file [lbmct.c](lbmct.c), inside the main loop, is:
+```
+      switch(cmd->cmd_type) {
+...
+      case LBMCT_CTRLR_CMD_TYPE_CT_SRC_CREATE:
+        err = lbmct_ctrlr_cmd_ct_src_create(ct, cmd);
+        break;
+```
+So the function which actually does most of the work to create a CT source
+is `lbmct_ctrlr_cmd_ct_src_create()`,
+which is back in file [lbmct_src.c](lbmct_src.c):
+```
+int lbmct_ctrlr_cmd_ct_src_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
+{
+  lbmct_ctrlr_cmd_ct_src_create_t *ct_src_create = cmd->cmd_data;
+```
+
+In the future, there's no need to trace through the controller thread
+main loop.
+The use of `LBMCT_CTRLR_CMD_TYPE_CT_SRC_CREATE` simply leads to removing
+the "_TYPE_" and converting to lower case to get the function
+`lbmct_ctrlr_cmd_ct_src_create()`.
+
+
+## Testing and Troubleshooting
+
+### Google Test
+
 ### Recent Events
 
 There is a circular recording of recent "events" stored with the ct_t structure
