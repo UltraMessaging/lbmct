@@ -1,6 +1,6 @@
 /* lbmct.c - Connected Topics code common to source-side and receiver-side.
  *
- * See http://ultramessaging.github.io/UMExamples/lbmct/c/index.html
+ * See https://github.com/UltraMessaging/lbmct
  *
  * Copyright (c) 2005-2018 Informatica Corporation. All Rights Reserved.
  * Permission is granted to licensees to use or alter this software for

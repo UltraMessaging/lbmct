@@ -1,5 +1,7 @@
 /* lbmct_src.c - Connected Topics code for source side.
  *
+ * See https://github.com/UltraMessaging/lbmct
+ *
  * Copyright (c) 2005-2018 Informatica Corporation. All Rights Reserved.
  * Permission is granted to licensees to use or alter this software for
  * any purpose, including commercial applications, according to the terms
@@ -316,7 +318,6 @@ int lbmct_src_conn_create(lbmct_src_conn_t **rtn_src_conn, lbmct_src_t *ct_src,
 {
   lbmct_src_conn_t *src_conn = NULL;
   lbmct_t *ct = NULL;
-  struct in_addr ip;
   char ip_str[INET_ADDRSTRLEN];  /* Large enough to hold strerror_r(). */
   int err;
 
@@ -356,8 +357,7 @@ int lbmct_src_conn_create(lbmct_src_conn_t **rtn_src_conn, lbmct_src_t *ct_src,
   src_conn->peer_info.flags |= LBMCT_PEER_INFO_FLAGS_SRC_METADATA_LEN;
 
   /* Assemble UIM address for this ct. */
-  ip.s_addr = (in_addr_t)ct->local_uim_addr.ip_addr;
-  (void)inet_ntop(AF_INET, &ip, ip_str, sizeof(ip_str));
+  (void)mul_inet_ntop(ct->local_uim_addr.ip_addr, ip_str, sizeof(ip_str));
   snprintf(src_conn->src_uim_addr, sizeof(src_conn->src_uim_addr),
     "TCP:%u:%s:%u",
     ct->local_uim_addr.domain_id, ip_str, ct->local_uim_addr.port);

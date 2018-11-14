@@ -1,7 +1,7 @@
 /* lbm_internal.h - non-official APIs, un-documented, and subject to change
  * without notice.  For Informatica internal use only.
  *
- * See http://ultramessaging.github.io/UMExamples/lbmct/c/index.html
+ * See https://github.com/UltraMessaging/lbmct
  *
  * Copyright (c) 2005-2018 Informatica Corporation. All Rights Reserved.
  * Permission is granted to licensees to use or alter this software for 
@@ -31,6 +31,7 @@ extern "C" {
 /* A few misc functions. */
 lbm_uint32_t mul_random_range(lbm_uint32_t from, lbm_uint32_t to);
 size_t mul_strnlen(const char *s, size_t maxlen);
+char *mul_inet_ntop(lbm_uint_t addr, char *dst, size_t buf_len);
 
 /* Two-lock, non-contending queue. */
 struct lbm_tl_queue_t_stct;

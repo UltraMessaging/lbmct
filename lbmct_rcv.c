@@ -1,6 +1,6 @@
 /* lbmct_rcv.c - Connected Topics code for receiver-side.
  *
- * See http://ultramessaging.github.io/UMExamples/lbmct/c/index.html
+ * See https://github.com/UltraMessaging/lbmct
  *
  * Copyright (c) 2005-2018 Informatica Corporation. All Rights Reserved.
  * Permission is granted to licensees to use or alter this software for
@@ -378,6 +378,7 @@ int lbmct_rcv_side_msg_rcv_cb(lbm_rcv_t *rcv, lbm_msg_t *msg, void *clientd)
   const char *msg_data = msg->data;
   size_t msg_len = msg->len;
   int starting_state;
+  int drsp_received = 0;
   int err;
 
   /* Sanity checks. */
@@ -421,11 +422,8 @@ int lbmct_rcv_side_msg_rcv_cb(lbm_rcv_t *rcv, lbm_msg_t *msg, void *clientd)
         if (err != LBM_OK) EL_RTN(lbm_errmsg(), LBM_OK);
       }
       else if (strncmp(LBMCT_DRSP_MSG_PREFIX, msg_data, LBMCT_PREFIX_SZ) == 0) {
-        /* Record receiving DRSP in event buffer. */
-        ct->recent_events[(ct->num_recent_events++) % LBMCT_MAX_RECENT_EVENTS] =
-          0x02000000 | 0x00000005;
-        err = lbmct_rcv_handle_handshake_drsp(rcv_conn, msg);
-        if (err != LBM_OK) EL_RTN(lbm_errmsg(), LBM_OK);
+        /* Delay calling drsp handler until after message is delivered. */
+        drsp_received = 1;
       }
       else {
         EL_RTN("Unrecognized handshake", LBM_OK);
@@ -449,6 +447,13 @@ int lbmct_rcv_side_msg_rcv_cb(lbm_rcv_t *rcv, lbm_msg_t *msg, void *clientd)
 
       msg->source_clientd = rcv_conn;  /* Restore our source clientd. */
     }
+  }
+  if (drsp_received) {
+    /* Record receiving DRSP in event buffer. */
+    ct->recent_events[(ct->num_recent_events++) % LBMCT_MAX_RECENT_EVENTS] =
+      0x02000000 | 0x00000005;
+    err = lbmct_rcv_handle_handshake_drsp(rcv_conn, msg);
+    if (err != LBM_OK) EL_RTN(lbm_errmsg(), LBM_OK);
   }
 
   return LBM_OK;
@@ -968,7 +973,6 @@ int lbmct_ctrlr_cmd_rcv_conn_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
   lbmct_ctrlr_cmd_rcv_conn_create_t *rcv_conn_create = cmd->cmd_data;
   lbmct_rcv_conn_t *rcv_conn = NULL;
   lbmct_rcv_t *ct_rcv = NULL;
-  struct in_addr ip;
   char ip_str[INET_ADDRSTRLEN];  /* Large enough to hold strerror_r(). */
   int err;
 
@@ -1013,8 +1017,7 @@ int lbmct_ctrlr_cmd_rcv_conn_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
   LBMCT_LIST_ADD(ct_rcv->conn_list_head, rcv_conn, conn_list);
 
   /* Assemble UIM address for this ct. */
-  ip.s_addr = (in_addr_t)ct->local_uim_addr.ip_addr;
-  (void)inet_ntop(AF_INET, &ip, ip_str, sizeof(ip_str));
+  (void)mul_inet_ntop(ct->local_uim_addr.ip_addr, ip_str, sizeof(ip_str));
   snprintf(rcv_conn->rcv_uim_addr, sizeof(rcv_conn->rcv_uim_addr),
     "TCP:%u:%s:%u",
     ct->local_uim_addr.domain_id, ip_str, ct->local_uim_addr.port);
