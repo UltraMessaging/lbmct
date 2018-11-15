@@ -26,7 +26,9 @@ deliver deletion events.
 
 The rest of this page provides a high-level description of the CT package.
 You can also jump to other pages:
-* [User Guide](Userguide.md) - explains how to write connected applications.
+* [Release Notes](Release_notes.md)
+* [User Guide](Userguide.md) - explains how to write Connected
+Topic applications.
 * [API Reference](API.md) - details on each API.
 * [Internal Design](Internal_Design.md) - details of the CT implementation.
 
@@ -191,6 +193,7 @@ although the SmartSource code could be conditionally compiled.
 ---
 
 You can now jump to other pages:
+* [Release Notes](Release_notes.md)
 * [User Guide](Userguide.md) - explains how to write Connected
 Topic applications.
 * [API Reference](API.md) - details on each API function and structure.
