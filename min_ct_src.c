@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #ifdef _WIN32
     #include <winsock2.h>
+    #include <ws2tcpip.h>
 #else
     #include <unistd.h>
     #include <netinet/in.h>
@@ -81,7 +82,7 @@ void *minsrc_src_conn_create_cb(lbmct_src_conn_t *src_conn,
 void minsrc_src_conn_delete_cb(lbmct_src_conn_t *src_conn,
   lbmct_peer_info_t *peer_info, void *src_clientd, void *conn_clientd)
 {
-  printf("conn delete: peer='%s'\n", conn_clientd);
+  printf("conn delete: peer='%s'\n", (char *)conn_clientd);
 
   app_state = DELETE_CALLED;
 
@@ -96,6 +97,15 @@ int main(int argc, char **argv) {
   lbmct_src_t *ct_src;
   lbm_src_t *um_src;
   int err;
+
+#if defined(_MSC_VER)
+  /* windows-specific code */
+  WSADATA wsadata;
+  int wsStat = WSAStartup(MAKEWORD(2,2), &wsadata);
+  if (wsStat != 0) {
+    printf("line %d: wsStat=%d\n",__LINE__,wsStat); exit(1);
+  }
+#endif
 
   /* If config file supplied, read it. */
   if (argc > 1) {

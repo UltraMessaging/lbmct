@@ -101,6 +101,7 @@ create and donate its thread.
 
 * In a DRO environment, you need to configure CT what the domain ID is.
 CT does not discover the domain ID dynamically.
+If using DRO, see [Domain ID](Domain_ID.md).
 
 ---
 

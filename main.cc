@@ -180,14 +180,14 @@ int test_rcv_cb(lbm_rcv_t *rcv, lbm_msg_t *msg, void *clientd)
 
     snprintf(msg_buffer[i % NUM_LOGS], LOG_SZ, "{%d} %d ms test_rcv_cb: type=%d, sqn=%d, source='%s', properties=%s, clientd='%s', source_clientd='%s', data='%s'%s\n",
        i, elapsed_time, msg->type, msg->sequence_number, msg->source,
-       (msg->properties == NULL) ? "(nil)" : "(non-nil)",
-       clientd, msg->source_clientd, msg->data, prop_str);
+       ((msg->properties == NULL) ? "(nil)" : "(non-nil)"),
+       (char *)clientd, (char *)msg->source_clientd, msg->data, prop_str);
   }  /* if msg type data */
   else {
     snprintf(msg_buffer[i % NUM_LOGS], LOG_SZ, "{%d} %d ms test_rcv_cb: type=%d, sqn=%d, source='%s', properties=%s, clientd='%s', source_clientd='%s'\n",
        i, elapsed_time, msg->type, msg->sequence_number, msg->source,
        (msg->properties == NULL) ? "(nil)" : "(non-nil)",
-       clientd, msg->source_clientd);
+       (char *)clientd, (char *)msg->source_clientd);
   }
   printf("%s", msg_buffer[i % NUM_LOGS]);  fflush(stdout);
 

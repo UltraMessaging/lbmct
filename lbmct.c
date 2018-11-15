@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #ifdef _WIN32
     #include <winsock2.h>
+    #include <ws2tcpip.h>
 #else
     #include <unistd.h>
     #include <netinet/in.h>
@@ -48,7 +49,6 @@ int lbmct_ctx_uim_addr(lbm_context_t *ctx, lbmct_ctx_uim_addr_t *uim_addr,
   int request_tcp_bind_request_port = 0;  /* network order */
   lbm_uint16_t request_port;  /* network order */
   lbm_ipv4_address_mask_t  request_tcp_interface;
-  struct in_addr struct_in_addr;
   int err;
 
   /* Make sure user has a request port. */
@@ -81,8 +81,6 @@ int lbmct_ctx_uim_addr(lbm_context_t *ctx, lbmct_ctx_uim_addr_t *uim_addr,
     if (err != LBM_OK) E_RTN(lbm_errmsg(), -1);
   }
   uim_addr->ip_addr = request_tcp_interface.addr;
-
-  struct_in_addr.s_addr = (in_addr_t)uim_addr->ip_addr;
 
   return LBM_OK;
 }  /* lbmct_ctx_uim_addr */
@@ -630,9 +628,12 @@ int lbmct_ctrlr_cmd_test(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
       BASENAME(__FILE__), __LINE__, test->test_str);
     return test->test_err;
   } else {
-    char *input_str = strdup(test->test_str);
-    sprintf(test->test_str, "%s: OK.", input_str);
-    free(input_str);
+    /* Overwrite the "test_str" input bugffer with the result.  But snprintf()
+     * cannot safely overwrite an input buffer!  So make a temp copy first.
+     */
+    char *temp_str = strdup(test->test_str);
+    snprintf(test->test_str, sizeof(test->test_str), "%s: OK.", temp_str);
+    free(temp_str);
   }
 
   return LBM_OK;

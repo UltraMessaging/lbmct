@@ -544,6 +544,7 @@ Not for normal use.
 * **`domain_id`** - For DRO environments,
 the publisher should set this to the Domain ID for this application.
 For non-DRO environments, this can be left at its default value of 0.
+If using DRO, see [Domain ID](Domain_ID.md).
 
 * **`delay_creq`** - When a receiver discovers a source, it delays sending its
 connect request message.

@@ -139,6 +139,7 @@ extern "C" {
 #if defined(_WIN32)
 
 #define snprintf _snprintf
+#define strdup _strdup
 
 #define SLEEP_SEC(x) Sleep((x)*1000)
 #define SLEEP_MSEC(x) Sleep(x)

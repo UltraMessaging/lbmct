@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #ifdef _WIN32
     #include <winsock2.h>
+    #include <ws2tcpip.h>
 #else
     #include <unistd.h>
     #include <netinet/in.h>
@@ -82,7 +83,7 @@ void *minrcv_rcv_conn_create_cb(lbmct_rcv_conn_t *rcv_conn,
 void minrcv_rcv_conn_delete_cb(lbmct_rcv_conn_t *rcv_conn,
   lbmct_peer_info_t *peer_info, void *rcv_clientd, void *conn_clientd)
 {
-  printf("conn delete: peer='%s'\n", conn_clientd); fflush(stdout);
+  printf("conn delete: peer='%s'\n", (char *)conn_clientd); fflush(stdout);
 
   app_state = DELETE_CALLED;
 
@@ -92,21 +93,19 @@ void minrcv_rcv_conn_delete_cb(lbmct_rcv_conn_t *rcv_conn,
 
 int min_rcv_cb(lbm_rcv_t *rcv, lbm_msg_t *msg, void *clientd)
 {
-  int err;
-
   if (msg->type == LBM_MSG_DATA) {
     if (msg->properties == NULL) {
       printf("min_rcv_cb: user message: '%s', peer='%s', app_state=%d\n",
-        msg->data, msg->source_clientd, app_state); fflush(stdout);
+        msg->data, (char *)msg->source_clientd, app_state); fflush(stdout);
     }
     else {
       printf("min_rcv_cb: ignore ct handshake, peer='%s', app_state=%d\n",
-        msg->source_clientd, app_state); fflush(stdout);
+        (char *)msg->source_clientd, app_state); fflush(stdout);
     }
   }  /* if msg type data */
   else {
     printf("min_rcv_cb: event=%d, peer='%s', app_state=%d\n",
-      msg->type, msg->source_clientd, app_state); fflush(stdout);
+      msg->type, (char *)msg->source_clientd, app_state); fflush(stdout);
   }
 
   return 0;
@@ -119,6 +118,15 @@ int main(int argc, char **argv) {
   lbmct_t *ct;
   lbmct_rcv_t *ct_rcv;
   int err;
+
+#if defined(_MSC_VER)
+  /* windows-specific code */
+  WSADATA wsadata;
+  int wsStat = WSAStartup(MAKEWORD(2,2), &wsadata);
+  if (wsStat != 0) {
+    printf("line %d: wsStat=%d\n",__LINE__,wsStat); exit(1);
+  }
+#endif
 
   /* If config file supplied, read it. */
   if (argc > 1) {
