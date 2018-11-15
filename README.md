@@ -1,4 +1,4 @@
-# lbmct - Connected Topics for Ultra Messaging
+# lbmct v0.1 README - Connected Topics for Ultra Messaging
 
 ## Introduction
 

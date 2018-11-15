@@ -1,4 +1,4 @@
-# lbmct Release Notes - Connected Topics for Ultra Messaging
+# lbmct v0.1 Release Notes - Connected Topics for Ultra Messaging
 
 ## Version 0.1
 
