@@ -1,6 +1,8 @@
-# lbmct v0.1 README - Connected Topics for Ultra Messaging
+# lbmct v0.2 README - Connected Topics for Ultra Messaging
 
 ## Introduction
+
+Version v0.2: Windows-specific bug fix.  See [Release Notes](Release_notes.md).
 
 The "lbmct" package is an API wrapper around the Ultra Messaging library which
 adds the concept of end-to-end connectedness to UM's normal pub/sub messaging
