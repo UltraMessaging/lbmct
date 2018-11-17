@@ -1,4 +1,4 @@
-# lbmct v0.2 API Reference - Connected Topics for Ultra Messaging
+# lbmct v0.3 API Reference - Connected Topics for Ultra Messaging
 
 This page provides details on each API function and structure.
 

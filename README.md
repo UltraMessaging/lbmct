@@ -1,8 +1,8 @@
-# lbmct v0.2 README - Connected Topics for Ultra Messaging
+# lbmct v0.3 README - Connected Topics for Ultra Messaging
 
 ## Introduction
 
-Version v0.2: Windows-specific bug fix.  See [Release Notes](Release_notes.md).
+Version v0.3: Doc improvement.  See [Release Notes](Release_notes.md).
 
 The "lbmct" package is an API wrapper around the Ultra Messaging library which
 adds the concept of end-to-end connectedness to UM's normal pub/sub messaging
@@ -80,8 +80,15 @@ with varying degrees of effort.
 
 * CT is not compatible with UM’s queuing features, including ULB.
 
+* CT is not compatible with the
+[Late Join](https://ultramessaging.github.io/currdoc/doc/Design/fundamentalconcepts.html#latejoin)
+feature.
+This is mostly because the Source's handshake message needs to be live,
+and needs to be the first sequence number delivered.
+
 * CT does not yet work with Persistence.
-I see some fundamental problems with a general Persistence solution since
+I see some fundamental problems with a general Persistence solution,
+partly due to CT's incompatibility with Late Join, and also because
 a recovering subscriber may not have access to a live publisher with which
 to exchange handshakes.
 But there may be some kind of limited version of it that could be implemented.

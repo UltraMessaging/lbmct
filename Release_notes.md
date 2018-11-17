@@ -1,4 +1,23 @@
-# lbmct v0.2 Release Notes - Connected Topics for Ultra Messaging
+# lbmct v0.3 Release Notes - Connected Topics for Ultra Messaging
+
+## Version 0.3
+
+Add doc that CT is incompatible with Late Join.
+See [Opportunities and Limitations](README.md#opportunities-and-limitations).
+
+Release date: 16-Nov-2018
+
+### New Features
+
+* None.
+
+See [Feature List](README.md#features) for full feature list.
+
+### Fixed Limitations
+
+* None.
+
+---
 
 ## Version 0.2
 
