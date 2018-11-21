@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Version v0.3: Doc improvement.  See [Release Notes](Release_notes.md).
+Version v0.3: Doc improvement.  See [Release Notes](doc/Release_notes.md).
 
 The "lbmct" package is an API wrapper around the Ultra Messaging library which
 adds the concept of end-to-end connectedness to UM's normal pub/sub messaging
@@ -28,11 +28,11 @@ deliver deletion events.
 
 The rest of this page provides a high-level description of the CT package.
 You can also jump to other pages:
-* [Release Notes](Release_notes.md)
-* [User Guide](Userguide.md) - explains how to write Connected
+* [Release Notes](doc/Release_notes.md)
+* [User Guide](doc/Userguide.md) - explains how to write Connected
 Topic applications.
-* [API Reference](API.md) - details on each API.
-* [Internal Design](Internal_Design.md) - details of the CT implementation.
+* [API Reference](doc/API.md) - details on each API.
+* [Internal Design](doc/Internal_Design.md) - details of the CT implementation.
 
 ---
 
@@ -112,7 +112,7 @@ create and donate its thread.
 
 * In a DRO environment, you need to configure CT what the domain ID is.
 CT does not discover the domain ID dynamically.
-If using DRO, see [Domain ID](Domain_ID.md).
+If using DRO, see [Domain ID](doc/Domain_ID.md).
 
 ---
 
@@ -202,8 +202,8 @@ although the SmartSource code could be conditionally compiled.
 ---
 
 You can now jump to other pages:
-* [Release Notes](Release_notes.md)
-* [User Guide](Userguide.md) - explains how to write Connected
+* [Release Notes](doc/Release_notes.md)
+* [User Guide](doc/Userguide.md) - explains how to write Connected
 Topic applications.
-* [API Reference](API.md) - details on each API function and structure.
-* [Internal Design](Internal_Design.md) - details of the CT implementation.
+* [API Reference](doc/API.md) - details on each API function and structure.
+* [Internal Design](doc/Internal_Design.md) - details of the CT implementation.

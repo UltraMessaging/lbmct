@@ -3,7 +3,7 @@
 ## Version 0.3
 
 Add doc that CT is incompatible with Late Join.
-See [Opportunities and Limitations](README.md#opportunities-and-limitations).
+See [Opportunities and Limitations](../README.md#opportunities-and-limitations).
 
 Release date: 16-Nov-2018
 
@@ -11,7 +11,7 @@ Release date: 16-Nov-2018
 
 * None.
 
-See [Feature List](README.md#features) for full feature list.
+See [Feature List](../README.md#features) for full feature list.
 
 ### Fixed Limitations
 
@@ -29,7 +29,7 @@ Release date: 16-Nov-2018
 
 * None.
 
-See [Feature List](README.md#features) for full feature list.
+See [Feature List](../README.md#features) for full feature list.
 
 ### Fixed Limitations
 
@@ -45,7 +45,7 @@ Release date: 15-Nov-2018
 
 ### Features
 
-* See [Feature List](README.md#features)
+* See [Feature List](../README.md#features)
 
 ### Fixed Limitations
 
