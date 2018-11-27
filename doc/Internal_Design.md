@@ -1,4 +1,4 @@
-# lbmct v0.3 Internal Design - Connected Topics for Ultra Messaging
+# lbmct v0.4 Internal Design - Connected Topics for Ultra Messaging
 
 This page provides details on the CT implementation.
 
@@ -19,6 +19,7 @@ Informatica will support their use within the UM GitHub version of CT.
 timers to make them easier to manage.
 This wrapper will be made available separately on GitHub as a UM example.
 
+---
 * **[lbmct.c](lbmct.c)** - Code common between sources and receivers.
 Contains the main CT controller thread.
 * **[lbmct_rcv.c](lbmct_rcv.c)** - Code specific to CT receivers.
@@ -26,8 +27,17 @@ Contains the main CT controller thread.
 * **[tmr.c](tmr.c)** - Code for the small wrapper around UM timers.
 * **[main.cc](main.cc)** - Google Test file.
 
+---
 * **[min_ct_src.c](min_ct_src.c)** - Minimal example of a CT publisher.
 * **[min_ct_rcv.c](min_ct_rcv.c)** - Minimal example of a CT subscriber.
+
+---
+* **[dllmain.cpp](dllmain.cpp)** - WINDOWS ONLY - support code for DLL.
+(This file normally goes in the
+
+* **[lbmct.vcxproj](lbmct.vcxproj)** - WINDOWS ONLY -
+Project file for Microsoft Visual Studio.
+Supports construction of DLL.
 
 ## Handshake Operation
 
@@ -41,11 +51,11 @@ It sends CRSP over the normal data transport.
 If the transport is taking an unusually long time to fully connect, that CRSP
 handshake will be lost due to "head loss".
 The CT Receiver will time it out and retry its CREQ.
-When the CT Recever does get the CRSP,
+When the CT Receiver does get the CRSP,
 it calls the subscriber's connection create callback,
 delivers the CRSP handshake to the subscriber,
 and it replies back to the Source with a UIM handshake:
-* C_OK - Connect OK (contains subscribe's metadata).
+* C_OK - Connect OK (contains subscriber's metadata).
 The CT Source will also time out and retry until it gets a C_OK,
 at which it will call the publisher's connection create callback,
 signalling to the publisher that the receiver is ready to receive handshake.
@@ -64,7 +74,7 @@ It sends DRSP over the normal data transport.
 The CT Receiver delivers the DRSP handshake to the subscriber,
 calls the subscriber's connection delete callback,
 and it replies back to the Source with a UIM handshake:
-* D_OK - Disconnect OK (contains subscribe's metadata).
+* D_OK - Disconnect OK (contains subscriber's metadata).
 When the CT source gets a D_OK,
 it calls the publisher's connection delete callback.
 
@@ -146,6 +156,10 @@ the "_TYPE_" and converting to lower case to get the function
 ## Testing and Troubleshooting
 
 ### Google Test
+
+A Google Test unit test program is included in "main.cpp".
+
+***TBD***
 
 ### Recent Events
 
@@ -240,3 +254,74 @@ recent_events:
 [12] 0x00000005  - LBMCT_CTRLR_CMD_TYPE_SRC_HANDSHAKE
 [13] 0x01000006  - src side handle handshake from rcv (D_OK)
 ```
+
+## Windows DLL Build
+
+For those users who wish to create a Windows DLL for the Connected Topics
+package, a set of files for Microsoft Visual Studio are included.
+
+This procedure assumes that 64-bit UM is being used.
+
+To use these files, perform the following steps.
+
+### Create Project
+
+* Start Visual Studio.
+* Pull down "File", select "New" -> "Project..."
+  * In left pane, expand "Installed" and "Visual C++" if necessary.
+Select "Windows Desktop".
+  * In center pane, select "Widows Desktop Wizard".
+  * In lower pane, change name "Project1" to "lbmct".
+  * Click "OK".
+* In "Windows Desktop Project" pop-up dialog box comes up.
+  * Change Application type to "Dynamic Link Library (.dll)".
+  * Uncheck "Precompiled Header".
+  * Click "OK".
+* Close the "lbmct.cpp" file editor.
+This should display the "Solution Explorer".
+* Change the build type from "x86" to "x64".
+* Pull down "File", select "Save All".
+* ***Exit Visual Studio.***
+
+### Copy GitHub Files
+
+Make sure Visual Studio is ***NOT*** running.
+
+* Open File Explorer window in the GitHub "c" directory.
+* Open File Explorer in the new Visual Studio "lbmct" source directory.
+* In Visual Studio directory, delete the "header.h", "lbmct.cpp", "targetver.h".
+* Copy GitHub "lbmct.vcxproj" **over** the same file in Visual Studio.
+* Copy all of the GitHub ".c", ".h", and ".cpp" files to Visual Studio.
+Only "dllmain.cpp" will need to be overwritten.
+
+At this point, the Visual Studio project directory should contain the following files:
+```
+dllmain.cpp           lbmct.vcxproj.filters      min_ct_rcv.c
+lbm_internal.h        lbmct.vcxproj.user         min_ct_src.c
+lbmct.c               lbmct_private.h            prt.h
+lbmct.h               lbmct_rcv.c                tmr.c
+lbmct.vcxproj         lbmct_src.c                tmr.h
+```
+
+### Fix Paths
+
+* Start Visual Studio.
+* Open lbmct Solution file.
+(I have sometimes seen it hang on "Preparing Solution File".
+It never seems to complete, so I just exit Visual Studio and restart.)
+* Right-click the "Solution 'lbmct'" and select "Properties".
+* In the left pane, expand "Configuration Properties", "C/C++", and "Linker".
+* Select "General" under "C/C++".
+  * In the right pane, the content for "Additional Include Directories"
+contains the path to the installation of UMS 6.10.
+This should be changed to the proper path for your UM product.
+(Note: if no UM path exists, make sure your build type is "x64".)
+* Select "General" under "Linker".
+  * In the right pane, the content for "Additional Library Directories"
+contains the path to the installation of UMS 6.10.
+This should be changed to the proper path for your UM product.
+* Pull down "File", select "Save All".
+
+## Build
+
+* Pull down "Build", select "Rebuild solution".

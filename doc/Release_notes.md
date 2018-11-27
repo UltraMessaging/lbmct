@@ -1,4 +1,23 @@
-# lbmct v0.3 Release Notes - Connected Topics for Ultra Messaging
+# lbmct v0.4 Release Notes - Connected Topics for Ultra Messaging
+
+## Version 0.4
+
+Support Windows DLL.
+
+Release date: 27-Nov-2018
+
+### New Features
+
+* Support for Windows DLL (issue #2).
+See [Windows DLL Build](Internal_Design.md#windows-dll-build)
+
+See [Feature List](../README.md#features) for full feature list.
+
+### Fixed Limitations
+
+* None.
+
+---
 
 ## Version 0.3
 

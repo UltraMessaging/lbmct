@@ -1,4 +1,4 @@
-# lbmct v0.3 README - Connected Topics for Ultra Messaging
+# lbmct v0.4 README - Connected Topics for Ultra Messaging
 
 ## Introduction
 
@@ -64,7 +64,7 @@ However, it does make use of the [Sending to Sources](https://ultramessaging.git
 so CT does require at least UM version 6.10.
 
 * CT is provided in source form via the
-[Ultra Messaging Github](https://github.com/UltraMessaging).
+[Ultra Messaging GitHub](https://github.com/UltraMessaging).
 Users are invited to improve CT and submit pull requests.
 
 * Both normal and Connected Sources and Receivers can share the same
@@ -96,7 +96,7 @@ But there may be some kind of limited version of it that could be implemented.
 * CT does not yet work with wildcard receivers.
 But it should work fine with appropriate CT API additions.
 
-* CT does not yet work with SmartSources.
+* CT does not yet work with Smart Sources.
 However, this work is planned.
 
 * CT does not yet have connection-level keepalive functionality.
@@ -108,7 +108,7 @@ create and donate its thread.
 
 * CT does not yet have Java and .NET wrappers.
 
-* Do we need a "Force Quit" flag for connection and CT objectd?
+* Do we need a "Force Quit" flag for connection and CT objects?
 
 * In a DRO environment, you need to configure CT what the domain ID is.
 CT does not discover the domain ID dynamically.
@@ -123,7 +123,7 @@ the thousands.
 
 * CT is not officially part of the UM product family.
 Support for CT may not be as rapid as product support,
-but we are committed to maintaining all of the code in the UM Github,
+but we are committed to maintaining all of the code in the UM GitHub,
 including CT.
 Note that:
 
@@ -196,8 +196,8 @@ Since it will not receive the proper handshake response,
 the receiver will be “deaf” to the non-CT Source.
 Thus, it is a bad idea to have both CT and non-CT Sources for the same topic.
 
-* When SmartSource is added, the sender will need to be at least UM 6.10,
-although the SmartSource code could be conditionally compiled.
+* When Smart Source is added, the sender will need to be at least UM 6.10,
+although the Smart Source code could be conditionally compiled.
 
 ---
 

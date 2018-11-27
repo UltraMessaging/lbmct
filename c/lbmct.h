@@ -14,7 +14,8 @@
  * EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF
  * NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
  * INFORMATICA DOES NOT WARRANT THAT USE OF THE SOFTWARE WILL BE UNINTERRUPTED
- * OR ERROR-FREE.  INFORMATICA SHALL NOT, UNDER ANY CIRCUMSTANCES, BE LIABLE TO  * LICENSEE FOR LOST PROFITS, CONSEQUENTIAL, INCIDENTAL, SPECIAL OR INDIRECT
+ * OR ERROR-FREE.  INFORMATICA SHALL NOT, UNDER ANY CIRCUMSTANCES, BE LIABLE TO
+ * LICENSEE FOR LOST PROFITS, CONSEQUENTIAL, INCIDENTAL, SPECIAL OR INDIRECT
  * DAMAGES ARISING OUT OF OR RELATED TO THIS AGREEMENT OR THE TRANSACTIONS
  * CONTEMPLATED HEREUNDER, EVEN IF INFORMATICA HAS BEEN APPRISED OF THE
  * LIKELIHOOD OF SUCH DAMAGES.
@@ -26,6 +27,18 @@
 /* This include files uses definitions from these includes. */
 #include <lbm/lbm.h>
 #include "prt.h"
+
+#if defined(_WIN32)
+#  ifdef LBMCT_EXPORTS
+#    define LBMCT_API __declspec(dllexport)
+#    define TMR_EXPORTS
+#  else
+#    define LBMCT_API __declspec(dllimport)
+#  endif
+#else
+#  define LBMCT_API
+#endif
+#include "tmr.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -136,25 +149,25 @@ typedef struct lbmct_config_t_stct {
 #define LBMCT_TEST_BITS_LOG_TICKS 0x00000080
 
 
-int lbmct_create(lbmct_t **ctp, lbm_context_t *ctx, lbmct_config_t *config,
+LBMCT_API int lbmct_create(lbmct_t **ctp, lbm_context_t *ctx, lbmct_config_t *config,
   const char *metadata, size_t metadata_sz);
-int lbmct_delete(lbmct_t *ct);
-int lbmct_src_create(lbmct_src_t **ct_srcp, lbmct_t *ct, const char *topic_str,
+LBMCT_API int lbmct_delete(lbmct_t *ct);
+LBMCT_API int lbmct_src_create(lbmct_src_t **ct_srcp, lbmct_t *ct, const char *topic_str,
   lbm_src_topic_attr_t *src_attr,
   lbm_src_cb_proc src_cb,
   lbmct_src_conn_create_function_cb src_conn_create_cb,
   lbmct_src_conn_delete_function_cb src_conn_delete_cb,
   void *clientd);
-lbm_src_t *lbmct_src_get_um_src(lbmct_src_t *ct_src);
-int lbmct_src_delete(lbmct_src_t *ct_src);
-int lbmct_rcv_create(lbmct_rcv_t **ct_rcvp, lbmct_t *ct, const char *topic_str,
+LBMCT_API lbm_src_t *lbmct_src_get_um_src(lbmct_src_t *ct_src);
+LBMCT_API int lbmct_src_delete(lbmct_src_t *ct_src);
+LBMCT_API int lbmct_rcv_create(lbmct_rcv_t **ct_rcvp, lbmct_t *ct, const char *topic_str,
   lbm_rcv_topic_attr_t *rcv_attr,
   lbm_rcv_cb_proc rcv_cb,
   lbmct_rcv_conn_create_function_cb rcv_conn_create_cb,
   lbmct_rcv_conn_delete_function_cb rcv_conn_delete_cb,
   void *clientd);
-int lbmct_rcv_delete(lbmct_rcv_t *ct_rcv);
-void lbmct_debug_dump(lbmct_t *ct, const char *msg);
+LBMCT_API int lbmct_rcv_delete(lbmct_rcv_t *ct_rcv);
+LBMCT_API void lbmct_debug_dump(lbmct_t *ct, const char *msg);
 
 #if defined(__cplusplus)
 }

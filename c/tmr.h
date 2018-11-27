@@ -14,7 +14,8 @@
  * EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF
  * NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
  * INFORMATICA DOES NOT WARRANT THAT USE OF THE SOFTWARE WILL BE UNINTERRUPTED
- * OR ERROR-FREE.  INFORMATICA SHALL NOT, UNDER ANY CIRCUMSTANCES, BE LIABLE TO  * LICENSEE FOR LOST PROFITS, CONSEQUENTIAL, INCIDENTAL, SPECIAL OR INDIRECT
+ * OR ERROR-FREE.  INFORMATICA SHALL NOT, UNDER ANY CIRCUMSTANCES, BE LIABLE TO
+ * LICENSEE FOR LOST PROFITS, CONSEQUENTIAL, INCIDENTAL, SPECIAL OR INDIRECT
  * DAMAGES ARISING OUT OF OR RELATED TO THIS AGREEMENT OR THE TRANSACTIONS
  * CONTEMPLATED HEREUNDER, EVEN IF INFORMATICA HAS BEEN APPRISED OF THE
  * LIKELIHOOD OF SUCH DAMAGES.
@@ -23,6 +24,16 @@
 #define TMR_H
 
 #include "prt.h"  /* Some portability definitions. */
+
+#if defined(_WIN32)
+#  ifdef TMR_EXPORTS
+#    define TMR_API __declspec(dllexport)
+#  else
+#    define TMR_API __declspec(dllimport)
+#  endif
+#else
+#  define TMR_API
+#endif
 
 #if defined(__cplusplus)
 extern "C" {
@@ -54,12 +65,12 @@ struct tmr_t_stct {
 };
 
 
-int tmr_create(tmr_t **tmrp, lbm_context_t *ctx);
-int tmr_schedule(int *id, tmr_t *tmr, tmr_cb_proc app_proc, void *clientd,
+TMR_API int tmr_create(tmr_t **tmrp, lbm_context_t *ctx);
+TMR_API int tmr_schedule(int *id, tmr_t *tmr, tmr_cb_proc app_proc, void *clientd,
   lbm_ulong_t delay);
-int tmr_cancel_sync(tmr_t *tmr);
-int tmr_cancel_ctx_thread(tmr_t *tmr);
-int tmr_delete_sync(tmr_t *tmr);
+TMR_API int tmr_cancel_sync(tmr_t *tmr);
+TMR_API int tmr_cancel_ctx_thread(tmr_t *tmr);
+TMR_API int tmr_delete_sync(tmr_t *tmr);
 
 #if defined(__cplusplus)
 }

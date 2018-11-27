@@ -1,4 +1,4 @@
-# lbmct v0.3 User Guide - Connected Topics for Ultra Messaging
+# lbmct v0.4 User Guide - Connected Topics for Ultra Messaging
 
 This page explains how to write Connected Topic application
 

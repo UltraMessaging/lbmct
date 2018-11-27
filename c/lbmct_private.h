@@ -15,7 +15,8 @@
  * EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF
  * NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
  * INFORMATICA DOES NOT WARRANT THAT USE OF THE SOFTWARE WILL BE UNINTERRUPTED
- * OR ERROR-FREE.  INFORMATICA SHALL NOT, UNDER ANY CIRCUMSTANCES, BE LIABLE TO  * LICENSEE FOR LOST PROFITS, CONSEQUENTIAL, INCIDENTAL, SPECIAL OR INDIRECT
+ * OR ERROR-FREE.  INFORMATICA SHALL NOT, UNDER ANY CIRCUMSTANCES, BE LIABLE TO
+ * LICENSEE FOR LOST PROFITS, CONSEQUENTIAL, INCIDENTAL, SPECIAL OR INDIRECT
  * DAMAGES ARISING OUT OF OR RELATED TO THIS AGREEMENT OR THE TRANSACTIONS
  * CONTEMPLATED HEREUNDER, EVEN IF INFORMATICA HAS BEEN APPRISED OF THE
  * LIKELIHOOD OF SUCH DAMAGES.
@@ -27,12 +28,13 @@
 /* This include file uses definitions from these include files. */
 
 #include <signal.h>
+#include "lbmct.h"
+#include "tmr.h"
 
 /* Make use of some internal UM APIs which are not officially part of our
  * public API.
  */
 #include "lbm_internal.h"
-#include "tmr.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -550,31 +552,31 @@ struct lbmct_rcv_conn_t_stct {
 
 
 /* Prototypes for lbmct.c */
-int lbmct_ctx_uim_addr(lbm_context_t *ctx, lbmct_ctx_uim_addr_t *uim_addr,
+LBMCT_API int lbmct_ctx_uim_addr(lbm_context_t *ctx, lbmct_ctx_uim_addr_t *uim_addr,
   int domain_id);
-int lbmct_rcv_conn_create(lbmct_rcv_conn_t **rcv_conn, lbmct_rcv_t *ct_rcv);
-int lbmct_rcv_conn_delete(lbmct_rcv_conn_t *rcv_conn);
-int lbmct_ctrlr_cmd_submit_and_wait(lbmct_t *ct,
+LBMCT_API int lbmct_rcv_conn_create(lbmct_rcv_conn_t **rcv_conn, lbmct_rcv_t *ct_rcv);
+LBMCT_API int lbmct_rcv_conn_delete(lbmct_rcv_conn_t *rcv_conn);
+LBMCT_API int lbmct_ctrlr_cmd_submit_and_wait(lbmct_t *ct,
   enum lbmct_ctrlr_cmd_type cmd_type, void *cmd_data);
-int lbmct_ctrlr_cmd_submit_nowait(lbmct_t *ct,
+LBMCT_API int lbmct_ctrlr_cmd_submit_nowait(lbmct_t *ct,
   enum lbmct_ctrlr_cmd_type cmd_type, void *cmd_data,
   enum lbmct_ctrlr_cmd_disposition cmd_disposition);
 
 /* Prototypes for lbmct_src.c */
-int lbmct_handshake_rcv_create(lbmct_t *ct);
-int lbmct_ctrlr_cmd_src_conn_tick(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
-int lbmct_ctrlr_cmd_ct_src_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
-int lbmct_ctrlr_cmd_src_handshake(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
-int lbmct_ctrlr_cmd_ct_src_delete(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
+LBMCT_API int lbmct_handshake_rcv_create(lbmct_t *ct);
+LBMCT_API int lbmct_ctrlr_cmd_src_conn_tick(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
+LBMCT_API int lbmct_ctrlr_cmd_ct_src_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
+LBMCT_API int lbmct_ctrlr_cmd_src_handshake(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
+LBMCT_API int lbmct_ctrlr_cmd_ct_src_delete(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
 
 /* Prototypes for lbmct_rcv.c */
-int lbmct_ctrlr_cmd_rcv_conn_tick(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
-int lbmct_ctrlr_cmd_ct_rcv_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
-int lbmct_ctrlr_cmd_rcv_conn_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
-int lbmct_ctrlr_cmd_ct_rcv_delete(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
-int lbmct_ctrlr_cmd_rcv_conn_delete(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
-int lbmct_ctrlr_cmd_rcv_send_c_ok(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
-int lbmct_ctrlr_cmd_rcv_send_d_ok(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
+LBMCT_API int lbmct_ctrlr_cmd_rcv_conn_tick(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
+LBMCT_API int lbmct_ctrlr_cmd_ct_rcv_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
+LBMCT_API int lbmct_ctrlr_cmd_rcv_conn_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
+LBMCT_API int lbmct_ctrlr_cmd_ct_rcv_delete(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
+LBMCT_API int lbmct_ctrlr_cmd_rcv_conn_delete(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
+LBMCT_API int lbmct_ctrlr_cmd_rcv_send_c_ok(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
+LBMCT_API int lbmct_ctrlr_cmd_rcv_send_d_ok(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd);
 
 #if defined(__cplusplus)
 }
