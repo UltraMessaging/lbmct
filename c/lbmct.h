@@ -31,7 +31,6 @@
 #if defined(_WIN32)
 #  ifdef LBMCT_EXPORTS
 #    define LBMCT_API __declspec(dllexport)
-#    define TMR_EXPORTS
 #  else
 #    define LBMCT_API __declspec(dllimport)
 #  endif
@@ -120,7 +119,7 @@ typedef void (*lbmct_rcv_conn_delete_function_cb)(lbmct_rcv_conn_t *rcv_conn,
 
 /* Default values for config options. */
 #define LBMCT_CT_CONFIG_DEFAULT_TEST_BITS  0x00000000
-#define LBMCT_CT_CONFIG_DEFAULT_DOMAIN_ID  0
+#define LBMCT_CT_CONFIG_DEFAULT_DOMAIN_ID  -1
 #define LBMCT_CT_CONFIG_DEFAULT_DELAY_CREQ 10    /* 10 ms */
 #define LBMCT_CT_CONFIG_DEFAULT_RETRY_IVL  1000  /* 1 sec */
 #define LBMCT_CT_CONFIG_DEFAULT_MAX_TRIES  5

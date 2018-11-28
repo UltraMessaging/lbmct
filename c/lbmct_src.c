@@ -359,9 +359,16 @@ int lbmct_src_conn_create(lbmct_src_conn_t **rtn_src_conn, lbmct_src_t *ct_src,
 
   /* Assemble UIM address for this ct. */
   (void)mul_inet_ntop(ct->local_uim_addr.ip_addr, ip_str, sizeof(ip_str));
-  snprintf(src_conn->src_uim_addr, sizeof(src_conn->src_uim_addr),
-    "TCP:%u:%s:%u",
-    ct->local_uim_addr.domain_id, ip_str, ct->local_uim_addr.port);
+  if (ct->local_uim_addr.domain_id > -1) {
+    snprintf(src_conn->src_uim_addr, sizeof(src_conn->src_uim_addr),
+      "TCP:%u:%s:%u",
+      ct->local_uim_addr.domain_id, ip_str, ct->local_uim_addr.port);
+  }
+  else {
+    snprintf(src_conn->src_uim_addr, sizeof(src_conn->src_uim_addr),
+      "TCP:%s:%u",
+      ip_str, ct->local_uim_addr.port);
+  }
 
   memcpy(src_conn->rcv_source_name, source_name,
     sizeof(src_conn->rcv_source_name));

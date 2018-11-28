@@ -23,17 +23,8 @@
 #ifndef TMR_H
 #define TMR_H
 
+#include "lbmct.h"
 #include "prt.h"  /* Some portability definitions. */
-
-#if defined(_WIN32)
-#  ifdef TMR_EXPORTS
-#    define TMR_API __declspec(dllexport)
-#  else
-#    define TMR_API __declspec(dllimport)
-#  endif
-#else
-#  define TMR_API
-#endif
 
 #if defined(__cplusplus)
 extern "C" {
@@ -65,12 +56,12 @@ struct tmr_t_stct {
 };
 
 
-TMR_API int tmr_create(tmr_t **tmrp, lbm_context_t *ctx);
-TMR_API int tmr_schedule(int *id, tmr_t *tmr, tmr_cb_proc app_proc, void *clientd,
+LBMCT_API int tmr_create(tmr_t **tmrp, lbm_context_t *ctx);
+LBMCT_API int tmr_schedule(int *id, tmr_t *tmr, tmr_cb_proc app_proc, void *clientd,
   lbm_ulong_t delay);
-TMR_API int tmr_cancel_sync(tmr_t *tmr);
-TMR_API int tmr_cancel_ctx_thread(tmr_t *tmr);
-TMR_API int tmr_delete_sync(tmr_t *tmr);
+LBMCT_API int tmr_cancel_sync(tmr_t *tmr);
+LBMCT_API int tmr_cancel_ctx_thread(tmr_t *tmr);
+LBMCT_API int tmr_delete_sync(tmr_t *tmr);
 
 #if defined(__cplusplus)
 }

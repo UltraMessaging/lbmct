@@ -38,6 +38,19 @@
 #include "tmr.h"
 #include "prt.h"
 
+int strnchr_cnt(char *s, int len, char c)
+{
+  int i;
+  int n = 0;
+  for (i = 0; i < len && s[i] != '\0'; i++) {
+    if (s[i] == c) {
+      n++;
+    }
+  }
+
+  return n;
+}  /* strnchr_cnt */
+
 
 /* On the receive side, we use the source notification feature
  * receive source_notification_function to trigger creation of a
@@ -194,6 +207,19 @@ int lbmct_rcv_handle_handshake_crsp(lbmct_rcv_conn_t *rcv_conn, lbm_msg_t *msg)
       rcv_conn->src_ct_id = src_ct_id;
       memcpy(rcv_conn->src_uim_addr, src_uim_addr,
         sizeof(rcv_conn->src_uim_addr));
+      /* See if should override source dest addr. */
+      switch (strnchr_cnt(src_uim_addr, sizeof(src_uim_addr), ':')) {
+        case 3:  /* src_uim_addr has domain ID; use it. */
+          memcpy(rcv_conn->src_dest_addr, src_uim_addr,
+            sizeof(rcv_conn->src_uim_addr));
+          break;
+        case 2:  /* src_uim_addr has NO domain ID; use existing dest addr. */
+          break;
+        default:
+          lbm_logf(LBM_LOG_WARNING,
+            "Warning at %s:%d, suspicious src_uim_addr '%s'\n",
+            BASENAME(__FILE__), __LINE__, src_uim_addr);
+      }  /* switch */
       rcv_conn->src_conn_id = src_conn_id;
 
       if (metadata_len > 0) {
@@ -607,7 +633,6 @@ int lbmct_rcv_conn_delete(lbmct_rcv_conn_t *rcv_conn)
 int lbmct_handshake_send_creq(lbmct_rcv_conn_t *rcv_conn)
 {
   char creq_msg[LBMCT_CREQ_MSG_SZ+1];
-  char dest_addr[LBM_MSG_MAX_SOURCE_LEN+1];
   lbmct_t *ct = rcv_conn->ct;
   int creq_len;
   int err;
@@ -619,14 +644,14 @@ int lbmct_handshake_send_creq(lbmct_rcv_conn_t *rcv_conn)
     rcv_conn->ct_rcv->topic_str);
   creq_len++;  /* Include final NULL. */
 
-  snprintf(dest_addr, sizeof(dest_addr), "SOURCE:%s",
-    rcv_conn->peer_info.rcv_source_name);
+  snprintf(rcv_conn->src_dest_addr, sizeof(rcv_conn->src_dest_addr),
+    "SOURCE:%s", rcv_conn->peer_info.rcv_source_name);
 
   if (! (ct->active_config.test_bits & LBMCT_TEST_BITS_NO_CREQ)) {
     /* Record sending CREQ in event buffer. */
     ct->recent_events[(ct->num_recent_events ++) % LBMCT_MAX_RECENT_EVENTS] =
       0x04000000 | 0x00000001;
-    err = lbm_unicast_immediate_message(ct->ctx, dest_addr,
+    err = lbm_unicast_immediate_message(ct->ctx, rcv_conn->src_dest_addr,
       LBMCT_HANDSHAKE_TOPIC_STR, creq_msg, creq_len, LBM_MSG_FLUSH);
     /* The UIM send can fail due to "CoreApi-9901-02: target SOURCE type:
      * transport not found".  This is a race condition where a delivery
@@ -639,7 +664,7 @@ int lbmct_handshake_send_creq(lbmct_rcv_conn_t *rcv_conn)
     if (err != LBM_OK) {
       lbm_logf(LBM_LOG_NOTICE,
         "%s:%d, error sending CREQ to %s: '%s'\n",
-        BASENAME(__FILE__), __LINE__, dest_addr, lbm_errmsg());
+        BASENAME(__FILE__), __LINE__, rcv_conn->src_dest_addr, lbm_errmsg());
 
       rcv_conn->state = LBMCT_CONN_STATE_TIME_WAIT;
 
@@ -651,7 +676,7 @@ int lbmct_handshake_send_creq(lbmct_rcv_conn_t *rcv_conn)
   else {
     lbm_logf(LBM_LOG_NOTICE,
       "LBMCT_TEST_BITS_NO_CREQ at %s:%d, skipping send of '%s' to %s\n",
-      BASENAME(__FILE__), __LINE__, creq_msg, dest_addr);
+      BASENAME(__FILE__), __LINE__, creq_msg, rcv_conn->src_dest_addr);
   }
 
   return LBM_OK;
@@ -692,7 +717,7 @@ int lbmct_handshake_send_dreq(lbmct_rcv_conn_t *rcv_conn)
     /* Record sending DREQ in event buffer. */
     ct->recent_events[(ct->num_recent_events ++) % LBMCT_MAX_RECENT_EVENTS] =
       0x04000000 | 0x00000004;
-    err = lbm_unicast_immediate_message(ct->ctx, rcv_conn->src_uim_addr,
+    err = lbm_unicast_immediate_message(ct->ctx, rcv_conn->src_dest_addr,
       LBMCT_HANDSHAKE_TOPIC_STR, dreq_msg, dreq_len, LBM_MSG_FLUSH);
     if (err != LBM_OK) E_RTN(lbm_errmsg(), -1);
   }
@@ -1019,9 +1044,16 @@ int lbmct_ctrlr_cmd_rcv_conn_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
 
   /* Assemble UIM address for this ct. */
   (void)mul_inet_ntop(ct->local_uim_addr.ip_addr, ip_str, sizeof(ip_str));
-  snprintf(rcv_conn->rcv_uim_addr, sizeof(rcv_conn->rcv_uim_addr),
-    "TCP:%u:%s:%u",
-    ct->local_uim_addr.domain_id, ip_str, ct->local_uim_addr.port);
+  if (ct->local_uim_addr.domain_id > -1) {
+    snprintf(rcv_conn->rcv_uim_addr, sizeof(rcv_conn->rcv_uim_addr),
+      "TCP:%u:%s:%u",
+      ct->local_uim_addr.domain_id, ip_str, ct->local_uim_addr.port);
+  }
+  else {
+    snprintf(rcv_conn->rcv_uim_addr, sizeof(rcv_conn->rcv_uim_addr),
+      "TCP:%s:%u",
+      ip_str, ct->local_uim_addr.port);
+  }
 
   /* Set up for retries.  First try is done in timer tick. */
   rcv_conn->try_cnt = 0;
@@ -1181,7 +1213,7 @@ int lbmct_ctrlr_cmd_rcv_send_c_ok(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
     /* Record sending C_OK in event buffer. */
     ct->recent_events[(ct->num_recent_events ++) % LBMCT_MAX_RECENT_EVENTS] =
       0x04000000 | 0x00000003;
-    err = lbm_unicast_immediate_message(ct->ctx, rcv_conn->src_uim_addr,
+    err = lbm_unicast_immediate_message(ct->ctx, rcv_conn->src_dest_addr,
       LBMCT_HANDSHAKE_TOPIC_STR, c_ok_msg, c_ok_msg_len, LBM_MSG_FLUSH);
     if (err != LBM_OK) { free(c_ok_msg); E_RTN(lbm_errmsg(), -1); }
   }
@@ -1231,7 +1263,7 @@ int lbmct_ctrlr_cmd_rcv_send_d_ok(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
     /* Record sending D_OK in event buffer. */
     ct->recent_events[(ct->num_recent_events ++) % LBMCT_MAX_RECENT_EVENTS] =
       0x04000000 | 0x00000006;
-    err = lbm_unicast_immediate_message(ct->ctx, rcv_conn->src_uim_addr,
+    err = lbm_unicast_immediate_message(ct->ctx, rcv_conn->src_dest_addr,
       LBMCT_HANDSHAKE_TOPIC_STR, d_ok_msg, dreq_len, LBM_MSG_FLUSH);
     if (err != LBM_OK) E_RTN(lbm_errmsg(), -1);
   }

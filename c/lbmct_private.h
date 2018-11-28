@@ -547,6 +547,7 @@ struct lbmct_rcv_conn_t_stct {
   unsigned int src_ct_id;
   char src_uim_addr[LBMCT_UIM_ADDR_STR_SZ+1];
   unsigned int src_conn_id;
+  char src_dest_addr[LBM_MSG_MAX_SOURCE_LEN+1];
   lbm_uint32_t sig;  /* LBMCT_SIG_RCV_CONN */
 };  /* lbmct_rcv_conn_t_stct */
 
