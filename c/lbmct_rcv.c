@@ -406,7 +406,7 @@ int lbmct_rcv_side_msg_rcv_cb(lbm_rcv_t *rcv, lbm_msg_t *msg, void *clientd)
   lbmct_t *ct = NULL;
   const char *msg_data = msg->data;
   size_t msg_len = msg->len;
-  int starting_state;
+  int deliver_msg = 0;
   int drsp_received = 0;
   int err;
 
@@ -420,12 +420,16 @@ int lbmct_rcv_side_msg_rcv_cb(lbm_rcv_t *rcv, lbm_msg_t *msg, void *clientd)
   if (ct == NULL) E_RTN("corrupted ct_rcv", -1);
   if (ct->sig != LBMCT_SIG_CT) E_RTN(E_BAD_SIG(ct), -1);
 
-  starting_state = rcv_conn->state;
-  if (starting_state == LBMCT_CONN_STATE_PRE_CREATED) {
+  if (rcv_conn->state == LBMCT_CONN_STATE_PRE_CREATED) {
     lbm_logf(LBM_LOG_INFO,
       "%s:%d, Received UM event type %d on pre-created connection; ignoring\n",
       BASENAME(__FILE__), __LINE__, msg->type);
     return LBM_OK;
+  }
+
+  /* If the starting state is running or ending, deliver this message. */
+  if (rcv_conn->state == LBMCT_CONN_STATE_RUNNING || rcv_conn->state == LBMCT_CONN_STATE_ENDING) {
+    deliver_msg = 1;
   }
 
   /* Check to see if it is a CT handshake message. */
@@ -457,22 +461,21 @@ int lbmct_rcv_side_msg_rcv_cb(lbm_rcv_t *rcv, lbm_msg_t *msg, void *clientd)
       else {
         EL_RTN("Unrecognized handshake", LBM_OK);
       }
+
+      /* Done processing handshake, if the final state is running or ending, deliver this message. */
+      if (rcv_conn->state == LBMCT_CONN_STATE_RUNNING || rcv_conn->state == LBMCT_CONN_STATE_ENDING) {
+        deliver_msg = 1;
+      }
     }  /* if ct message prop exists */
   }
 
   /* Does user want pre-connected messages to be delivered? */
   if (ct->active_config.pre_delivery) {
     /* Force the message to always be delivered. */
-    starting_state = LBMCT_CONN_STATE_RUNNING;
+    deliver_msg = 1;
   }
 
-  /* Want to deliver messages up to and including DRSP, which sets state
-   * to TIME_WAIT. */
-  if (starting_state == LBMCT_CONN_STATE_RUNNING ||
-    starting_state == LBMCT_CONN_STATE_ENDING ||
-    rcv_conn->state == LBMCT_CONN_STATE_RUNNING ||
-    rcv_conn->state == LBMCT_CONN_STATE_ENDING)
-  {
+  if (deliver_msg) {
     /* BOS and EOS are no longer reliable; don't deliver. */
     if (msg->type != LBM_MSG_BOS && msg->type != LBM_MSG_EOS) {
       /* Deliver to application, with its connection clientd. */
