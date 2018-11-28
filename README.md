@@ -190,12 +190,13 @@ activities on the source.
 Note that the source will be nominally unaware of non-CT Receivers and will
 not be able to issue any kind of warning if this use case is not desired.
 
-* A CT Receiver subscribing to a non-CT Source is not supported.
+* A CT Receiver subscribing to a non-CT Source is not recommended.
 The CT Receiver will repeatedly send CT control handshake messages to the
 source context.
 Since it will not receive the proper handshake response,
-the receiver will be “deaf” to the non-CT Source.
-Thus, it is a bad idea to have both CT and non-CT Sources for the same topic.
+the receiver will normally be “deaf” to the non-CT Source.
+However, the "pre_delivery" option can be used to force delivery of messages
+received from non-connected sources.
 
 * When Smart Source is added, the sender will need to be at least UM 6.10,
 although the Smart Source code could be conditionally compiled.

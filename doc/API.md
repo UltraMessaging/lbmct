@@ -503,6 +503,7 @@ typedef struct lbmct_config_t_stct {
   int delay_creq;  /* Time (in ms) to delay sending initial CREQ handshake. */
   int retry_ivl;   /* Timeout to retry a handshake. */
   int max_tries;   /* Give up after this many handshake tries. */
+  int pre_delivery; /* Enables delivery of received msgs before handshakes. */
 } lbmct_config_t;
 ```
 
@@ -514,10 +515,11 @@ For fields that are not set, the default values used by CT are as follows:
 The default values for the fields are:
 ```
 #define LBMCT_CT_CONFIG_DEFAULT_TEST_BITS  0x00000000
-#define LBMCT_CT_CONFIG_DEFAULT_DOMAIN_ID  0
+#define LBMCT_CT_CONFIG_DEFAULT_DOMAIN_ID  -1
 #define LBMCT_CT_CONFIG_DEFAULT_DELAY_CREQ 10    /* 10 ms */
 #define LBMCT_CT_CONFIG_DEFAULT_RETRY_IVL  1000  /* 1 sec */
 #define LBMCT_CT_CONFIG_DEFAULT_MAX_TRIES  5
+#define LBMCT_CT_CONFIG_DEFAULT_PRE_DELIVERY 0
 ```
 
 The `flags` field is a bitmap indicating which of the subsequent fields are
@@ -531,6 +533,7 @@ The bits are:
 #define LBMCT_CT_CONFIG_FLAGS_DELAY_CREQ 0x00000004
 #define LBMCT_CT_CONFIG_FLAGS_RETRY_IVL  0x00000008
 #define LBMCT_CT_CONFIG_FLAGS_MAX_TRIES  0x00000010
+#define LBMCT_CT_CONFIG_FLAGS_PRE_DELIVERY 0x00000020
 ```
 
 **Fields**
@@ -543,8 +546,10 @@ Not for normal use.
 
 * **`domain_id`** - For DRO environments,
 the publisher should set this to the Domain ID for this application.
-For non-DRO environments, this can be left at its default value of 0.
-If using DRO, see [Domain ID](Domain_ID.md).
+For non-DRO environments, this should be set to 0.
+If using DRO, the value can be left at its default of -1, and the CT receiver
+will use the "send to source" UIM addressing for all handshake messages.
+See [Domain ID](Domain_ID.md).
 
 * **`delay_creq`** - When a receiver discovers a source, it delays sending its
 connect request message.
@@ -560,3 +565,9 @@ They are not a keepalive mechanism to detect failure of an active connection.
 
 * **`max_tries`** - Maximum number of attempts to exchange a given
 handshake control message before CT gives up and deletes the connection.
+
+* **`pre_delivery`** - When set to 1, enables the delivery of received
+messages from non-CT sources (i.e. before the connect handshake completes).
+For those messages received outside of the normal connected state, the
+[lbm_msg_t](https://ultramessaging.github.io/currdoc/doc/API/structlbm__msg__t__stct.html)
+structure field `source_clientd` will be NULL.

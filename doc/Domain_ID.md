@@ -48,6 +48,16 @@ Domain IDs, which is currently not disclosed to applications.
 
 ## Possible Solutions
 
+### Sending to Sources
+
+As of UM version 6.10, a special form of Unicast Immediate Messaging can
+be used, called
+[Sending to Sources](https://ultramessaging.github.io/currdoc/doc/Design/umfeatures.html#sendingtosources).
+However, this is a rather inefficient addressing mode, so it is
+preferred to send Unicast Immediate Messages with the proper domain ID.
+However, if the solutions listed below are not feasible, the domain ID
+can be configured to -1, and the CT receiver will always use Sending to Sources.
+
 ### New API for Domain ID
 
 Informatica has a tentative roadmap item for adding an API to inform the
