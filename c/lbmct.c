@@ -98,6 +98,7 @@ int lbmct_process_config(lbmct_t *ct)
   ct->active_config.delay_creq = LBMCT_CT_CONFIG_DEFAULT_DELAY_CREQ;
   ct->active_config.retry_ivl = LBMCT_CT_CONFIG_DEFAULT_RETRY_IVL;
   ct->active_config.max_tries = LBMCT_CT_CONFIG_DEFAULT_MAX_TRIES;
+  ct->active_config.pre_delivery = LBMCT_CT_CONFIG_DEFAULT_PRE_DELIVERY;
 
   /* Extract each supplied option.  */
   test_flag = 0x00000001;
@@ -119,6 +120,9 @@ int lbmct_process_config(lbmct_t *ct)
         break;
       case LBMCT_CT_CONFIG_FLAGS_MAX_TRIES:
         ct->active_config.max_tries = ct->user_config.max_tries;
+        break;
+      case LBMCT_CT_CONFIG_FLAGS_PRE_DELIVERY:
+        ct->active_config.pre_delivery = ct->user_config.pre_delivery;
         break;
       default:
         ;  /* Ignore unrecognized bits for backwards compatibility. */

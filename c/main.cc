@@ -299,6 +299,88 @@ void test_rcv_conn_delete_cb(lbmct_rcv_conn_t *rcv_conn,
 }  /* test_rcv_conn_delete_cb */
 
 
+TEST(Ct,CtOldSrc) {
+  lbmct_t *r_ct = NULL;
+  lbm_topic_t *topic_obj;
+  lbm_src_t *src;
+  lbmct_rcv_t *ct_rcv;
+  lbmct_config_t ct_config;
+  int err;
+
+#ifndef _WIN32
+  signal(SIGPIPE, SIG_IGN);
+#endif
+  SLEEP_MSEC(100);
+  log_cnt = 0;
+  msg_cnt = 0;
+  MSEC_CLOCK(test_start_time);
+  ASSERT_EQ(0, sync_sem_cnt);
+
+  /* Create ct objects. */
+
+  /* Force delivery of un-connected messages. */
+  ct_config.flags = LBMCT_CT_CONFIG_FLAGS_PRE_DELIVERY;
+  ct_config.pre_delivery = 1;
+  /* Speed up the retries. */
+  ct_config.flags |= LBMCT_CT_CONFIG_FLAGS_MAX_TRIES;
+  ct_config.max_tries = 2;
+  ct_config.flags |= LBMCT_CT_CONFIG_FLAGS_RETRY_IVL;
+  ct_config.retry_ivl = 200;
+
+  err = lbmct_create(&r_ct, ctx2, &ct_config, NULL, 0);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  err = lbm_src_topic_alloc(&topic_obj, ctx1, "CtOldSrc", NULL);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  err = lbm_src_create(&src, ctx1, topic_obj, NULL, NULL, NULL);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  err = lbmct_rcv_create(&ct_rcv, r_ct, "CtOldSrc", NULL, test_rcv_cb,
+    test_rcv_conn_create_cb, test_rcv_conn_delete_cb, rcv_clientd);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+  SLEEP_MSEC(50);
+  ASSERT_EQ(0, log_cnt);
+
+  err = lbm_src_send(src, "msg0", 5, LBM_MSG_FLUSH);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  SLEEP_MSEC(50);
+
+  ASSERT_NE(null_ptr, strstr(msg_buffer[0], "test_rcv_cb: type=0, sqn=0, source='TCP:"));
+  ASSERT_NE(null_ptr, strstr(msg_buffer[0], "source_clientd='(null)', data='msg0'"));
+  ASSERT_EQ(1, msg_cnt);
+
+  SLEEP_MSEC(400);  /* Let receiver go to timewait. */
+  err = lbm_src_send(src, "msg1", 5, LBM_MSG_FLUSH);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+  SLEEP_MSEC(50);
+
+  ASSERT_NE(null_ptr, strstr(msg_buffer[1], "test_rcv_cb: type=0, sqn=1, source='TCP:"));
+  ASSERT_NE(null_ptr, strstr(msg_buffer[1], "source_clientd='(null)', data='msg1'"));
+  ASSERT_EQ(2, msg_cnt);
+  ASSERT_NE(null_ptr, strstr(log_buffer[0], "Warning at lbmct_rcv.c"));
+  ASSERT_NE(null_ptr, strstr(log_buffer[0], "giving up connecting to source 'TCP:"));
+  ASSERT_NE(null_ptr, strstr(log_buffer[0], "for topic 'CtOldSrc'"));
+  ASSERT_EQ(1, log_cnt);
+
+  err = lbmct_rcv_delete(ct_rcv);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  SLEEP_MSEC(50);
+
+  err = lbmct_delete(r_ct);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  err = lbm_src_delete(src);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  ASSERT_EQ(1, log_cnt);
+  ASSERT_EQ(2, msg_cnt);
+  ASSERT_EQ(0, sync_sem_cnt);
+}  /* CtOldSrc */
+
+
 TEST(Ct,CtRetryExceed2) {
   lbmct_t *s_ct = NULL;
   lbmct_t *r_ct = NULL;
@@ -573,6 +655,8 @@ TEST(Ct,CtCreateDeleteTest) {
   ct_config.flags |= LBMCT_CT_CONFIG_FLAGS_TEST_BITS;
   ct_config.delay_creq = 5;
   ct_config.flags |= LBMCT_CT_CONFIG_FLAGS_DELAY_CREQ;
+  ct_config.pre_delivery = 6;
+  ct_config.flags |= LBMCT_CT_CONFIG_FLAGS_PRE_DELIVERY;
 
   /* Test ct creation and deletion. */
   err = lbmct_create(&ct, ctx1, &ct_config, "Hi", 3);  /* Metadata is "Hi". */
@@ -583,6 +667,7 @@ TEST(Ct,CtCreateDeleteTest) {
   ASSERT_EQ(3, ct->active_config.max_tries);
   ASSERT_EQ(4, ct->active_config.test_bits);
   ASSERT_EQ(5, ct->active_config.delay_creq);
+  ASSERT_EQ(6, ct->active_config.pre_delivery);
 
   /* Ready to create source. */
 

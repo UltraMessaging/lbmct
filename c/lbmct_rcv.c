@@ -87,6 +87,7 @@ void *lbmct_src_notif_create_cb(const char *source_name, void *clientd)
   PRT_MALLOC_SET_N(rcv_conn, lbmct_rcv_conn_t, 0x5a, 1);
   rcv_conn->sig = LBMCT_SIG_RCV_CONN;
   rcv_conn->state = LBMCT_CONN_STATE_PRE_CREATED;
+  rcv_conn->app_conn_clientd = NULL;
 
   /* Send command to controller thread.  Do not wait for it to complete. */
   PRT_MALLOC_SET_N(rcv_conn_create, lbmct_ctrlr_cmd_rcv_conn_create_t, 0x5a, 1);
@@ -459,6 +460,12 @@ int lbmct_rcv_side_msg_rcv_cb(lbm_rcv_t *rcv, lbm_msg_t *msg, void *clientd)
     }  /* if ct message prop exists */
   }
 
+  /* Does user want pre-connected messages to be delivered? */
+  if (ct->active_config.pre_delivery) {
+    /* Force the message to always be delivered. */
+    starting_state = LBMCT_CONN_STATE_RUNNING;
+  }
+
   /* Want to deliver messages up to and including DRSP, which sets state
    * to TIME_WAIT. */
   if (starting_state == LBMCT_CONN_STATE_RUNNING ||
@@ -605,8 +612,10 @@ int lbmct_rcv_conn_delete(lbmct_rcv_conn_t *rcv_conn)
     LBMCT_LIST_DEL(ct->rcv_list_head, ct_rcv, rcv_list);
 
     /* Delete the underlying UM source. */
-    lbm_rcv_delete(ct_rcv->um_rcv);
-    ct_rcv->um_rcv = NULL;
+    if (ct_rcv->um_rcv != NULL) {
+      lbm_rcv_delete(ct_rcv->um_rcv);
+      ct_rcv->um_rcv = NULL;
+    }
 
     PRT_VOL32(ct_rcv->sig) = LBMCT_SIG_DEAD;
     free(ct_rcv);
@@ -1075,6 +1084,7 @@ int lbmct_ctrlr_cmd_ct_rcv_delete(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
   lbmct_ctrlr_cmd_ct_rcv_delete_t *rcv_delete = cmd->cmd_data;
   lbmct_rcv_t *ct_rcv = rcv_delete->ct_rcv;
   lbmct_rcv_conn_t *rcv_conn = NULL;
+  int num_conns_ending = 0;
   int err;
 
   /* Sanity checks. */
@@ -1116,14 +1126,23 @@ int lbmct_ctrlr_cmd_ct_rcv_delete(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
     }
     else {
       PRT_MUTEX_UNLOCK(rcv_conn->conn_lock);
+    }
 
-      lbm_logf(LBM_LOG_NOTICE,
-        "%s:%d, deleting conn in state %d, skipping DREQ\n",
-        BASENAME(__FILE__), __LINE__, rcv_conn->state);
+    if (rcv_conn->state != LBMCT_CONN_STATE_TIME_WAIT) {
+      num_conns_ending++;
     }
 
     rcv_conn = rcv_conn->conn_list_next;
   }  /* while rcv_conn */
+
+  if (num_conns_ending == 0) {
+    /* Delete the underlying UM receiver.  This will trigger deletion of any
+     * delivery controllers that haven't been deleted already. */
+    if (ct_rcv->um_rcv != NULL) {
+      lbm_rcv_delete(ct_rcv->um_rcv);
+      ct_rcv->um_rcv = NULL;
+    }
+  }
 
   /* If there are no child connections, finish deleting the ct_rcv.  (Otherwise
    * wait till those child connections are done being deleted.)
@@ -1133,10 +1152,6 @@ int lbmct_ctrlr_cmd_ct_rcv_delete(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
 
     /* Remove from ct. */
     LBMCT_LIST_DEL(ct->rcv_list_head, ct_rcv, rcv_list);
-
-    /* Delete the underlying UM receiver. */
-    lbm_rcv_delete(ct_rcv->um_rcv);
-    ct_rcv->um_rcv = NULL;
 
     PRT_VOL32(ct_rcv->sig) = LBMCT_SIG_DEAD;
     free(ct_rcv);

@@ -116,6 +116,7 @@ typedef void (*lbmct_rcv_conn_delete_function_cb)(lbmct_rcv_conn_t *rcv_conn,
 #define LBMCT_CT_CONFIG_FLAGS_DELAY_CREQ 0x00000004
 #define LBMCT_CT_CONFIG_FLAGS_RETRY_IVL  0x00000008
 #define LBMCT_CT_CONFIG_FLAGS_MAX_TRIES  0x00000010
+#define LBMCT_CT_CONFIG_FLAGS_PRE_DELIVERY 0x00000020
 
 /* Default values for config options. */
 #define LBMCT_CT_CONFIG_DEFAULT_TEST_BITS  0x00000000
@@ -123,6 +124,7 @@ typedef void (*lbmct_rcv_conn_delete_function_cb)(lbmct_rcv_conn_t *rcv_conn,
 #define LBMCT_CT_CONFIG_DEFAULT_DELAY_CREQ 10    /* 10 ms */
 #define LBMCT_CT_CONFIG_DEFAULT_RETRY_IVL  1000  /* 1 sec */
 #define LBMCT_CT_CONFIG_DEFAULT_MAX_TRIES  5
+#define LBMCT_CT_CONFIG_DEFAULT_PRE_DELIVERY 0
 
 typedef struct lbmct_config_t_stct {
   lbm_uint32_t flags;  /* LBMCT_CONFIG_FLAGS_... */
@@ -131,6 +133,7 @@ typedef struct lbmct_config_t_stct {
   int delay_creq;  /* Time (in ms) to delay sending initial CREQ handshake. */
   int retry_ivl;   /* Timeout to retry a handshake. */
   int max_tries;   /* Give up after this many handshake tries. */
+  int pre_delivery; /* Enables delivery of received msgs before handshakes. */
 } lbmct_config_t;
 
 
