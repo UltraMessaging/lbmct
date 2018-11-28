@@ -120,7 +120,10 @@ int test_log_cb(int level, const char *message, void *clientd)
     }  /* if 6259-7 */
   }  /* if num_domain_ids < 2 */
 
-  if (level == LBM_LOG_INFO || strstr(message, "DEBUG") != NULL) {
+  if (level == LBM_LOG_INFO ||
+    strstr(message, "DEBUG") != NULL ||
+    strstr(message, "Connection reset by peer") != NULL)
+  {
     /* Don't record info or debug messages. */
     printf("[](%d) %d ms %s", level, elapsed_time, message);  fflush(stdout);
   } else {
@@ -304,7 +307,9 @@ TEST(Ct,CtRetryExceed2) {
   lbmct_config_t ct_config;
   int err;
 
+#ifndef _WIN32
   signal(SIGPIPE, SIG_IGN);
+#endif
   SLEEP_MSEC(100);
   log_cnt = 0;
   msg_cnt = 0;
@@ -381,7 +386,9 @@ TEST(Ct,CtEchoTest) {
   lbmct_ctrlr_cmd_test_t test;
   int err;
 
+#ifndef _WIN32
   signal(SIGPIPE, SIG_IGN);
+#endif
   SLEEP_MSEC(100);
   log_cnt = 0;
   msg_cnt = 0;
@@ -453,7 +460,9 @@ TEST(Ct,CtRetryExceed1) {
   lbmct_config_t ct_config;
   int err;
 
+#ifndef _WIN32
   signal(SIGPIPE, SIG_IGN);
+#endif
   SLEEP_MSEC(100);
   log_cnt = 0;
   msg_cnt = 0;
@@ -541,7 +550,9 @@ TEST(Ct,CtCreateDeleteTest) {
   size_t opt_len;
   int err;
 
+#ifndef _WIN32
   signal(SIGPIPE, SIG_IGN);
+#endif
   SLEEP_MSEC(100);
   log_cnt = 0;
   msg_cnt = 0;
@@ -654,7 +665,9 @@ TEST(Ct,RetryExceed3) {
   lbmct_config_t ct_config;
   int err;
 
+#ifndef _WIN32
   signal(SIGPIPE, SIG_IGN);
+#endif
   SLEEP_MSEC(100);
   log_cnt = 0;
   msg_cnt = 0;
@@ -749,7 +762,9 @@ TEST(Ct,CtMultiStream) {
   int i;
   int err;
 
+#ifndef _WIN32
   signal(SIGPIPE, SIG_IGN);
+#endif
   SLEEP_MSEC(100);
   log_cnt = 0;
   msg_cnt = 0;
@@ -948,7 +963,9 @@ TEST(Ct,CtSimpleMessages1) {
   lbm_uint32_t int_prop_val;
   int err;
 
+#ifndef _WIN32
   signal(SIGPIPE, SIG_IGN);
+#endif
   SLEEP_MSEC(100);
   log_cnt = 0;
   msg_cnt = 0;
@@ -1071,7 +1088,9 @@ TEST(Ct,CtSimpleMessages2) {
   lbmct_config_t ct_config;
   int err;
 
+#ifndef _WIN32
   signal(SIGPIPE, SIG_IGN);
+#endif
   SLEEP_MSEC(100);
   log_cnt = 0;
   msg_cnt = 0;
@@ -1193,10 +1212,21 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
+#if defined(_MSC_VER)
+  /* windows-specific code */
+  WSADATA wsadata;
+  int wsStat = WSAStartup(MAKEWORD(2,2), &wsadata);
+  if (wsStat != 0) {
+    printf("line %d: wsStat=%d\n",__LINE__,wsStat); exit(1);
+  }
+#endif
+
   /* Not sure why I need to do this with MacOS.  Not sure why some of the
    * tests generates a sigpipe on Mac but not Linux.
    */
+#ifndef _WIN32
   signal(SIGPIPE, SIG_IGN);
+#endif
 
   PRT_MUTEX_INIT(log_lock);
   PRT_MUTEX_INIT(msg_lock);
