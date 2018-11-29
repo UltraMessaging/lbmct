@@ -158,8 +158,20 @@ the "_TYPE_" and converting to lower case to get the function
 ### Google Test
 
 A Google Test unit test program is included in "main.cpp".
+This has been run on MacOS, Linux, and Windows.
 
-***TBD***
+It is beyond the scope of this documentation to describe how to set up
+the build and runtime environments for Google Test.
+
+### Valgrind
+
+The Google Test has been run under Valgrind with no errors.
+
+### Lcov
+
+The Google Test has been run under the "lcov" line coverage tool with
+the lbmct files achieving over 96% line coverage.
+(The tmr section is lower, but is more-thoroughly tested elsewhere.)
 
 ### Recent Events
 
