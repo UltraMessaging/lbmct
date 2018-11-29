@@ -339,13 +339,13 @@ TEST(Ct,CtOldSrc) {
   err = lbmct_rcv_create(&ct_rcv, r_ct, "CtOldSrc", NULL, test_rcv_cb,
     test_rcv_conn_create_cb, test_rcv_conn_delete_cb, rcv_clientd);
   ASSERT_EQ(0, err) << lbm_errmsg();
-  SLEEP_MSEC(50);
+  SLEEP_MSEC(70);
   ASSERT_EQ(0, log_cnt);
 
   err = lbm_src_send(src, "msg0", 5, LBM_MSG_FLUSH);
   ASSERT_EQ(0, err) << lbm_errmsg();
 
-  SLEEP_MSEC(50);
+  SLEEP_MSEC(70);
 
   ASSERT_NE(null_ptr, strstr(msg_buffer[0], "test_rcv_cb: type=0, sqn=0, source='TCP:"));
   ASSERT_NE(null_ptr, strstr(msg_buffer[0], "source_clientd='(null)', data='msg0'"));
@@ -628,6 +628,7 @@ TEST(Ct,CtCreateDeleteTest) {
   lbm_src_topic_attr_t *sattr = NULL;
   lbm_rcv_topic_attr_t *rattr = NULL;
   lbmct_config_t ct_config;
+  lbmct_peer_info_t peer_info;
   lbm_ulong_t opt_val;
   size_t opt_len;
   int err;
@@ -640,6 +641,10 @@ TEST(Ct,CtCreateDeleteTest) {
   msg_cnt = 0;
   MSEC_CLOCK(test_start_time);
   ASSERT_EQ(0, sync_sem_cnt);
+
+  /* Make sure API structures haven't changed size. */
+  ASSERT_EQ(156, sizeof(ct_config));
+  ASSERT_EQ(336, sizeof(peer_info));
 
   /* Test setting configs. These settings are not intended to *do* anything,
    * just verify that the settings make it into the active config.
@@ -1001,6 +1006,8 @@ TEST(Ct,CtMultiStream) {
   err = lbmct_src_delete(ct_src5);
   ASSERT_EQ(0, err) << lbm_errmsg();
 
+  SLEEP_MSEC(100);
+
   err = lbmct_rcv_delete(ct_rcv1);
   ASSERT_EQ(0, err) << lbm_errmsg();
   err = lbmct_rcv_delete(ct_rcv2);
@@ -1012,9 +1019,11 @@ TEST(Ct,CtMultiStream) {
   err = lbmct_rcv_delete(ct_rcv5);
   ASSERT_EQ(0, err) << lbm_errmsg();
 
-  SLEEP_MSEC(200);
+  SLEEP_MSEC(100);
   ASSERT_LE(32, log_cnt);
   ASSERT_EQ(30, msg_cnt);
+
+  SLEEP_MSEC(200);
 
   err = lbmct_delete(ct1);
   ASSERT_EQ(0, err) << lbm_errmsg();

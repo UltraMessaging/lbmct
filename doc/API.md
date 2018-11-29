@@ -456,40 +456,49 @@ The bits are:
 #define LBMCT_PEER_INFO_FLAGS_RCV_END_SEQ_NUM 0x40
 ```
 
-**Fields**
+### lbmct_peer_info_t Fields
 
-* **`status`** - Indicates health of the connection at that point in time.
+#### `lbmct_peer_info_t.status`
+Indicates health of the connection at that point in time.
 Possible values: LBMCT_CONN_STATUS_OK, LBMCT_CONN_STATUS_BAD_CLOSE.
 
-* **`flags`** - Bitmap indicating which subsequent fields are set.
+#### `lbmct_peer_info_t.flags`
+Bitmap indicating which subsequent fields are set.
 
-* **`src_metadata`** - Pointer to the CT Source's application metadata
+#### `lbmct_peer_info_t.src_metadata`
+Pointer to the CT Source's application metadata
 supplied in the publisher's call to [lbmct_create()][#lbmct_create].
 If the publisher did not supply metadata,
 the LBMCT_PEER_INFO_FLAGS_SRC_METADATA bit will be zero in the `flags` field.
 
-* **`src_metadata_len` - Number of bytes of metadata pointed to by
+#### `lbmct_peer_info_t.src_metadata_len`
+Number of bytes of metadata pointed to by
 `rcv_metadata`.
 
-* **`rcv_metadata`** - Pointer to the CT Receiver's applicaiton metadata
+#### `lbmct_peer_info_t.rcv_metadata`
+Pointer to the CT Receiver's applicaiton metadata
 supplied in the subscriber's call to [lbmct_create()][#lbmct_create].
 If the subscriber did not supply metadata,
 the LBMCT_PEER_INFO_FLAGS_SRC_METADATA bit will be zero in the `flags` field.
 
-* **`src_metadata_len` - Number of bytes of metadata pointed to by
+#### `lbmct_peer_info_t.src_metadata_len`
+Number of bytes of metadata pointed to by
 `src_metadata`.
 
-* **`rcv_source_name`** - Source "name" as seen by receiver.
+#### `lbmct_peer_info_t.rcv_source_name`
+Source "name" as seen by receiver.
 This field is only filled in on the subscriber side.
 Note that especially in a DRO environment, different subscribers can
 see different source names for the same actual source.
 The IP and Port will be that of the DRO's proxy source, not the
 originating source's IP and Port.
 
-* **`rcv_start_seq_num`** - Topic-level sequence number of the CRSP handshake
+#### `lbmct_peer_info_t.rcv_start_seq_num`
+Topic-level sequence number of the CRSP handshake
 received by the subscriber which established the connection.
 
-* **`rcv_end_seq_num`** - Topic-level sequence number of the DRSP handsnake
+#### `lbmct_peer_info_t.rcv_end_seq_num`
+Topic-level sequence number of the DRSP handsnake
 received by the subscriber which closed the connection.
 
 
@@ -536,26 +545,31 @@ The bits are:
 #define LBMCT_CT_CONFIG_FLAGS_PRE_DELIVERY 0x00000020
 ```
 
-**Fields**
+### lbmct_config_t Fields
 
-* **`flags`** - Bitmap indicating which subsequent fields are set
+#### `lbmct_config_t.flags`
+Bitmap indicating which subsequent fields are set
 by the application
 
-* **`test_bits`** - Bitmap used to control internal behavior for unit testing.
+#### `lbmct_config_t.test_bits`
+Bitmap used to control internal behavior for unit testing.
 Not for normal use.
 
-* **`domain_id`** - For DRO environments,
+#### `lbmct_config_t.domain_id`
+For DRO environments,
 the publisher should set this to the Domain ID for this application.
 For non-DRO environments, this should be set to 0.
 If using DRO, the value can be left at its default of -1, and the CT receiver
 will use the "send to source" UIM addressing for all handshake messages.
 See [Domain ID](Domain_ID.md).
 
-* **`delay_creq`** - When a receiver discovers a source, it delays sending its
+#### `lbmct_config_t.delay_creq`
+When a receiver discovers a source, it delays sending its
 connect request message.
 This is to avoid "head loss" on the source's transport session.
 
-* **`retry_ivl`** - The CT layer uses handshake control messages to
+#### `lbmct_config_t.retry_ivl`
+The CT layer uses handshake control messages to
 manage connections.
 There are situations where these messages can be lost,
 so a retry mechanism is used to recover lost handshake control messages.
@@ -563,10 +577,12 @@ The `retry_ivl` field indicates the time interval used for retries.
 NOTE: this retry mechanism is for the opening and closing of connections.
 They are not a keepalive mechanism to detect failure of an active connection.
 
-* **`max_tries`** - Maximum number of attempts to exchange a given
+#### `lbmct_config_t.max_tries`
+Maximum number of attempts to exchange a given
 handshake control message before CT gives up and deletes the connection.
 
-* **`pre_delivery`** - When set to 1, enables the delivery of received
+#### `lbmct_config_t.pre_delivery`
+When set to 1, enables the delivery of received
 messages from non-CT sources (i.e. before the connect handshake completes).
 For those messages received outside of the normal connected state, the
 [lbm_msg_t](https://ultramessaging.github.io/currdoc/doc/API/structlbm__msg__t__stct.html)

@@ -82,6 +82,14 @@ typedef struct lbmct_rcv_conn_t_stct lbmct_rcv_conn_t;
 /* Structure to pass important information to the application during
  * the connection create and delete callbacks.  The "err" field indicates
  * if the connection create/delete was clean and successful.
+ * IMPORTANT: to maintain ABI compatibility:
+ *   1. Do not remove fields from this structure.  Fields can be renamed
+ *      to "unused1", "unused2", etc., but keep their original types.
+ *   2. Do not change the data type of a field.  You can change it to "unused"
+ *      and add a new one (see next item).
+ *   3. Only add fields near the end, above the "lbmct_reserved[]" array.
+ *      When a field is added, the equivilent number of bytes must be
+ *      subtracted from the reserved array to keep the structure size the same.
  */
 typedef struct {
   int status;  /* LBMCT_CONN_STATUS_* */
@@ -90,9 +98,10 @@ typedef struct {
   size_t src_metadata_len;
   char *rcv_metadata;
   size_t rcv_metadata_len;
-  char rcv_source_name[LBM_MSG_MAX_SOURCE_LEN+1];  /* Not very useful to app. */
   lbm_uint_t rcv_start_seq_num;  /* Receive-side sequence number of CRSP. */
   lbm_uint_t rcv_end_seq_num;  /* Receive-side sequence number or DRSP. */
+  char rcv_source_name[LBM_MSG_MAX_SOURCE_LEN];  /* Not very useful to app. */
+  char lbmct_reserved[160];  /* Reserved for future growth.  Set to zero. */
 } lbmct_peer_info_t;
 
 
@@ -126,6 +135,15 @@ typedef void (*lbmct_rcv_conn_delete_function_cb)(lbmct_rcv_conn_t *rcv_conn,
 #define LBMCT_CT_CONFIG_DEFAULT_MAX_TRIES  5
 #define LBMCT_CT_CONFIG_DEFAULT_PRE_DELIVERY 0
 
+/* IMPORTANT: to maintain ABI compatibility:
+ *   1. Do not remove fields from this structure.  Fields can be renamed
+ *      to "unused1", "unused2", etc., but keep their original types.
+ *   2. Do not change the data type of a field.  You can change it to "unused"
+ *      and add a new one (see next item).
+ *   3. Only add fields near the end, above the "lbmct_reserved[]" array.
+ *      When a field is added, the equivilent number of bytes must be
+ *      subtracted from the reserved array to keep the structure size the same.
+ */
 typedef struct lbmct_config_t_stct {
   lbm_uint32_t flags;  /* LBMCT_CONFIG_FLAGS_... */
   lbm_uint32_t test_bits;  /* Set bits for internal testing. */
@@ -134,6 +152,7 @@ typedef struct lbmct_config_t_stct {
   int retry_ivl;   /* Timeout to retry a handshake. */
   int max_tries;   /* Give up after this many handshake tries. */
   int pre_delivery; /* Enables delivery of received msgs before handshakes. */
+  char lbmct_reserved[128];  /* Reserved for future growth. */
 } lbmct_config_t;
 
 

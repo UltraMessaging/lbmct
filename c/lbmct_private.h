@@ -498,7 +498,7 @@ struct lbmct_src_conn_t_stct {
   int app_conn_delete_called;
   lbm_uint32_t rcv_ct_id;
   char rcv_uim_addr[LBMCT_UIM_ADDR_STR_SZ+1];
-  char rcv_source_name[LBM_MSG_MAX_SOURCE_LEN+1];
+  char rcv_source_name[LBM_MSG_MAX_SOURCE_LEN];
   lbm_uint32_t rcv_conn_id;
   char rcv_conn_id_str[LBMCT_RCV_CONN_ID_STR_SZ+1];
   lbm_uint32_t sig;  /* LBMCT_SIG_SRC_CONN */

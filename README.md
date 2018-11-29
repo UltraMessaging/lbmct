@@ -195,8 +195,8 @@ The CT Receiver will repeatedly send CT control handshake messages to the
 source context.
 Since it will not receive the proper handshake response,
 the receiver will normally be “deaf” to the non-CT Source.
-However, the "pre_delivery" option can be used to force delivery of messages
-received from non-connected sources.
+However, the [pre_delivery](doc/API.md#lbmct_config_tpre_delivery) option can
+be configured to force delivery of messages received from non-connected sources.
 
 * When Smart Source is added, the sender will need to be at least UM 6.10,
 although the Smart Source code could be conditionally compiled.

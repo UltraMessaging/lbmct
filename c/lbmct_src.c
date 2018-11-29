@@ -350,6 +350,7 @@ int lbmct_src_conn_create(lbmct_src_conn_t **rtn_src_conn, lbmct_src_t *ct_src,
   src_conn->app_conn_delete_called = 0;
   src_conn->try_cnt = 0;
 
+  memset(&src_conn->peer_info, 0, sizeof(src_conn->peer_info));
   src_conn->peer_info.status = LBMCT_CONN_STATUS_OK;
   src_conn->peer_info.flags = 0;
   src_conn->peer_info.src_metadata = ct->metadata;
@@ -402,7 +403,7 @@ int lbmct_src_handle_handshake_creq(lbmct_t *ct,
   char cmd[LBMCT_PREFIX_SZ+1];
   unsigned int field_cnt;
   unsigned int rcv_ct_id;
-  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN+1];
+  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int rcv_conn_id;
   int topic_str_ofs = 0;
   const char *topic_str;
@@ -510,10 +511,10 @@ int lbmct_src_handle_handshake_c_ok(lbmct_t *ct,
   char cmd[LBMCT_PREFIX_SZ+1];
   unsigned int field_cnt;
   unsigned int rcv_ct_id;
-  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN+1];
+  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int rcv_conn_id;
   unsigned int src_ct_id;
-  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN+1];
+  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int src_conn_id;
   unsigned int start_sqn;
   int metadata_len;
@@ -630,10 +631,10 @@ int lbmct_src_handle_handshake_dreq(lbmct_t *ct,
   char cmd[LBMCT_PREFIX_SZ+1];
   unsigned int field_cnt;
   unsigned int rcv_ct_id;
-  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN+1];
+  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int rcv_conn_id;
   unsigned int src_ct_id;
-  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN+1];
+  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int src_conn_id;
   int null_ofs = 0;
 
@@ -720,10 +721,10 @@ int lbmct_src_handle_handshake_d_ok(lbmct_t *ct,
   char cmd[LBMCT_PREFIX_SZ+1];
   unsigned int field_cnt;
   unsigned int rcv_ct_id;
-  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN+1];
+  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int rcv_conn_id;
   unsigned int src_ct_id;
-  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN+1];
+  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int src_conn_id;
   unsigned int end_sqn;
   int null_ofs = 0;

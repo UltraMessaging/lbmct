@@ -28,9 +28,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* Macro to approximate the basename() function. */
-#define BASENAME(_p) ((strrchr(_p, '/') == NULL) ? (_p) : (strrchr(_p, '/')+1))
-
 /* Macros to standardize error handling. */
 
 /* IMMEDIATE FATAL ERRORS, do not return bad status, call abort().  DO NOT
@@ -139,6 +136,9 @@ extern "C" {
 
 #if defined(_WIN32)
 
+/* Macro to approximate the basename() function. */
+#define BASENAME(_p) ((strrchr(_p, '\\') == NULL) ? (_p) : (strrchr(_p, '\\')+1))
+
 #define snprintf _snprintf
 #define strdup _strdup
 
@@ -186,6 +186,9 @@ typedef HANDLE prt_thread_t;
 
 #include <unistd.h>
 #include <pthread.h>
+
+/* Macro to approximate the basename() function. */
+#define BASENAME(_p) ((strrchr(_p, '/') == NULL) ? (_p) : (strrchr(_p, '/')+1))
 
 #define SLEEP_SEC(x) sleep(x)
 #define SLEEP_MSEC(x) do {\

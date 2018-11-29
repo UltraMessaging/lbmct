@@ -150,10 +150,10 @@ int lbmct_rcv_handle_handshake_crsp(lbmct_rcv_conn_t *rcv_conn, lbm_msg_t *msg)
   char cmd[LBMCT_PREFIX_SZ+1];
   unsigned int field_cnt;
   unsigned int rcv_ct_id;
-  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN+1];
+  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int rcv_conn_id;
   unsigned int src_ct_id;
-  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN+1];
+  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int src_conn_id;
   int metadata_len;
   int metadata_ofs = 0;
@@ -283,10 +283,10 @@ int lbmct_rcv_handle_handshake_drsp(lbmct_rcv_conn_t *rcv_conn, lbm_msg_t *msg)
   char cmd[LBMCT_PREFIX_SZ+1];
   unsigned int field_cnt;
   unsigned int rcv_ct_id;
-  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN+1];
+  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int rcv_conn_id;
   unsigned int src_ct_id;
-  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN+1];
+  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int src_conn_id;
   int null_ofs = 0;
 
@@ -1041,8 +1041,9 @@ int lbmct_ctrlr_cmd_rcv_conn_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
   rcv_conn->app_conn_delete_called = 0;
   rcv_conn->try_cnt = 0;
 
-  rcv_conn->peer_info.flags = 0;
+  memset(&rcv_conn->peer_info, 0, sizeof(rcv_conn->peer_info));
   rcv_conn->peer_info.status = LBMCT_CONN_STATUS_OK;
+  rcv_conn->peer_info.flags = 0;
   rcv_conn->peer_info.rcv_metadata = ct->metadata;
   rcv_conn->peer_info.flags |= LBMCT_PEER_INFO_FLAGS_RCV_METADATA;
   rcv_conn->peer_info.rcv_metadata_len = ct->metadata_len;
