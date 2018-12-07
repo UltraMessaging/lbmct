@@ -1,4 +1,4 @@
-# lbmct v0.4 Internal Design - Connected Topics for Ultra Messaging
+# lbmct v0.5 Internal Design - Connected Topics for Ultra Messaging
 
 This page provides details on the CT implementation.
 

@@ -1,9 +1,8 @@
-# lbmct v0.4 README - Connected Topics for Ultra Messaging
+# lbmct v0.5 README - Connected Topics for Ultra Messaging
 
 ## Introduction
 
-Version v0.4: Support for Windows DLL.
-See [Release Notes](doc/Release_notes.md).
+Version v0.4: See [Release Notes](doc/Release_notes.md).
 
 The "lbmct" package is an API wrapper around the Ultra Messaging library which
 adds the concept of end-to-end connectedness to UM's normal pub/sub messaging
@@ -197,6 +196,8 @@ Since it will not receive the proper handshake response,
 the receiver will normally be “deaf” to the non-CT Source.
 However, the [pre_delivery](doc/API.md#lbmct_config_tpre_delivery) option can
 be configured to force delivery of messages received from non-connected sources.
+The receiver will still attempt to connect to the source, but at least
+the messages from the source will be delivered.
 
 * When Smart Source is added, the sender will need to be at least UM 6.10,
 although the Smart Source code could be conditionally compiled.

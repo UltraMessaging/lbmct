@@ -1,4 +1,37 @@
-# lbmct v0.4 Release Notes - Connected Topics for Ultra Messaging
+# lbmct v0.5 Release Notes - Connected Topics for Ultra Messaging
+
+## Version 0.5
+
+Support Windows DLL.
+
+Release date: 07-Dec-2018
+
+### New Features
+
+* Configuration option [pre_delivery](doc/API.md#lbmct_config_tpre_delivery)
+allows a connected receiver to get messages from a legacy non-connected
+source.
+
+* Added support for deployments where it is not possible to inform CT about
+the domain IDs of the source and receivers.
+Changed default domain ID to -1.
+If no valid domain ID is sent, the receiver sends all UIMs to the
+source's "source string".
+Note that this has a performance penalty (how much depends on the size
+of the receiving context's resolver cache).
+
+* Modified Google Test self-test to be Windowds-friendly.
+It is now possible to run the self-test suite under Visual Studio.
+
+* Minor changes to improve Windows DLL.
+
+See [Feature List](../README.md#features) for full feature list.
+
+### Fixed Limitations
+
+* None.
+
+---
 
 ## Version 0.4
 

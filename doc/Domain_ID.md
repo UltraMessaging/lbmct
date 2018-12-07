@@ -1,4 +1,4 @@
-# lbmct v0.4 Domain IDs - Connected Topics for Ultra Messaging
+# lbmct v0.5 Domain IDs - Connected Topics for Ultra Messaging
 
 ## Introduction
 
