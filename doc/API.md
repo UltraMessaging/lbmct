@@ -187,7 +187,7 @@ This is a copy of the clientd pointer passed to
 
 * **`conn_clientd`** - A pointer to application state.
 This is a copy of the pointer returned by
-[lbmct_src_conn_create_function_cb][#lbmct_src_conn_create_function_cb]
+[lbmct_src_conn_create_function_cb](#lbmct_src_conn_create_function_cb)
 at connection creation time.
 
 **Returns**
@@ -363,7 +363,7 @@ This is a copy of the clientd pointer passed to
 
 * **`conn_clientd`** - A pointer to application state.
 This is a copy of the pointer returned by
-[lbmct_rcv_conn_create_function_cb][#lbmct_rcv_conn_create_function_cb]
+[lbmct_rcv_conn_create_function_cb](#lbmct_rcv_conn_create_function_cb)
 at connection creation time.
 
 **Returns**
@@ -467,7 +467,7 @@ Bitmap indicating which subsequent fields are set.
 
 #### `lbmct_peer_info_t.src_metadata`
 Pointer to the CT Source's application metadata
-supplied in the publisher's call to [lbmct_create()][#lbmct_create].
+supplied in the publisher's call to [lbmct_create()](#lbmct_create).
 If the publisher did not supply metadata,
 the LBMCT_PEER_INFO_FLAGS_SRC_METADATA bit will be zero in the `flags` field.
 
@@ -477,7 +477,7 @@ Number of bytes of metadata pointed to by
 
 #### `lbmct_peer_info_t.rcv_metadata`
 Pointer to the CT Receiver's applicaiton metadata
-supplied in the subscriber's call to [lbmct_create()][#lbmct_create].
+supplied in the subscriber's call to [lbmct_create()](#lbmct_create).
 If the subscriber did not supply metadata,
 the LBMCT_PEER_INFO_FLAGS_SRC_METADATA bit will be zero in the `flags` field.
 

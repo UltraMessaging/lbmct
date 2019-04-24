@@ -8,7 +8,7 @@ Release date: 07-Dec-2018
 
 ### New Features
 
-* Configuration option [pre_delivery](doc/API.md#lbmct_config_tpre_delivery)
+* Configuration option [pre_delivery](API.md#lbmct_config_tpre_delivery)
 allows a connected receiver to get messages from a legacy non-connected
 source.
 
