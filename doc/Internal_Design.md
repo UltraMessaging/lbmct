@@ -1,6 +1,26 @@
 # lbmct v0.5 Internal Design - Connected Topics for Ultra Messaging
 
-This page provides details on the CT implementation.
+Source conn is created by reception of a "CREQ" handshake.
+Receiver conn is created by the new source callback
+(a receiver delivery controller is created).
+This leads to differences in the invocation and content of connection object
+creation.
+
+Another major difference between the source and receiver sides is the amount
+of processing done within the context thread vs. the ctrlr thread.
+
+For the receive side, there is significant processing done in each thread.
+This is because message reception latency must be minimized,
+and handshake messages must be delivered to the application.
+So much of the processing of received handshake messages must be done
+within the context callback.
+But some things need to be done in a non-context thread,
+like sending UIM messages.
+Since both threads do significant processing,
+locking has to be done to serialize access to the state data.
+
+This locking is not needed on the source side because all critical processing
+is done from the ctrlr thread.
 
 ## Files
 

@@ -1,21 +1,22 @@
-# lbmct v0.6 C User Guide - Connected Topics for Ultra Messaging
+# lbmct v0.6 Java User Guide - Connected Topics for Ultra Messaging
 
-This page explains how to write C-language Connected Topic application.
-For Java, see the [Java User Guide](Java_Userguide.md).
+This page explains how to write Java-language Connected Topic application.
+For C, see the [C User Guide](Userguide.md).
 
 ## Publisher Code Outline
 
-See [min_ct_src.c](../c/min_ct_src.c) for a compilable example.
+See [MinCtSrc.java](../java/MinCtSrc.java) for a compilable example.
 
 A publisher of a connected topic needs to perform the following:
 
 **Initialization**
 
 * Create a context object with the normal API:
+[LBMContext(LBMContextAttributes)](https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMContext.html#ad6173b302534ee9011ce56897a6952ac).
 [lbm_context_create()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a8058947690bd0995bc2c59d4a61b462f).
 
 * Create a CT object with the CT API:
-[lbmct_create()](#lbmct_create).
+[LbmCt]().
 This CT object is associated with a context and should be thought of as
 analogous to a context.
 For example, one CT object can host any number of CT Sources (and CT Receivers).
