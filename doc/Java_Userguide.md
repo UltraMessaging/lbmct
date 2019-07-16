@@ -12,14 +12,17 @@ A publisher of a connected topic needs to perform the following:
 **Initialization**
 
 * Create a context object with the normal API:
-[LBMContext(LBMContextAttributes)](https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMContext.html#ad6173b302534ee9011ce56897a6952ac).
+[LBMContext](https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMContext.html#ad6173b302534ee9011ce56897a6952ac).
 [lbm_context_create()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a8058947690bd0995bc2c59d4a61b462f).
 
 * Create a CT object with the CT API:
-[LbmCt]().
+[LbmCt](https://ultramessaging.github.io/lbmct/javadoc/com/latencybusters/lbmct/LbmCt.html#LbmCt--).
+This only creates the object; it still needs to be initialized, which is done with the CT API:
+[LbmCt::start](https://ultramessaging.github.io/lbmct/javadoc/com/latencybusters/lbmct/LbmCt.html#start-com.latencybusters.lbm.LBMContext-com.latencybusters.lbmct.LbmCtConfig-java.nio.ByteBuffer-).
 This CT object is associated with a context and should be thought of as
 analogous to a context.
-For example, one CT object can host any number of CT Sources (and CT Receivers).
+For example, most applications have only one CT object which can host any
+number of CT Sources and CT Receivers.
 
 * Create a CT Source object with a CT API:
 [lbmct_src_create()](#lbmct_src_create).
