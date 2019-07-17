@@ -13,7 +13,6 @@ A publisher of a connected topic needs to perform the following:
 
 * Create a context object with the normal API:
 [LBMContext](https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMContext.html#ad6173b302534ee9011ce56897a6952ac).
-[lbm_context_create()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a8058947690bd0995bc2c59d4a61b462f).
 
 * Create a CT object with the CT API:
 [LbmCt](https://ultramessaging.github.io/lbmct/javadoc/com/latencybusters/lbmct/LbmCt.html#LbmCt--).
@@ -143,3 +142,10 @@ If C binary structures are supplied, be aware that the fields will not be
 marshalled; if platforms of different "endian" are used,
 it is the application's responsibility to convert between host and network
 order.
+
+## Debugging
+
+The LbmCtCtrlr object contains a blocking queue named "debugQ" which is used
+as a simple unbounded event recorder.
+Its operation is controlled by setting the
+

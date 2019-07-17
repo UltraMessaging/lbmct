@@ -29,7 +29,7 @@ public class LbmCtPeerInfo {
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int STATUS_OK=0;
   @SuppressWarnings("WeakerAccess")  // public API.
-  public final static int STATUS_BAD_CLOSE=-1;
+  public final static int STATUS_BAD_STOP =-1;
 
 
   // Flag bits for "flags" field.
@@ -44,7 +44,7 @@ public class LbmCtPeerInfo {
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int FLAGS_RCV_END_SEQ_NUM   = 0x10;
 
-  private int status = STATUS_BAD_CLOSE;
+  private int status = STATUS_BAD_STOP;
   private int flags = 0;
   private ByteBuffer srcMetadata = null;
   private ByteBuffer rcvMetadata = null;

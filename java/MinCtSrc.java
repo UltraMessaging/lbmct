@@ -65,8 +65,8 @@ class MinCtSrc {
     }
 
     // Clean up.
-    myCtSrc.close();  // Important to close the CT Source when finished.
-    myCt.close();  //  Important to close the CT object when finished.
+    myCtSrc.stop();  // Important to stop the CT Source when finished.
+    myCt.stop();  //  Important to stop the CT object when finished.
   }
 
 

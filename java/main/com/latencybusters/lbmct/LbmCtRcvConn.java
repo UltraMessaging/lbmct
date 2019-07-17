@@ -30,7 +30,7 @@ import com.latencybusters.lbm.*;
 @SuppressWarnings("WeakerAccess")  // public API.
 public class LbmCtRcvConn {
   enum States {
-    PRE_CREATED, STARTING, RUNNING, ENDING, FIN_WAIT, CLOSE_WAIT
+    PRE_CREATED, STARTING, RUNNING, ENDING, FIN_WAIT, STOP_WAIT
   }
 
   private LbmCtRcv ctRcv;  // Initialized in constructor.
@@ -108,9 +108,9 @@ public class LbmCtRcvConn {
     } else {
       connState = newState;
 
-      if (newState == States.CLOSE_WAIT) {
+      if (newState == States.STOP_WAIT) {
         // In the normal case, the user's delete callback is invoked from inside handleDrsp.  But there are a lot of
-        // cases where the conn can be closed abnormally.  This catches them all.
+        // cases where the conn can be stopped abnormally.  This catches them all.
         if (wasAppConnCreateCalled) {
           if ((ctRcv.getConnDeleteCb() != null) && (! wasAppConnDeleteCalled)) {
             ctRcv.getConnDeleteCb().onRcvConnDelete(ctRcv, peerInfo, ctRcv.getCbArg(), rcvConnCbArg);
@@ -120,7 +120,7 @@ public class LbmCtRcvConn {
 
         // See if transitioning from an active to an inactive state.
         if ((oldState.ordinal() > States.PRE_CREATED.ordinal()) &&
-            (oldState.ordinal() < States.CLOSE_WAIT.ordinal()))
+            (oldState.ordinal() < States.STOP_WAIT.ordinal()))
         {
           ctRcv.decrementActiveConns();
         }
@@ -152,8 +152,8 @@ public class LbmCtRcvConn {
     boolean timerNeeded = false;
 
     synchronized (ctRcv.getLock()) {
-      if (ctRcv.isClosing()) {
-        setConnState(States.CLOSE_WAIT);
+      if (ctRcv.isStopping()) {
+        setConnState(States.STOP_WAIT);
       } else {
         setConnState(States.STARTING);
         sourceStr = cmd.getSourceStr();
@@ -220,7 +220,7 @@ public class LbmCtRcvConn {
     ct.dbg("rcvConnTmrExpire: " + this);
     synchronized (ctRcv.getLock()) {
       // Don't bother delivering timer ticks if conn is waiting to be deleted.  Ditto stale ticks.
-      if ((connState != States.CLOSE_WAIT) && (connTmr.getId() == pendingTmrId)) {
+      if ((connState != States.STOP_WAIT) && (connTmr.getId() == pendingTmrId)) {
         LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
         nextCmd.setRcvConnTmrExpire(this, pendingTmrId);
         ctrlr.submitNowait(nextCmd);  // This "calls" cmdRcvConnTmrExpire below.
@@ -243,9 +243,9 @@ public class LbmCtRcvConn {
         pendingTmrId = -1;  // Timer has fired; not pending any more.
 
         if (connState == States.STARTING) {
-          if (ctRcv.isClosing()) {  // User requested close of the CT receiver; this timer event was probably queued.
+          if (ctRcv.isStopping()) {  // User requested stop of the CT receiver; this timer event was probably queued.
             // Even if a CREQ was sent, go straight to time_wait.  No need to send DREQ (the src will timeout CRSPs).
-            setConnState(States.CLOSE_WAIT);
+            setConnState(States.STOP_WAIT);
           }
           else {
             // Backoff time initial fast tries.
@@ -267,7 +267,7 @@ public class LbmCtRcvConn {
               nextAction = RcvConnTmrExpireActions.SEND_CREQ;
             } else {
               LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up connecting to source '" + sourceStr + "' for topic '" + ctRcv.getTopicStr() + "'\n");
-              setConnState(States.CLOSE_WAIT);
+              setConnState(States.STOP_WAIT);
             }
           }
         }
@@ -277,10 +277,10 @@ public class LbmCtRcvConn {
             tryCnt++;  // Retry the DREQ.
             nextAction = RcvConnTmrExpireActions.SEND_DREQ;
           } else {
-            LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up closing connection to source '" + sourceStr + "' for topic '" + ctRcv.getTopicStr() + "'\n");
-            peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_CLOSE);
+            LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up stopping connection to source '" + sourceStr + "' for topic '" + ctRcv.getTopicStr() + "'\n");
+            peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_STOP);
 
-            setConnState(States.CLOSE_WAIT);
+            setConnState(States.STOP_WAIT);
           }
         }
 
@@ -289,8 +289,8 @@ public class LbmCtRcvConn {
             tryCnt++;  // Retry the DREQ.
             nextAction = RcvConnTmrExpireActions.SEND_DOK;
           } else {
-            LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up closing connection to source '" + sourceStr + "' for topic '" + ctRcv.getTopicStr() + "'\n");
-            setConnState(States.CLOSE_WAIT);
+            LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up stopping connection to source '" + sourceStr + "' for topic '" + ctRcv.getTopicStr() + "'\n");
+            setConnState(States.STOP_WAIT);
           }
         }
 
@@ -381,10 +381,10 @@ public class LbmCtRcvConn {
             // A crsp is handled by the connection before it is delivered to the app.
             switch (handshakeType) {
               case LbmCtHandshakeParser.MSG_TYPE_CRSP:
-                if ((connState == States.STARTING) && ctRcv.isClosing()) {
+                if ((connState == States.STARTING) && ctRcv.isStopping()) {
                   // This conn isn't started yet,
                   // even if a CREQ was sent, go straight to time_wait.  No need to send DREQ (the src will timeout CRSPs).
-                  setConnState(States.CLOSE_WAIT);
+                  setConnState(States.STOP_WAIT);
                 } else {
                   // Want to deliver crsp to user *after* it is handled.
                   handleCrsp(handshakeParser, umSequenceNum);
@@ -588,7 +588,7 @@ public class LbmCtRcvConn {
         if ((connState == States.STARTING) || (connState == States.RUNNING) || (connState == States.FIN_WAIT) || (connState == States.ENDING)) {
           // In time wait state, we are waiting for the UM receiver delivery controller to be deleted, triggering a
           // call to per-source delete callback.  That does the final connection cleanup.
-          setConnState(States.CLOSE_WAIT);
+          setConnState(States.STOP_WAIT);
         }
 
         pendingTmrId = -1;
@@ -601,37 +601,37 @@ public class LbmCtRcvConn {
 
   // Called from onSourceDelete
   // THREAD: ctx
-  void close() throws Exception {
+  void stop() throws Exception {
     // The connection is about to be deleted, no more timer ticks.
     pendingTmrId = -1;
     connTmr.cancelCtxThread();
     // As of now, there can be no new conn-level events generated for this conn.  But there might be some queued
-    // events, like timers that fired just before the cancel.  Submit this close to the ctrlr thread to be the last
+    // events, like timers that fired just before the cancel.  Submit this stop to the ctrlr thread to be the last
     // event processed.
 
-    ct.dbg("close: " + this);
+    ct.dbg("stop: " + this);
     LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
-    nextCmd.setRcvConnClose(this);
-    ctrlr.submitNowait(nextCmd);  // This "calls" cmdRcvConnClose below.
+    nextCmd.setRcvConnStop(this);
+    ctrlr.submitNowait(nextCmd);  // This "calls" cmdRcvConnStop below.
   }
 
-  // This performs the close activities, after the delivery controller has been deleted.
+  // This performs the stop activities, after the delivery controller has been deleted.
   // THREAD: ctrlr
-  boolean cmdRcvConnClose(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {
+  boolean cmdRcvConnStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {
     synchronized (ctRcv.getLock()) {
-      if (connState != States.CLOSE_WAIT) {
-        // Tell app that the connection closed abnormally.
-        peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_CLOSE);
-        setConnState(States.CLOSE_WAIT);
+      if (connState != States.STOP_WAIT) {
+        // Tell app that the connection stopped abnormally.
+        peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_STOP);
+        setConnState(States.STOP_WAIT);
       }
 
-      // No new events for this connection, but there may be queued events.  Process them before final close.
+      // No new events for this connection, but there may be queued events.  Process them before final stop.
       LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
-      nextCmd.setRcvConnFinalClose(this);
+      nextCmd.setRcvConnFinalStop(this);
       ctrlr.submitNowait(nextCmd);
 
       // Remove from the ctRcv connection set.  Won't be found by the disconnect loop any more.
-      // This can also wake up the close on the CtRcv, if a close is pending.
+      // This can also wake up the stop on the CtRcv, if a stop is pending.
       ctRcv.removeFromRcvConnSet(this);
 
       pendingTmrId = -1;
@@ -642,7 +642,7 @@ public class LbmCtRcvConn {
   }
 
   // THREAD: ctrlr
-  boolean cmdRcvConnFinalClose(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {
+  boolean cmdRcvConnFinalStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {
     clear();
     return true;
   }
@@ -667,7 +667,7 @@ public class LbmCtRcvConn {
     handshakeParser = null;
   }
 
-  // Invoked by user calling close for CtRcv.  That close calls disconnect for each extant connection.
+  // Invoked by user calling stop for CtRcv.  That stop calls disconnect for each extant connection.
   // THREAD: ctrlr
   void disconnect() {
     LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
@@ -675,7 +675,7 @@ public class LbmCtRcvConn {
     ctrlr.submitNowait(nextCmd);
   }
 
-  // Executed when the user calls the receive close API.  ctRcv.closing is true.
+  // Executed when the user calls the receive stop API.  ctRcv.stopping is true.
   // THREAD: ctrlr
   boolean cmdRcvConnDisconnect(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {
     boolean sendDreqNeeded = false;
@@ -684,7 +684,7 @@ public class LbmCtRcvConn {
     synchronized (ctRcv.getLock()) {
       if ((connState == States.PRE_CREATED) || (connState == States.STARTING)) {
         // Even if a CREQ was sent, go straight to time_wait.  No need to send DREQ (the src will timeout CRSPs).
-        setConnState(States.CLOSE_WAIT);
+        setConnState(States.STOP_WAIT);
         tmrCancelNeeded = true;  // pre_created and starting have timers that we don't need any more.
       } else if (connState == States.RUNNING) {
         setConnState(States.ENDING);

@@ -109,7 +109,7 @@ class LbmCtCtrlr extends Thread {
     } // switch
   } // complete()
 
-  void close() throws Exception {
+  void exit() throws Exception {
     LbmCtCtrlrCmd cmd = cmdGet();
     cmd.setQuit();
     submitWait(cmd);  // This "calls" cmdQuit below.
@@ -161,17 +161,17 @@ class LbmCtCtrlr extends Thread {
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getCtSrc());
             cmdComplete = cmd.getCtSrc().cmdCtSrcStart(cmd);
             break;
-          case CT_SRC_CLOSE:
+          case CT_SRC_STOP:
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getCtSrc());
-            cmdComplete = cmd.getCtSrc().cmdCtSrcClose(cmd);
+            cmdComplete = cmd.getCtSrc().cmdCtSrcStop(cmd);
             break;
-          case CT_SRC_UM_SOURCE_CLOSE:
+          case CT_SRC_UM_SOURCE_STOP:
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getCtSrc());
-            cmdComplete = cmd.getCtSrc().cmdCtSrcUmSourceClose(cmd);
+            cmdComplete = cmd.getCtSrc().cmdCtSrcUmSourceStop(cmd);
             break;
-          case CT_SRC_FINAL_CLOSE:
+          case CT_SRC_FINAL_STOP:
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getCtSrc());
-            cmdComplete = cmd.getCtSrc().cmdCtSrcFinalClose(cmd);
+            cmdComplete = cmd.getCtSrc().cmdCtSrcFinalStop(cmd);
             break;
           case SRC_HANDSHAKE:
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getCt());
@@ -181,17 +181,17 @@ class LbmCtCtrlr extends Thread {
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getSrcConn());
             cmdComplete = cmd.getSrcConn().cmdSrcConnTmrExpire(cmd);
             break;
-          case SRC_CONN_FINAL_CLOSE:
+          case SRC_CONN_FINAL_STOP:
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getSrcConn());
-            cmdComplete = cmd.getSrcConn().cmdSrcConnFinalClose(cmd);
+            cmdComplete = cmd.getSrcConn().cmdSrcConnFinalStop(cmd);
             break;
           case CT_RCV_START:
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getCtRcv());
             cmdComplete = cmd.getCtRcv().cmdCtRcvStart(cmd);
             break;
-          case CT_RCV_CLOSE:
+          case CT_RCV_STOP:
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getCtRcv());
-            cmdComplete = cmd.getCtRcv().cmdCtRcvClose(cmd);
+            cmdComplete = cmd.getCtRcv().cmdCtRcvStop(cmd);
             break;
           case RCV_CONN_START:
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getRcvConn());
@@ -201,13 +201,13 @@ class LbmCtCtrlr extends Thread {
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getRcvConn());
             cmdComplete = cmd.getRcvConn().cmdRcvConnTmrExpire(cmd);
             break;
-          case RCV_CONN_CLOSE:
+          case RCV_CONN_STOP:
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getRcvConn());
-            cmdComplete = cmd.getRcvConn().cmdRcvConnClose(cmd);
+            cmdComplete = cmd.getRcvConn().cmdRcvConnStop(cmd);
             break;
-          case RCV_CONN_FINAL_CLOSE:
+          case RCV_CONN_FINAL_STOP:
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getRcvConn());
-            cmdComplete = cmd.getRcvConn().cmdRcvConnFinalClose(cmd);
+            cmdComplete = cmd.getRcvConn().cmdRcvConnFinalStop(cmd);
             break;
           case RCV_SEND_COK:
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getRcvConn());
@@ -221,13 +221,13 @@ class LbmCtCtrlr extends Thread {
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getRcvConn());
             cmdComplete = cmd.getRcvConn().cmdRcvConnDisconnect(cmd);
             break;
-          case CT_RCV_UM_RECEIVER_CLOSE:
+          case CT_RCV_UM_RECEIVER_STOP:
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getCtRcv());
-            cmdComplete = cmd.getCtRcv().cmdCtRcvUmReceiverClose(cmd);
+            cmdComplete = cmd.getCtRcv().cmdCtRcvUmReceiverStop(cmd);
             break;
-          case CT_RCV_FINAL_CLOSE:
+          case CT_RCV_FINAL_STOP:
             ct.dbg("dequeue cmd: " + cmd.getCmdType() + ", " + cmd.getCtRcv());
-            cmdComplete = cmd.getCtRcv().cmdCtRcvFinalClose(cmd);
+            cmdComplete = cmd.getCtRcv().cmdCtRcvFinalStop(cmd);
             break;
           default:
             throw new LBMException("LbmCt: Unkown command: " + cmd.getCmdType());

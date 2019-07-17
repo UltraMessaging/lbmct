@@ -64,8 +64,8 @@ class MinCtRcv {
     }
 
     // Clean up.
-    myCtRcv.close();  // Important to close the CT Receiver when finished.
-    myCt.close();  //  Important to close the CT object when finished.
+    myCtRcv.stop();  // Important to stop the CT Receiver when finished.
+    myCt.stop();  //  Important to stop the CT object when finished.
   }
 
 

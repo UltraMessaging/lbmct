@@ -32,10 +32,10 @@ enum CmdCompletions {
 class LbmCtCtrlrCmd {
   enum CmdTypes {
     NONE, TEST, QUIT,
-    CT_SRC_START, SRC_CONN_TMR_EXPIRE, SRC_HANDSHAKE, SRC_CONN_FINAL_CLOSE, CT_SRC_CLOSE, CT_SRC_UM_SOURCE_CLOSE,
-    CT_SRC_FINAL_CLOSE,
-    RCV_CONN_TMR_EXPIRE, CT_RCV_START, RCV_CONN_START, CT_RCV_CLOSE, RCV_CONN_CLOSE, RCV_SEND_COK, RCV_SEND_DOK,
-    RCV_CONN_DISCONNECT, RCV_CONN_FINAL_CLOSE, CT_RCV_UM_RECEIVER_CLOSE, CT_RCV_FINAL_CLOSE
+    CT_SRC_START, SRC_CONN_TMR_EXPIRE, SRC_HANDSHAKE, SRC_CONN_FINAL_STOP, CT_SRC_STOP, CT_SRC_UM_SOURCE_STOP,
+    CT_SRC_FINAL_STOP,
+    RCV_CONN_TMR_EXPIRE, CT_RCV_START, RCV_CONN_START, CT_RCV_STOP, RCV_CONN_STOP, RCV_SEND_COK, RCV_SEND_DOK,
+    RCV_CONN_DISCONNECT, RCV_CONN_FINAL_STOP, CT_RCV_UM_RECEIVER_STOP, CT_RCV_FINAL_STOP
   }
 
   private CmdTypes cmdType;
@@ -175,31 +175,31 @@ class LbmCtCtrlrCmd {
     srcTmrId = inTmrId;
   }
 
-  // cmdType = SRC_CONN_FINAL_CLOSE
+  // cmdType = SRC_CONN_FINAL_STOP
 
-  void setSrcConnFinalClose(LbmCtSrcConn inSrcConn) {
-    cmdType = CmdTypes.SRC_CONN_FINAL_CLOSE;
+  void setSrcConnFinalStop(LbmCtSrcConn inSrcConn) {
+    cmdType = CmdTypes.SRC_CONN_FINAL_STOP;
     srcConn = inSrcConn;
   }
 
-  // cmdType = SRC_CLOSE
+  // cmdType = CT_SRC_STOP
 
-  void setCtSrcClose(LbmCtSrc inCtSrc) {
-    cmdType = CmdTypes.CT_SRC_CLOSE;
+  void setCtSrcStop(LbmCtSrc inCtSrc) {
+    cmdType = CmdTypes.CT_SRC_STOP;
     ctSrc = inCtSrc;
   }
 
-  // cmdType = CT_SRC_UM_SOURCE_CLOSE
+  // cmdType = CT_SRC_UM_SOURCE_STOP
 
-  void setCtSrcUmSourceClose(LbmCtSrc inCtSrc) {
-    cmdType = CmdTypes.CT_SRC_UM_SOURCE_CLOSE;
+  void setCtSrcUmSourceStop(LbmCtSrc inCtSrc) {
+    cmdType = CmdTypes.CT_SRC_UM_SOURCE_STOP;
     ctSrc = inCtSrc;
   }
 
-  // cmdType = CT_SRC_FINAL_CLOSE
+  // cmdType = CT_SRC_FINAL_STOP
 
-  void setCtSrcFinalClose(LbmCtSrc inCtSrc) {
-    cmdType = CmdTypes.CT_SRC_FINAL_CLOSE;
+  void setCtSrcFinalStop(LbmCtSrc inCtSrc) {
+    cmdType = CmdTypes.CT_SRC_FINAL_STOP;
     ctSrc = inCtSrc;
   }
 
@@ -233,10 +233,10 @@ class LbmCtCtrlrCmd {
     rcvCbArg = inRcvCbArg;
   }
 
-  // cmdType = RCV_CLOSE
+  // cmdType = CT_RCV_STOP
 
-  void setCtRcvClose(LbmCtRcv inCtRcv) {
-    cmdType = CmdTypes.CT_RCV_CLOSE;
+  void setCtRcvStop(LbmCtRcv inCtRcv) {
+    cmdType = CmdTypes.CT_RCV_STOP;
     ctRcv = inCtRcv;
   }
 
@@ -304,24 +304,24 @@ class LbmCtCtrlrCmd {
     rcvConn = inRcvConn;
   }
 
-  // cmdType = RCV_CONN_CLOSE
+  // cmdType = RCV_CONN_STOP
 
-  void setRcvConnClose(LbmCtRcvConn inRcvConn) {
-    cmdType = CmdTypes.RCV_CONN_CLOSE;
+  void setRcvConnStop(LbmCtRcvConn inRcvConn) {
+    cmdType = CmdTypes.RCV_CONN_STOP;
     rcvConn = inRcvConn;
   }
 
-  // cmdType = RCV_CONN_FINAL_CLOSE
+  // cmdType = RCV_CONN_FINAL_STOP
 
-  void setRcvConnFinalClose(LbmCtRcvConn inRcvConn) {
-    cmdType = CmdTypes.RCV_CONN_FINAL_CLOSE;
+  void setRcvConnFinalStop(LbmCtRcvConn inRcvConn) {
+    cmdType = CmdTypes.RCV_CONN_FINAL_STOP;
     rcvConn = inRcvConn;
   }
 
-  // cmdType = RCV_CLOSE_UM_RECEIVER
+  // cmdType = CT_RCV_STOP_UM_RECEIVER
 
-  void setCtRcvUmReceiverClose(LbmCtRcv inCtRcv) {
-    cmdType = CmdTypes.CT_RCV_UM_RECEIVER_CLOSE;
+  void setCtRcvUmReceiverStop(LbmCtRcv inCtRcv) {
+    cmdType = CmdTypes.CT_RCV_UM_RECEIVER_STOP;
     ctRcv = inCtRcv;
   }
 
@@ -332,10 +332,10 @@ class LbmCtCtrlrCmd {
     rcvConn = inRcvConn;
   }
 
-  // cmdType = CT_RCV_FINAL_CLOSE
+  // cmdType = CT_RCV_FINAL_STOP
 
-  void setCtRcvFinalClose(LbmCtRcv inCtRcv) {
-    cmdType = CmdTypes.CT_RCV_FINAL_CLOSE;
+  void setCtRcvFinalStop(LbmCtRcv inCtRcv) {
+    cmdType = CmdTypes.CT_RCV_FINAL_STOP;
     ctRcv = inCtRcv;
   }
 }

@@ -38,7 +38,7 @@
 <span class="sourceLineNo">030</span>@SuppressWarnings("WeakerAccess")  // public API.<a name="line.30"></a>
 <span class="sourceLineNo">031</span>public class LbmCtRcvConn {<a name="line.31"></a>
 <span class="sourceLineNo">032</span>  enum States {<a name="line.32"></a>
-<span class="sourceLineNo">033</span>    PRE_CREATED, STARTING, RUNNING, ENDING, FIN_WAIT, CLOSE_WAIT<a name="line.33"></a>
+<span class="sourceLineNo">033</span>    PRE_CREATED, STARTING, RUNNING, ENDING, FIN_WAIT, STOP_WAIT<a name="line.33"></a>
 <span class="sourceLineNo">034</span>  }<a name="line.34"></a>
 <span class="sourceLineNo">035</span><a name="line.35"></a>
 <span class="sourceLineNo">036</span>  private LbmCtRcv ctRcv;  // Initialized in constructor.<a name="line.36"></a>
@@ -116,9 +116,9 @@
 <span class="sourceLineNo">108</span>    } else {<a name="line.108"></a>
 <span class="sourceLineNo">109</span>      connState = newState;<a name="line.109"></a>
 <span class="sourceLineNo">110</span><a name="line.110"></a>
-<span class="sourceLineNo">111</span>      if (newState == States.CLOSE_WAIT) {<a name="line.111"></a>
+<span class="sourceLineNo">111</span>      if (newState == States.STOP_WAIT) {<a name="line.111"></a>
 <span class="sourceLineNo">112</span>        // In the normal case, the user's delete callback is invoked from inside handleDrsp.  But there are a lot of<a name="line.112"></a>
-<span class="sourceLineNo">113</span>        // cases where the conn can be closed abnormally.  This catches them all.<a name="line.113"></a>
+<span class="sourceLineNo">113</span>        // cases where the conn can be stopped abnormally.  This catches them all.<a name="line.113"></a>
 <span class="sourceLineNo">114</span>        if (wasAppConnCreateCalled) {<a name="line.114"></a>
 <span class="sourceLineNo">115</span>          if ((ctRcv.getConnDeleteCb() != null) &amp;&amp; (! wasAppConnDeleteCalled)) {<a name="line.115"></a>
 <span class="sourceLineNo">116</span>            ctRcv.getConnDeleteCb().onRcvConnDelete(ctRcv, peerInfo, ctRcv.getCbArg(), rcvConnCbArg);<a name="line.116"></a>
@@ -128,7 +128,7 @@
 <span class="sourceLineNo">120</span><a name="line.120"></a>
 <span class="sourceLineNo">121</span>        // See if transitioning from an active to an inactive state.<a name="line.121"></a>
 <span class="sourceLineNo">122</span>        if ((oldState.ordinal() &gt; States.PRE_CREATED.ordinal()) &amp;&amp;<a name="line.122"></a>
-<span class="sourceLineNo">123</span>            (oldState.ordinal() &lt; States.CLOSE_WAIT.ordinal()))<a name="line.123"></a>
+<span class="sourceLineNo">123</span>            (oldState.ordinal() &lt; States.STOP_WAIT.ordinal()))<a name="line.123"></a>
 <span class="sourceLineNo">124</span>        {<a name="line.124"></a>
 <span class="sourceLineNo">125</span>          ctRcv.decrementActiveConns();<a name="line.125"></a>
 <span class="sourceLineNo">126</span>        }<a name="line.126"></a>
@@ -160,8 +160,8 @@
 <span class="sourceLineNo">152</span>    boolean timerNeeded = false;<a name="line.152"></a>
 <span class="sourceLineNo">153</span><a name="line.153"></a>
 <span class="sourceLineNo">154</span>    synchronized (ctRcv.getLock()) {<a name="line.154"></a>
-<span class="sourceLineNo">155</span>      if (ctRcv.isClosing()) {<a name="line.155"></a>
-<span class="sourceLineNo">156</span>        setConnState(States.CLOSE_WAIT);<a name="line.156"></a>
+<span class="sourceLineNo">155</span>      if (ctRcv.isStopping()) {<a name="line.155"></a>
+<span class="sourceLineNo">156</span>        setConnState(States.STOP_WAIT);<a name="line.156"></a>
 <span class="sourceLineNo">157</span>      } else {<a name="line.157"></a>
 <span class="sourceLineNo">158</span>        setConnState(States.STARTING);<a name="line.158"></a>
 <span class="sourceLineNo">159</span>        sourceStr = cmd.getSourceStr();<a name="line.159"></a>
@@ -228,7 +228,7 @@
 <span class="sourceLineNo">220</span>    ct.dbg("rcvConnTmrExpire: " + this);<a name="line.220"></a>
 <span class="sourceLineNo">221</span>    synchronized (ctRcv.getLock()) {<a name="line.221"></a>
 <span class="sourceLineNo">222</span>      // Don't bother delivering timer ticks if conn is waiting to be deleted.  Ditto stale ticks.<a name="line.222"></a>
-<span class="sourceLineNo">223</span>      if ((connState != States.CLOSE_WAIT) &amp;&amp; (connTmr.getId() == pendingTmrId)) {<a name="line.223"></a>
+<span class="sourceLineNo">223</span>      if ((connState != States.STOP_WAIT) &amp;&amp; (connTmr.getId() == pendingTmrId)) {<a name="line.223"></a>
 <span class="sourceLineNo">224</span>        LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.224"></a>
 <span class="sourceLineNo">225</span>        nextCmd.setRcvConnTmrExpire(this, pendingTmrId);<a name="line.225"></a>
 <span class="sourceLineNo">226</span>        ctrlr.submitNowait(nextCmd);  // This "calls" cmdRcvConnTmrExpire below.<a name="line.226"></a>
@@ -251,9 +251,9 @@
 <span class="sourceLineNo">243</span>        pendingTmrId = -1;  // Timer has fired; not pending any more.<a name="line.243"></a>
 <span class="sourceLineNo">244</span><a name="line.244"></a>
 <span class="sourceLineNo">245</span>        if (connState == States.STARTING) {<a name="line.245"></a>
-<span class="sourceLineNo">246</span>          if (ctRcv.isClosing()) {  // User requested close of the CT receiver; this timer event was probably queued.<a name="line.246"></a>
+<span class="sourceLineNo">246</span>          if (ctRcv.isStopping()) {  // User requested stop of the CT receiver; this timer event was probably queued.<a name="line.246"></a>
 <span class="sourceLineNo">247</span>            // Even if a CREQ was sent, go straight to time_wait.  No need to send DREQ (the src will timeout CRSPs).<a name="line.247"></a>
-<span class="sourceLineNo">248</span>            setConnState(States.CLOSE_WAIT);<a name="line.248"></a>
+<span class="sourceLineNo">248</span>            setConnState(States.STOP_WAIT);<a name="line.248"></a>
 <span class="sourceLineNo">249</span>          }<a name="line.249"></a>
 <span class="sourceLineNo">250</span>          else {<a name="line.250"></a>
 <span class="sourceLineNo">251</span>            // Backoff time initial fast tries.<a name="line.251"></a>
@@ -275,7 +275,7 @@
 <span class="sourceLineNo">267</span>              nextAction = RcvConnTmrExpireActions.SEND_CREQ;<a name="line.267"></a>
 <span class="sourceLineNo">268</span>            } else {<a name="line.268"></a>
 <span class="sourceLineNo">269</span>              LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up connecting to source '" + sourceStr + "' for topic '" + ctRcv.getTopicStr() + "'\n");<a name="line.269"></a>
-<span class="sourceLineNo">270</span>              setConnState(States.CLOSE_WAIT);<a name="line.270"></a>
+<span class="sourceLineNo">270</span>              setConnState(States.STOP_WAIT);<a name="line.270"></a>
 <span class="sourceLineNo">271</span>            }<a name="line.271"></a>
 <span class="sourceLineNo">272</span>          }<a name="line.272"></a>
 <span class="sourceLineNo">273</span>        }<a name="line.273"></a>
@@ -285,10 +285,10 @@
 <span class="sourceLineNo">277</span>            tryCnt++;  // Retry the DREQ.<a name="line.277"></a>
 <span class="sourceLineNo">278</span>            nextAction = RcvConnTmrExpireActions.SEND_DREQ;<a name="line.278"></a>
 <span class="sourceLineNo">279</span>          } else {<a name="line.279"></a>
-<span class="sourceLineNo">280</span>            LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up closing connection to source '" + sourceStr + "' for topic '" + ctRcv.getTopicStr() + "'\n");<a name="line.280"></a>
-<span class="sourceLineNo">281</span>            peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_CLOSE);<a name="line.281"></a>
+<span class="sourceLineNo">280</span>            LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up stopping connection to source '" + sourceStr + "' for topic '" + ctRcv.getTopicStr() + "'\n");<a name="line.280"></a>
+<span class="sourceLineNo">281</span>            peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_STOP);<a name="line.281"></a>
 <span class="sourceLineNo">282</span><a name="line.282"></a>
-<span class="sourceLineNo">283</span>            setConnState(States.CLOSE_WAIT);<a name="line.283"></a>
+<span class="sourceLineNo">283</span>            setConnState(States.STOP_WAIT);<a name="line.283"></a>
 <span class="sourceLineNo">284</span>          }<a name="line.284"></a>
 <span class="sourceLineNo">285</span>        }<a name="line.285"></a>
 <span class="sourceLineNo">286</span><a name="line.286"></a>
@@ -297,8 +297,8 @@
 <span class="sourceLineNo">289</span>            tryCnt++;  // Retry the DREQ.<a name="line.289"></a>
 <span class="sourceLineNo">290</span>            nextAction = RcvConnTmrExpireActions.SEND_DOK;<a name="line.290"></a>
 <span class="sourceLineNo">291</span>          } else {<a name="line.291"></a>
-<span class="sourceLineNo">292</span>            LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up closing connection to source '" + sourceStr + "' for topic '" + ctRcv.getTopicStr() + "'\n");<a name="line.292"></a>
-<span class="sourceLineNo">293</span>            setConnState(States.CLOSE_WAIT);<a name="line.293"></a>
+<span class="sourceLineNo">292</span>            LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up stopping connection to source '" + sourceStr + "' for topic '" + ctRcv.getTopicStr() + "'\n");<a name="line.292"></a>
+<span class="sourceLineNo">293</span>            setConnState(States.STOP_WAIT);<a name="line.293"></a>
 <span class="sourceLineNo">294</span>          }<a name="line.294"></a>
 <span class="sourceLineNo">295</span>        }<a name="line.295"></a>
 <span class="sourceLineNo">296</span><a name="line.296"></a>
@@ -389,10 +389,10 @@
 <span class="sourceLineNo">381</span>            // A crsp is handled by the connection before it is delivered to the app.<a name="line.381"></a>
 <span class="sourceLineNo">382</span>            switch (handshakeType) {<a name="line.382"></a>
 <span class="sourceLineNo">383</span>              case LbmCtHandshakeParser.MSG_TYPE_CRSP:<a name="line.383"></a>
-<span class="sourceLineNo">384</span>                if ((connState == States.STARTING) &amp;&amp; ctRcv.isClosing()) {<a name="line.384"></a>
+<span class="sourceLineNo">384</span>                if ((connState == States.STARTING) &amp;&amp; ctRcv.isStopping()) {<a name="line.384"></a>
 <span class="sourceLineNo">385</span>                  // This conn isn't started yet,<a name="line.385"></a>
 <span class="sourceLineNo">386</span>                  // even if a CREQ was sent, go straight to time_wait.  No need to send DREQ (the src will timeout CRSPs).<a name="line.386"></a>
-<span class="sourceLineNo">387</span>                  setConnState(States.CLOSE_WAIT);<a name="line.387"></a>
+<span class="sourceLineNo">387</span>                  setConnState(States.STOP_WAIT);<a name="line.387"></a>
 <span class="sourceLineNo">388</span>                } else {<a name="line.388"></a>
 <span class="sourceLineNo">389</span>                  // Want to deliver crsp to user *after* it is handled.<a name="line.389"></a>
 <span class="sourceLineNo">390</span>                  handleCrsp(handshakeParser, umSequenceNum);<a name="line.390"></a>
@@ -596,7 +596,7 @@
 <span class="sourceLineNo">588</span>        if ((connState == States.STARTING) || (connState == States.RUNNING) || (connState == States.FIN_WAIT) || (connState == States.ENDING)) {<a name="line.588"></a>
 <span class="sourceLineNo">589</span>          // In time wait state, we are waiting for the UM receiver delivery controller to be deleted, triggering a<a name="line.589"></a>
 <span class="sourceLineNo">590</span>          // call to per-source delete callback.  That does the final connection cleanup.<a name="line.590"></a>
-<span class="sourceLineNo">591</span>          setConnState(States.CLOSE_WAIT);<a name="line.591"></a>
+<span class="sourceLineNo">591</span>          setConnState(States.STOP_WAIT);<a name="line.591"></a>
 <span class="sourceLineNo">592</span>        }<a name="line.592"></a>
 <span class="sourceLineNo">593</span><a name="line.593"></a>
 <span class="sourceLineNo">594</span>        pendingTmrId = -1;<a name="line.594"></a>
@@ -609,37 +609,37 @@
 <span class="sourceLineNo">601</span><a name="line.601"></a>
 <span class="sourceLineNo">602</span>  // Called from onSourceDelete<a name="line.602"></a>
 <span class="sourceLineNo">603</span>  // THREAD: ctx<a name="line.603"></a>
-<span class="sourceLineNo">604</span>  void close() throws Exception {<a name="line.604"></a>
+<span class="sourceLineNo">604</span>  void stop() throws Exception {<a name="line.604"></a>
 <span class="sourceLineNo">605</span>    // The connection is about to be deleted, no more timer ticks.<a name="line.605"></a>
 <span class="sourceLineNo">606</span>    pendingTmrId = -1;<a name="line.606"></a>
 <span class="sourceLineNo">607</span>    connTmr.cancelCtxThread();<a name="line.607"></a>
 <span class="sourceLineNo">608</span>    // As of now, there can be no new conn-level events generated for this conn.  But there might be some queued<a name="line.608"></a>
-<span class="sourceLineNo">609</span>    // events, like timers that fired just before the cancel.  Submit this close to the ctrlr thread to be the last<a name="line.609"></a>
+<span class="sourceLineNo">609</span>    // events, like timers that fired just before the cancel.  Submit this stop to the ctrlr thread to be the last<a name="line.609"></a>
 <span class="sourceLineNo">610</span>    // event processed.<a name="line.610"></a>
 <span class="sourceLineNo">611</span><a name="line.611"></a>
-<span class="sourceLineNo">612</span>    ct.dbg("close: " + this);<a name="line.612"></a>
+<span class="sourceLineNo">612</span>    ct.dbg("stop: " + this);<a name="line.612"></a>
 <span class="sourceLineNo">613</span>    LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.613"></a>
-<span class="sourceLineNo">614</span>    nextCmd.setRcvConnClose(this);<a name="line.614"></a>
-<span class="sourceLineNo">615</span>    ctrlr.submitNowait(nextCmd);  // This "calls" cmdRcvConnClose below.<a name="line.615"></a>
+<span class="sourceLineNo">614</span>    nextCmd.setRcvConnStop(this);<a name="line.614"></a>
+<span class="sourceLineNo">615</span>    ctrlr.submitNowait(nextCmd);  // This "calls" cmdRcvConnStop below.<a name="line.615"></a>
 <span class="sourceLineNo">616</span>  }<a name="line.616"></a>
 <span class="sourceLineNo">617</span><a name="line.617"></a>
-<span class="sourceLineNo">618</span>  // This performs the close activities, after the delivery controller has been deleted.<a name="line.618"></a>
+<span class="sourceLineNo">618</span>  // This performs the stop activities, after the delivery controller has been deleted.<a name="line.618"></a>
 <span class="sourceLineNo">619</span>  // THREAD: ctrlr<a name="line.619"></a>
-<span class="sourceLineNo">620</span>  boolean cmdRcvConnClose(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {<a name="line.620"></a>
+<span class="sourceLineNo">620</span>  boolean cmdRcvConnStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {<a name="line.620"></a>
 <span class="sourceLineNo">621</span>    synchronized (ctRcv.getLock()) {<a name="line.621"></a>
-<span class="sourceLineNo">622</span>      if (connState != States.CLOSE_WAIT) {<a name="line.622"></a>
-<span class="sourceLineNo">623</span>        // Tell app that the connection closed abnormally.<a name="line.623"></a>
-<span class="sourceLineNo">624</span>        peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_CLOSE);<a name="line.624"></a>
-<span class="sourceLineNo">625</span>        setConnState(States.CLOSE_WAIT);<a name="line.625"></a>
+<span class="sourceLineNo">622</span>      if (connState != States.STOP_WAIT) {<a name="line.622"></a>
+<span class="sourceLineNo">623</span>        // Tell app that the connection stopped abnormally.<a name="line.623"></a>
+<span class="sourceLineNo">624</span>        peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_STOP);<a name="line.624"></a>
+<span class="sourceLineNo">625</span>        setConnState(States.STOP_WAIT);<a name="line.625"></a>
 <span class="sourceLineNo">626</span>      }<a name="line.626"></a>
 <span class="sourceLineNo">627</span><a name="line.627"></a>
-<span class="sourceLineNo">628</span>      // No new events for this connection, but there may be queued events.  Process them before final close.<a name="line.628"></a>
+<span class="sourceLineNo">628</span>      // No new events for this connection, but there may be queued events.  Process them before final stop.<a name="line.628"></a>
 <span class="sourceLineNo">629</span>      LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.629"></a>
-<span class="sourceLineNo">630</span>      nextCmd.setRcvConnFinalClose(this);<a name="line.630"></a>
+<span class="sourceLineNo">630</span>      nextCmd.setRcvConnFinalStop(this);<a name="line.630"></a>
 <span class="sourceLineNo">631</span>      ctrlr.submitNowait(nextCmd);<a name="line.631"></a>
 <span class="sourceLineNo">632</span><a name="line.632"></a>
 <span class="sourceLineNo">633</span>      // Remove from the ctRcv connection set.  Won't be found by the disconnect loop any more.<a name="line.633"></a>
-<span class="sourceLineNo">634</span>      // This can also wake up the close on the CtRcv, if a close is pending.<a name="line.634"></a>
+<span class="sourceLineNo">634</span>      // This can also wake up the stop on the CtRcv, if a stop is pending.<a name="line.634"></a>
 <span class="sourceLineNo">635</span>      ctRcv.removeFromRcvConnSet(this);<a name="line.635"></a>
 <span class="sourceLineNo">636</span><a name="line.636"></a>
 <span class="sourceLineNo">637</span>      pendingTmrId = -1;<a name="line.637"></a>
@@ -650,7 +650,7 @@
 <span class="sourceLineNo">642</span>  }<a name="line.642"></a>
 <span class="sourceLineNo">643</span><a name="line.643"></a>
 <span class="sourceLineNo">644</span>  // THREAD: ctrlr<a name="line.644"></a>
-<span class="sourceLineNo">645</span>  boolean cmdRcvConnFinalClose(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {<a name="line.645"></a>
+<span class="sourceLineNo">645</span>  boolean cmdRcvConnFinalStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {<a name="line.645"></a>
 <span class="sourceLineNo">646</span>    clear();<a name="line.646"></a>
 <span class="sourceLineNo">647</span>    return true;<a name="line.647"></a>
 <span class="sourceLineNo">648</span>  }<a name="line.648"></a>
@@ -675,7 +675,7 @@
 <span class="sourceLineNo">667</span>    handshakeParser = null;<a name="line.667"></a>
 <span class="sourceLineNo">668</span>  }<a name="line.668"></a>
 <span class="sourceLineNo">669</span><a name="line.669"></a>
-<span class="sourceLineNo">670</span>  // Invoked by user calling close for CtRcv.  That close calls disconnect for each extant connection.<a name="line.670"></a>
+<span class="sourceLineNo">670</span>  // Invoked by user calling stop for CtRcv.  That stop calls disconnect for each extant connection.<a name="line.670"></a>
 <span class="sourceLineNo">671</span>  // THREAD: ctrlr<a name="line.671"></a>
 <span class="sourceLineNo">672</span>  void disconnect() {<a name="line.672"></a>
 <span class="sourceLineNo">673</span>    LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.673"></a>
@@ -683,7 +683,7 @@
 <span class="sourceLineNo">675</span>    ctrlr.submitNowait(nextCmd);<a name="line.675"></a>
 <span class="sourceLineNo">676</span>  }<a name="line.676"></a>
 <span class="sourceLineNo">677</span><a name="line.677"></a>
-<span class="sourceLineNo">678</span>  // Executed when the user calls the receive close API.  ctRcv.closing is true.<a name="line.678"></a>
+<span class="sourceLineNo">678</span>  // Executed when the user calls the receive stop API.  ctRcv.stopping is true.<a name="line.678"></a>
 <span class="sourceLineNo">679</span>  // THREAD: ctrlr<a name="line.679"></a>
 <span class="sourceLineNo">680</span>  boolean cmdRcvConnDisconnect(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {<a name="line.680"></a>
 <span class="sourceLineNo">681</span>    boolean sendDreqNeeded = false;<a name="line.681"></a>
@@ -692,7 +692,7 @@
 <span class="sourceLineNo">684</span>    synchronized (ctRcv.getLock()) {<a name="line.684"></a>
 <span class="sourceLineNo">685</span>      if ((connState == States.PRE_CREATED) || (connState == States.STARTING)) {<a name="line.685"></a>
 <span class="sourceLineNo">686</span>        // Even if a CREQ was sent, go straight to time_wait.  No need to send DREQ (the src will timeout CRSPs).<a name="line.686"></a>
-<span class="sourceLineNo">687</span>        setConnState(States.CLOSE_WAIT);<a name="line.687"></a>
+<span class="sourceLineNo">687</span>        setConnState(States.STOP_WAIT);<a name="line.687"></a>
 <span class="sourceLineNo">688</span>        tmrCancelNeeded = true;  // pre_created and starting have timers that we don't need any more.<a name="line.688"></a>
 <span class="sourceLineNo">689</span>      } else if (connState == States.RUNNING) {<a name="line.689"></a>
 <span class="sourceLineNo">690</span>        setConnState(States.ENDING);<a name="line.690"></a>

@@ -26,7 +26,7 @@ import com.latencybusters.lbm.*;
 
 class LbmCtSrcConn {
   enum States {
-    PRE_CREATED, STARTING, RUNNING, ENDING, CLOSE_WAIT
+    PRE_CREATED, STARTING, RUNNING, ENDING, STOP_WAIT
   }
 
   private LbmCtSrc ctSrc;  // Initialized in constructor.
@@ -89,9 +89,9 @@ class LbmCtSrcConn {
     } else {
       connState = newState;
 
-      if (newState == States.CLOSE_WAIT) {
+      if (newState == States.STOP_WAIT) {
         // In the normal case, the user's delete callback is invoked from inside handleDok.  But there are a lot of
-        // cases where the conn can be closed abnormally.  This catches them all.
+        // cases where the conn can be stopped abnormally.  This catches them all.
         if (wasAppConnCreateCalled) {
           if ((ctSrc.getConnDeleteCb() != null) && (! wasAppConnDeleteCalled)) {
             ctSrc.getConnDeleteCb().onSrcConnDelete(ctSrc, peerInfo, ctSrc.getCbArg(), srcConnCbArg);
@@ -99,22 +99,22 @@ class LbmCtSrcConn {
           wasAppConnDeleteCalled = true;
         }
 
-        if (oldState != States.CLOSE_WAIT) {
+        if (oldState != States.STOP_WAIT) {
           // Remove from the ctSrc connection set.  Won't be found by the disconnect loop any more.
           ctSrc.removeFromSrcConnSet(this);
           // Remove from the map that lets the UIM receive find the connection.
           ct.removeFromSrcConnMap(this);
 
           // There shouldn't be any new events generated, but there might be some events queued, like timers.
-          // Queue the connection close to end up behind any final queued events.
+          // Queue the connection stop to end up behind any final queued events.
           LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
-          nextCmd.setSrcConnFinalClose(this);
-          ctrlr.submitNowait(nextCmd);  // This "calls" cmdSrcConnFinalClose below.
+          nextCmd.setSrcConnFinalStop(this);
+          ctrlr.submitNowait(nextCmd);  // This "calls" cmdSrcConnFinalStop below.
         }
 
         // See if transitioning from an active to an inactive state.
         if ((oldState.ordinal() > States.PRE_CREATED.ordinal()) &&
-            (oldState.ordinal() < States.CLOSE_WAIT.ordinal()))
+            (oldState.ordinal() < States.STOP_WAIT.ordinal()))
         {
           ctSrc.decrementActiveConns();
         }
@@ -128,9 +128,9 @@ class LbmCtSrcConn {
     }
   }
 
-  // This performs the close activities, after the deletion handshakes are done.
+  // This performs the stop activities, after the deletion handshakes are done.
   // THREAD: ctrlr
-  boolean cmdSrcConnFinalClose(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {
+  boolean cmdSrcConnFinalStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {
     clear();
     return true;
   }
@@ -154,8 +154,8 @@ class LbmCtSrcConn {
     rcvConnId = creqHandshakeParser.getRcvConnId();
     rcvConnKey = creqHandshakeParser.getRcvConnKey();
 
-    if (ctSrc.isClosing()) {
-      setConnState(States.CLOSE_WAIT);
+    if (ctSrc.isStopping()) {
+      setConnState(States.STOP_WAIT);
     } else {
       setConnState(States.STARTING);
     }
@@ -294,8 +294,8 @@ class LbmCtSrcConn {
       pendingTmrId = -1;
 
       if (connState == States.STARTING) {
-        if (ctSrc.isClosing()) {
-          setConnState(States.CLOSE_WAIT);
+        if (ctSrc.isStopping()) {
+          setConnState(States.STOP_WAIT);
         }
         else {
           // Timed out waiting for COK, retry?
@@ -306,7 +306,7 @@ class LbmCtSrcConn {
           } else {
             // Too many retries, force-delete the connection.
             LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up accepting connection from receiver '" + ctSrc.getTopicStr() + "'\n");
-            setConnState(States.CLOSE_WAIT);
+            setConnState(States.STOP_WAIT);
           }
         }
       }
@@ -318,10 +318,10 @@ class LbmCtSrcConn {
           pendingTmrId = connTmr.schedule(srcConnTmrCb, null, config.getRetryIvl());
         } else {
           // Too many retries, force-delete the connection.
-          LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up closing connection from receiver for topic '" + ctSrc.getTopicStr() + "'\n");
-          peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_CLOSE);
+          LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up stopping connection from receiver for topic '" + ctSrc.getTopicStr() + "'\n");
+          peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_STOP);
 
-          setConnState(States.CLOSE_WAIT);
+          setConnState(States.STOP_WAIT);
         }
       }
       else {
@@ -374,7 +374,7 @@ class LbmCtSrcConn {
 
     handshakeSendDfin();
 
-    setConnState(States.CLOSE_WAIT);
+    setConnState(States.STOP_WAIT);
   }
 
 

@@ -31,13 +31,13 @@ import com.latencybusters.lbm.*;
 
 /**
  * An instance of the Connected Topics for Ultra Messaging (UM).
- * <p>
  * A Connected Topics instance is associated with a UM context.
  * A given UM context must not have more than one Connected Topics instance associated with it.
- * When an {@code LbmCt} is created, its full initialization is deferred until its {@link #start} method is called.
+ * When an {@link #LbmCt()} object is created, its full initialization is deferred until its {@link #start} method is
+ * called.
  * <p>
  * A Connected Topics instance has an independent thread associated with it.
- * Since it is an active object, it must be explicitly deleted when it is no longer needed, using the {@link #close} method.
+ * Since it is an active object, it must be explicitly deleted when it is no longer needed, using the {@link #stop} method.
  */
 @SuppressWarnings("WeakerAccess")
 public class LbmCt {
@@ -64,7 +64,12 @@ public class LbmCt {
   private Set<LbmCtRcv> ctRcvSet = null;
 
   /**
-   * Creates a Connected Topics instance.
+   * Creates a CT (Connected Topics) object.
+   * A CT object is similar in scope to a UM Context object, and is associated with a context.
+   * Many applications have only one context, and therefore one CT.
+   * A single CT can support multiple connected sources and receivers.
+   * <p>
+   * This constructor only creates the object.
    * Its full initialization is deferred until its {@link #start} method is called.
    */
   public LbmCt() {
@@ -81,8 +86,23 @@ public class LbmCt {
   int getLocalIpAddr() { return localIpAddr; }
   int getCtId() { return ctId; }
 
-  // THREAD: user
-  @SuppressWarnings("WeakerAccess")  // public API.
+  /**
+   * Initializes a CT object.
+   * This is typically called immediately after the object is created ({@link #LbmCt()} constructor).
+   * When {@code start} returns, the CT is ready for connected source and receiver creation.
+   * <p>
+   * When the application is finished using Connected Topics functionality, the CT should be stopped
+   * ({@link #stop} API).
+   * <p>
+   * @param inCtx  UM context associated with the CT.
+   * @param inConfig  Configuration options for CT.
+   *     The CT object retains a reference to the passed-in configuration object.
+   *     If multiple CT objects are created in a single process, separate configuration object instances should be
+   *     used for each CT.
+   * @param inMetadata  Application-specific data, delivered to the remote connecting peers.
+   *     This metadata must be wrapped in a ByteBuffer and flipped so that it can be read by the CT.
+   * @throws Exception  LBMException thrown.
+   */
   public void start(LBMContext inCtx, LbmCtConfig inConfig, ByteBuffer inMetadata) throws Exception {
     ctx = inCtx;
     if (inConfig == null) {
@@ -145,10 +165,15 @@ public class LbmCt {
   }
 
 
-  // Public API.
+  /**
+   * Stops processing Connected Topics messages and frees resources.
+   * All CT sources and receivers must already be stopped.
+   * <p>
+   * @throws Exception  LBMException thrown.
+   */
   // THREAD: user
   @SuppressWarnings("WeakerAccess")  // public API.
-  public void close() throws Exception {
+  public void stop() throws Exception {
     if (! ctSrcSet.isEmpty()) {
       throw new LBMException("Must delete sources and receivers");
     }
@@ -158,7 +183,7 @@ public class LbmCt {
 
     // CT sources and receivers are gone.  Tear down everything else.
     umHandshakeRcv.close();  // Delete the UM receiver.
-    ctrlr.close();
+    ctrlr.exit();
     ctrlr.join();
 
     // Remove references to everything.
@@ -215,7 +240,7 @@ public class LbmCt {
     srcConnMap.put(srcConn.getRcvConnKey(), srcConn);
   }
 
-  // When a source-side connection to a remote receiver is closed, it is removed from the map.
+  // When a source-side connection to a remote receiver is stopped, it is removed from the map.
   void removeFromSrcConnMap(LbmCtSrcConn srcConn) {
     srcConnMap.remove(srcConn.getRcvConnKey());
   }
@@ -278,20 +303,12 @@ public class LbmCt {
     return connId;
   }
 
-  // Utility to get an exception's error message and stack trace as a string.
-  static String exDetails(Exception e) {
-    // Put stack trace into string writer "sw".
-    StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
-    e.printStackTrace(pw);
-    // Return error message and stack trace.
-    return sw.toString();
-  }
 
-
-  // Create the UM receiver for reception of handshake messages sent to the source.
-  // Since these messages are sent as UIMs, disable all for this receiver.
-  // THREAD: user
+  /*
+   * Create the UM receiver for reception of handshake messages sent to the source.
+   * Since these messages are sent as UIMs, disable all for this receiver.
+   * THREAD: user
+   */
   private void srcHandshakeRcvCreate() throws Exception {
     LBMReceiverAttributes rcvAttr = new LBMReceiverAttributes();
     rcvAttr.setProperty("resolver_query_minimum_initial_interval", "0");
@@ -305,8 +322,9 @@ public class LbmCt {
     rcvAttr.dispose();
   }
 
-  /**
+  /*
    * Implementation of {@code LBMReceiver} callback interface for UM receiver events.
+   * See https://ultramessaging.github.io/currdoc/doc/JavaAPI/interfacecom_1_1latencybusters_1_1lbm_1_1LBMReceiverCallback.html
    */
   private static class SrcSideMsgRcvCb implements LBMReceiverCallback {
     LbmCt ct;
@@ -317,8 +335,10 @@ public class LbmCt {
       this.ctrlr = ctrlr;
     }
 
-    // Not part of public API.
-    // THREAD: ctx
+    /*
+     * Not part of public API.  Declared public to conform to interface.
+     * THREAD: ctx
+     */
     public int onReceive(Object cbArgs, LBMMessage umMsg) {
       try {
         ct.srcHandshake(umMsg);
@@ -330,9 +350,11 @@ public class LbmCt {
     }
   }
 
-  // The code below conceptually belongs with LbmCtSrc, but first we need to determine
-  // which instance this message belongs to (or a new instance).
-  // THREAD: ctx
+  /*
+   * The code below conceptually belongs with LbmCtSrc, but first we need to determine
+   * which instance this message belongs to (or a new instance).
+   * THREAD: ctx
+   */
   private void srcHandshake(LBMMessage umMsg) {
     if (umMsg.type() == LBM.MSG_DATA) {
       LbmCtCtrlrCmd cmd = ctrlr.cmdGet();
@@ -371,7 +393,7 @@ public class LbmCt {
 
     if (srcConnMap.containsKey(handshakeParser.getRcvConnKey())) {
       srcConn = srcConnMap.get(handshakeParser.getRcvConnKey());
-      if (srcConn.getCtSrc().isClosing()) {
+      if (srcConn.getCtSrc().isStopping()) {
         throw new LBMException("Got creq on exiting src");
       }
     } else { // No src connection yet, create one.
@@ -381,7 +403,7 @@ public class LbmCt {
         throw new LBMException("CREQ recvd for topic '" + topicStr + "' with no src");
       }
       LbmCtSrc ctSrc = ctSrcMap.get(topicStr);
-      if (ctSrc.isClosing()) {
+      if (ctSrc.isStopping()) {
         throw new LBMException("Got creq on exiting src");
       }
 
@@ -433,6 +455,16 @@ public class LbmCt {
     } else {
       LBMPubLog.pubLog(LBM.LOG_INFO, "LbtCt::srcHandshakeDok: DOK handshake received for topic " + handshakeParser.getTopicStr() + " with no connection\n");
     }
+  }
+
+  // Utility to get an exception's error message and stack trace as a string.
+  static String exDetails(Exception e) {
+    // Put stack trace into string writer "sw".
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    e.printStackTrace(pw);
+    // Return error message and stack trace.
+    return sw.toString();
   }
 
   void dbg(String msg) {

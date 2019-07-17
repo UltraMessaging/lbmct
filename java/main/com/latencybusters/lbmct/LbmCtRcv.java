@@ -39,10 +39,10 @@ public class LbmCtRcv {
   private Set<LbmCtRcvConn> rcvConnSet = null;
   private int numActiveConns = 0;
 
-  private boolean closing = false;
-  private LbmCtCtrlrCmd pendingCloseCmd = null;
-  private boolean umReceiverCloseSubmitted = false;
-  private boolean finalCloseSubmitted = false;
+  private boolean stopping = false;
+  private LbmCtCtrlrCmd pendingStopCmd = null;
+  private boolean umReceiverStopSubmitted = false;
+  private boolean finalStopSubmitted = false;
 
   // Getters.
   Object getLock() { return lock; }
@@ -52,10 +52,9 @@ public class LbmCtRcv {
   LbmCtRcvConnCreateCallback getConnCreateCb() { return connCreateCb; }
   LbmCtRcvConnDeleteCallback getConnDeleteCb() { return connDeleteCb; }
   Object getCbArg() { return cbArg; }
-  boolean isClosing() { return closing; }
+  boolean isStopping() { return stopping; }
 
   // Public API for actual creation of UM receiver.  Just hand off to ctrlr thread.
-  @SuppressWarnings("WeakerAccess")  // public API.
   public void start(LbmCt inCt, String topicStr, LBMReceiverAttributes rcvAttr, LBMReceiverCallback rcvCb,
                     LbmCtRcvConnCreateCallback connCreateCb, LbmCtRcvConnDeleteCallback connDeleteCb, Object cbArg)
       throws Exception
@@ -113,12 +112,12 @@ public class LbmCtRcv {
 
   // Public API for deleting a CT receiver.
   @SuppressWarnings("WeakerAccess")  // public API.
-  public void close() throws Exception {
+  public void stop() throws Exception {
     LbmCtCtrlr ctrlr = this.ctrlr;  // get a local copy since the command will delete the ctSrc.
 
     LbmCtCtrlrCmd nextCmd = ctrlr.cmdGet();
-    nextCmd.setCtRcvClose(this);
-    ctrlr.submitWait(nextCmd);  // This "calls" cmdCtRcvClose below.
+    nextCmd.setCtRcvStop(this);
+    ctrlr.submitWait(nextCmd);  // This "calls" cmdCtRcvStop below.
 
     Exception e = nextCmd.getE();  // Save exception for re-throwing after freeing the command.
     ctrlr.cmdFree(nextCmd);  // Return command object to free pool.
@@ -131,34 +130,34 @@ public class LbmCtRcv {
   }
 
   // THREAD: ctrlr
-  boolean cmdCtRcvClose(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {
+  boolean cmdCtRcvStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {
     synchronized (this) {
-      closing = true;
-      pendingCloseCmd = cmd;
+      stopping = true;
+      pendingStopCmd = cmd;
 
       for (LbmCtRcvConn rcvConn : rcvConnSet) {
         // These disconnects are submitted to the command queue.
         rcvConn.disconnect();
       }
 
-      if ((numActiveConns == 0) && (!umReceiverCloseSubmitted)) {
-        // Since closing is true, no new connections should become active.
-        // There might be some connection-related commands queued.  Queue the UM receiver close behind them.
+      if ((numActiveConns == 0) && (!umReceiverStopSubmitted)) {
+        // Since stopping is true, no new connections should become active.
+        // There might be some connection-related commands queued.  Queue the UM receiver stop behind them.
         LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
-        nextCmd.setCtRcvUmReceiverClose(this);
+        nextCmd.setCtRcvUmReceiverStop(this);
         ctrlr.submitNowait(nextCmd);
-        umReceiverCloseSubmitted = true;
+        umReceiverStopSubmitted = true;
       }
     }
 
-    return false;  // Command completion is triggered by finalCloseMaybe().
+    return false;
   }
 
-  // This is called when there are no more "active" connections.  But there can still be CLOSE_WAIT connections.
+  // This is called when there are no more "active" connections.  But there can still be STOP_WAIT connections.
   // Also, there can be some connection-related commands queued.
   // THREAD: ctrlr
-  boolean cmdCtRcvUmReceiverClose(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {
-    // Close the UM receiver outside of the lock because the call to close can directly call onSourceDelete(), which
+  boolean cmdCtRcvUmReceiverStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {
+    // Stop the UM receiver outside of the lock because the call to stop can directly call onSourceDelete(), which
     // might need to take the lock.
     if (umRcv != null) {
       umRcv.close();
@@ -166,45 +165,45 @@ public class LbmCtRcv {
     }
 
     // At this point, no new connections will be created.  But there might be some commands in the
-    // queue waiting to be processed.  Submit the final close to be behind those.
+    // queue waiting to be processed.  Submit the final stop to be behind those.
     synchronized(this) {
       if (numActiveConns != 0) {
         // This should never happen.  Log warning and continue.
-        LBMPubLog.pubLog(LBM.LOG_WARNING, "Internal error: cmdCtRcvUmReceiverClose: numActiveConns=" + numActiveConns + "\n");
+        LBMPubLog.pubLog(LBM.LOG_WARNING, "Internal error: cmdCtRcvUmReceiverStop: numActiveConns=" + numActiveConns + "\n");
       }
       if (rcvConnSet.isEmpty()) {
         // No more
-        if (!finalCloseSubmitted) {  // Don't submit another one if one is already pending.
+        if (!finalStopSubmitted) {  // Don't submit another one if one is already pending.
           LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
-          nextCmd.setCtRcvFinalClose(this);
-          ctrlr.submitNowait(nextCmd);  // This "calls" cmdRcvConnClose below.
+          nextCmd.setCtRcvFinalStop(this);
+          ctrlr.submitNowait(nextCmd);  // This "calls" cmdRcvConnStop below.
 
-          finalCloseSubmitted = true;
+          finalStopSubmitted = true;
         }
       }
     }
     return true;
   }
 
-  // There should be no more connections of any kind, active or CLOSE_WAIT.
+  // There should be no more connections of any kind, active or STOP_WAIT.
   // THREAD: ctrlr
-  boolean cmdCtRcvFinalClose(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {
+  boolean cmdCtRcvFinalStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {
     synchronized (this) {
       // There should be no connections left at all.
       try {
         if (! rcvConnSet.isEmpty()) {
-          throw new LBMException("Internal error, cmdCtRcvFinalClose: rcvConnSet not empty");
+          throw new LBMException("Internal error, cmdCtRcvFinalStop: rcvConnSet not empty");
         }
       } catch (Exception e) {
         // Pass the exception back to the application.
-        pendingCloseCmd.setE(e);
+        pendingStopCmd.setE(e);
       }
 
       ct.removeFromCtRcvSet(this);
       // This ct receiver is now fully removed from the LbmCt.
 
-      // Wake up ctRcv close().
-      ctrlr.cmdComplete(pendingCloseCmd);
+      // Wake up ctRcv stop().
+      ctrlr.cmdComplete(pendingStopCmd);
     }
     return true;
   }
@@ -222,7 +221,7 @@ public class LbmCtRcv {
     connDeleteCb = null;
     cbArg = null;
     rcvConnSet = null;
-    pendingCloseCmd = null;
+    pendingStopCmd = null;
   }
 
   void addToRcvConnSet(LbmCtRcvConn rcvConn) {
@@ -232,22 +231,22 @@ public class LbmCtRcv {
   void removeFromRcvConnSet(LbmCtRcvConn rcvConn) {
     synchronized (this) {
       rcvConnSet.remove(rcvConn);
-      if (isClosing() && rcvConnSet.isEmpty()) {
-        if (!umReceiverCloseSubmitted) {
+      if (isStopping() && rcvConnSet.isEmpty()) {
+        if (!umReceiverStopSubmitted) {
           LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
-          nextCmd.setCtRcvUmReceiverClose(this);
+          nextCmd.setCtRcvUmReceiverStop(this);
           ctrlr.submitNowait(nextCmd);
 
-          umReceiverCloseSubmitted = true;
+          umReceiverStopSubmitted = true;
         }
-        else if (!finalCloseSubmitted) {  // Don't submit another one if one is already pending.
+        else if (!finalStopSubmitted) {  // Don't submit another one if one is already pending.
           // At this point, no new connections will be created.  But there might be some commands in the
-          // queue waiting to be processed.  Submit the final close to be behind those.
+          // queue waiting to be processed.  Submit the final stop to be behind those.
           LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
-          nextCmd.setCtRcvFinalClose(this);
+          nextCmd.setCtRcvFinalStop(this);
           ctrlr.submitNowait(nextCmd);
 
-          finalCloseSubmitted = true;
+          finalStopSubmitted = true;
         }
       }
     }
@@ -262,13 +261,13 @@ public class LbmCtRcv {
   void decrementActiveConns() {
     synchronized (this) {
       numActiveConns--;
-      if (isClosing()) {
-        if ((numActiveConns == 0) && (!umReceiverCloseSubmitted)) {
-          // There might be some connection-related commands queued.  Queue the UM receiver close behind.
+      if (isStopping()) {
+        if ((numActiveConns == 0) && (!umReceiverStopSubmitted)) {
+          // There might be some connection-related commands queued.  Queue the UM receiver stop behind.
           LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
-          nextCmd.setCtRcvUmReceiverClose(this);
+          nextCmd.setCtRcvUmReceiverStop(this);
           ctrlr.submitNowait(nextCmd);
-          umReceiverCloseSubmitted = true;
+          umReceiverStopSubmitted = true;
         }
       }
     }
@@ -307,7 +306,7 @@ public class LbmCtRcv {
 
       ct.dbg("onSourceDelete: " + rcvConn);
       try {
-        rcvConn.close();
+        rcvConn.stop();
       } catch (Exception e) {
         LBMPubLog.pubLog(LBM.LOG_WARNING, "LbmCtRcv:onSourceDelete: " + LbmCt.exDetails(e) + "\n");
       }

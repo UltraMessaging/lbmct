@@ -24,6 +24,11 @@ package com.latencybusters.lbmct;
 import java.util.*;
 import com.latencybusters.lbm.*;
 
+/**
+ * A connected source.
+ * Creates an underlying UM source, which is available with the {@link #getUmSrc()} method.
+ * When an {@code LbmCtSrc} is created, its full initialization is deferred until its {@link #start} method is called.
+ */
 @SuppressWarnings("WeakerAccess")  // public API.
 public class LbmCtSrc {
   private LbmCt ct = null;
@@ -37,10 +42,25 @@ public class LbmCtSrc {
   private Set<LbmCtSrcConn> srcConnSet = null;
   private int numActiveConns = 0;
 
-  private boolean closing = false;
-  private LbmCtCtrlrCmd pendingCloseCmd = null;
-  private boolean umSourceCloseSubmitted = false;
-  private boolean finalCloseSubmitted = false;
+  private boolean stopping = false;
+  private LbmCtCtrlrCmd pendingStopCmd = null;
+  private boolean umSourceStopSubmitted = false;
+  private boolean finalStopSubmitted = false;
+
+  /**
+   * Creates a Connected Topic Source object.
+   * Creation of a CT Source object creates an underlying UM source.
+   * Unlike a UM source, creation a CT Source object is not a two step process.
+   * (A UM source requires first allocating a UM topic object, and then creating the source.
+   * A CT source combines the two steps in it's {@link #start} method.)
+   * Note that to send a message, the application must access the underlying UM source
+   * with the {@link #getUmSrc()} method.
+   * <p>
+   * This constructor only creates the object.
+   * Its full initialization is deferred until its {@code start} method is called.
+   */
+  public LbmCtSrc() {
+  }
 
   // Getters.
   LbmCt getCt() { return ct; }
@@ -48,14 +68,49 @@ public class LbmCtSrc {
   LbmCtSrcConnCreateCallback getConnCreateCb() { return connCreateCb; }
   LbmCtSrcConnDeleteCallback getConnDeleteCb() { return connDeleteCb; }
   Object getCbArg() { return cbArg; }
-  boolean isClosing() { return closing; }
+  boolean isStopping() { return stopping; }
 
-  // Public API to get underlying UM source object from CT source.
+  /**
+   * Obtain a reference to a CT Source's underlying UM source.
+   * This is needed so that the application can send messages.
+   * @return  reference to underlying UM source.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public LBMSource getUmSrc() { return umSrc; }
 
-  // Public API for actual creation of the UM source.  Just hand off to ctrlr thread.
-  @SuppressWarnings("WeakerAccess")  // public API.
+  /**
+   * Initializes a CT Source object.
+   * This is typically called immediately after the object is created ({@link #LbmCtSrc() constructor}).
+   * The {@code start} method can return before any connections are made.
+   * Any messages sent to the source prior to the first connection event may not be received by any receivers.
+   * <p>
+   * When the application is finished using this CT Source, it should be stopped ({@link #stop} API).
+   * <p>
+   * @param inCt  CT object to associate with this CT Source.
+   * @param topicStr  Topic string.
+   *     This is the same as the {@code symbol} parameter when creating a UM source topic with
+   *     <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMTopic.html#ab728a34e695bfccc73c8fa1a33b0e70d">LBMTopic</a>.
+   * @param srcAttr  Attributes object used to initialize the underlying UM source.
+   *     This is the same as the {@code lbmsattr} parameter when creating a UM source topic with
+   *     <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMTopic.html#ab728a34e695bfccc73c8fa1a33b0e70d">LBMTopic</a>.
+   * @param srcCb  An object implementing the <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/interfacecom_1_1latencybusters_1_1lbm_1_1LBMSourceEventCallback.html">LBMSourceEventCallback</a>
+   *     This is the same as the {@code cb} parameter when creating a UM source with
+   *     <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMSource.html#ab8e3998370398ea2929bfaf814d79457">LBMSource</a>.
+   *     It is used to deliver UM source events to the application.
+   *     This parameter is optional (null should be passed if not needed).
+   *     Note that the SRC_EVENT_CONNECT and SRC_EVENT_DISCONNECT events should be ignored.
+   *     The CT connect and disconnect callbacks should be used instead.
+   * @param connCreateCb  Callback object invoked when a CT Receiver connects to this CT source.
+   *     Technically this parameter is optional (null should be passed if not needed), but its use is central to the
+   *     Connected Topics paradigm.
+   * @param connDeleteCb  Callback object invoked when a CT receiver disconnects from this CT source.
+   *     Technically this parameter is optional (null should be passed if not needed), but its use is central to the
+   *     Connected Topics paradigm.
+   * @param cbArg  Application-specific object which is passed to the three callbacks ({@code srcCb},
+   *     {@code connCreateCb}, {@code connDeleteCb}).
+   *     This parameter is optional (null should be passed if not needed).
+   * @throws Exception  LBMException thrown.
+   */
   public void start(LbmCt inCt, String topicStr, LBMSourceAttributes srcAttr, LBMSourceEventCallback srcCb,
                     LbmCtSrcConnCreateCallback connCreateCb, LbmCtSrcConnDeleteCallback connDeleteCb, Object cbArg)
       throws Exception
@@ -97,14 +152,20 @@ public class LbmCtSrc {
     return true;
   }
 
-  // Public API for deleting CT source.
+  /**
+   * Stops this CT source object.
+   * Calling this method performs a graceful disconnection of any active connections, blocking the caller until
+   * the disconnections are completed.
+   * <p>
+   * @throws Exception  LBMException thrown.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
-  public void close() throws Exception {
+  public void stop() throws Exception {
     LbmCtCtrlr ctrlr = this.ctrlr;  // get a local copy since the command will delete the ctSrc.
 
     LbmCtCtrlrCmd nextCmd = ctrlr.cmdGet();
-    nextCmd.setCtSrcClose(this);
-    ctrlr.submitWait(nextCmd);  // This "calls" cmdCtSrcClose below.
+    nextCmd.setCtSrcStop(this);
+    ctrlr.submitWait(nextCmd);  // This "calls" cmdCtSrcStop below.
 
     Exception e = nextCmd.getE();  // Save exception to be re-thrown after cmd free.
     ctrlr.cmdFree(nextCmd);  // Return command object to free pool.
@@ -120,48 +181,48 @@ public class LbmCtSrc {
   }
 
   // THREAD: ctrlr
-  boolean cmdCtSrcClose(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {
-    closing = true;
-    pendingCloseCmd = cmd;
+  boolean cmdCtSrcStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {
+    stopping = true;
+    pendingStopCmd = cmd;
 
     for (LbmCtSrcConn srcConn : srcConnSet) {
       // These disconnects are submitted to the command queue.
       srcConn.disconnect();
     }
 
-    if ((numActiveConns == 0) && (!umSourceCloseSubmitted)) {
-      // Since closing is true, no new connections should become active.
-      // There might be some connection-related commands queued.  Queue the UM source close behind them.
+    if ((numActiveConns == 0) && (!umSourceStopSubmitted)) {
+      // Since stopping is true, no new connections should become active.
+      // There might be some connection-related commands queued.  Queue the UM source stop behind them.
       LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
-      nextCmd.setCtSrcUmSourceClose(this);
+      nextCmd.setCtSrcUmSourceStop(this);
       ctrlr.submitNowait(nextCmd);
-      umSourceCloseSubmitted = true;
+      umSourceStopSubmitted = true;
     }
 
-    return false;  // Command completion is triggered by finalCloseMaybe().
+    return false;
   }
 
   // This is called when there are no more "active" connections.
   // There can still be some connection-related commands queued.
   // THREAD: ctrlr
-  boolean cmdCtSrcUmSourceClose(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {
+  boolean cmdCtSrcUmSourceStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {
     if (umSrc != null) {
       umSrc.close();
       umSrc = null;
     }
 
     // At this point, no new connections will be created.  But there might be some commands in the
-    // queue waiting to be processed.  Submit the final close to be behind those.
+    // queue waiting to be processed.  Submit the final stop to be behind those.
     if ((numActiveConns != 0) || (! srcConnSet.isEmpty())) {
       // This should never happen.  Log warning and continue.
-      LBMPubLog.pubLog(LBM.LOG_WARNING, "Internal error: cmdCtSrcUmSourceClose: numActiveConns=" + numActiveConns + " (should be 0), srcConnSet.isEmpty=" + srcConnSet.isEmpty() + " (should be true)\n");
+      LBMPubLog.pubLog(LBM.LOG_WARNING, "Internal error: cmdCtSrcUmSourceStop: numActiveConns=" + numActiveConns + " (should be 0), srcConnSet.isEmpty=" + srcConnSet.isEmpty() + " (should be true)\n");
     } else {
-      if (!finalCloseSubmitted) {  // Don't submit another one if one is already pending.
+      if (!finalStopSubmitted) {  // Don't submit another one if one is already pending.
         LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
-        nextCmd.setCtSrcFinalClose(this);
-        ctrlr.submitNowait(nextCmd);  // This "calls" cmdSrcConnClose below.
+        nextCmd.setCtSrcFinalStop(this);
+        ctrlr.submitNowait(nextCmd);  // This "calls" cmdSrcConnStop below.
 
-        finalCloseSubmitted = true;
+        finalStopSubmitted = true;
       }
     }
     return true;
@@ -169,23 +230,23 @@ public class LbmCtSrc {
 
   // There should be no more connections of any kind.
   // THREAD: ctrlr
-  boolean cmdCtSrcFinalClose(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {
+  boolean cmdCtSrcFinalStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {
     synchronized (this) {
       // There should be no connections left at all.
       try {
         if (! srcConnSet.isEmpty()) {
-          throw new LBMException("Internal error, cmdCtSrcFinalClose: srcConnSet not empty");
+          throw new LBMException("Internal error, cmdCtSrcFinalStop: srcConnSet not empty");
         }
       } catch (Exception e) {
         // Pass the exception back to the application.
-        pendingCloseCmd.setE(e);
+        pendingStopCmd.setE(e);
       }
 
       ct.removeFromCtSrcSet(this);
       // This ct source is now fully removed from the LbmCt.
 
-      // Wake up ctSrc close().
-      ctrlr.cmdComplete(pendingCloseCmd);
+      // Wake up ctSrc stop().
+      ctrlr.cmdComplete(pendingStopCmd);
     }
     return true;
   }
@@ -202,7 +263,7 @@ public class LbmCtSrc {
     connDeleteCb = null;
     cbArg = null;
     srcConnSet = null;
-    pendingCloseCmd = null;
+    pendingStopCmd = null;
   }
 
   void addToSrcConnSet(LbmCtSrcConn srcConn) {
@@ -211,22 +272,22 @@ public class LbmCtSrc {
 
   void removeFromSrcConnSet(LbmCtSrcConn srcConn) {
     srcConnSet.remove(srcConn);
-    if (isClosing() && srcConnSet.isEmpty()) {
-      if (!umSourceCloseSubmitted) {
+    if (isStopping() && srcConnSet.isEmpty()) {
+      if (!umSourceStopSubmitted) {
         LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
-        nextCmd.setCtSrcUmSourceClose(this);
+        nextCmd.setCtSrcUmSourceStop(this);
         ctrlr.submitNowait(nextCmd);
 
-        umSourceCloseSubmitted = true;
+        umSourceStopSubmitted = true;
       }
-      else if (!finalCloseSubmitted) {
+      else if (!finalStopSubmitted) {
         // At this point, no new connections will be created.  But there might be some commands in the
-        // queue waiting to be processed.  Submit the final close to be behind those.
+        // queue waiting to be processed.  Submit the final stop to be behind those.
         LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
-        nextCmd.setCtSrcFinalClose(this);
+        nextCmd.setCtSrcFinalStop(this);
         ctrlr.submitNowait(nextCmd);
 
-        finalCloseSubmitted = true;
+        finalStopSubmitted = true;
       }
     }
   }
@@ -237,13 +298,13 @@ public class LbmCtSrc {
 
   void decrementActiveConns() {
     numActiveConns--;
-    if (isClosing()) {
-      if ((numActiveConns == 0) && (!umSourceCloseSubmitted)) {
-        // There might be some connection-related commands queued.  Queue the UM receiver close behind.
+    if (isStopping()) {
+      if ((numActiveConns == 0) && (!umSourceStopSubmitted)) {
+        // There might be some connection-related commands queued.  Queue the UM receiver stop behind.
         LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();
-        nextCmd.setCtSrcUmSourceClose(this);
+        nextCmd.setCtSrcUmSourceStop(this);
         ctrlr.submitNowait(nextCmd);
-        umSourceCloseSubmitted = true;
+        umSourceStopSubmitted = true;
       }
     }
   }
