@@ -21,8 +21,7 @@
  */
 
 /**
- * Provides "Connected Topics" semantics for Ultra Messaging.
- * See <a href="https://github.com/UltraMessaging/lbmct">https://github.com/UltraMessaging/lbmct</a> for overview
- * and user manual.
+ * Provides "Connected Topics" semantics for Ultra Messaging; see
+ * <a href="https://github.com/UltraMessaging/lbmct">https://github.com/UltraMessaging/lbmct</a> for overview and user manual.
  */
 package com.latencybusters.lbmct;

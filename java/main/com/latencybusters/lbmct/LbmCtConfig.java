@@ -23,12 +23,12 @@ package com.latencybusters.lbmct;
 
 /**
  * Container object holding configuration of an instance of {@code LbmCt}.
- * The caller creates an config instance and sets desired options, and then * passes it to {@link LbmCt#start}.
+ * The caller creates an config instance and sets desired options, and then passes it to {@link LbmCt#start}.
  * <p>
  * Note that the CT object retains a reference to the passed-in configuration object, so it is not recommended to modify
  * options after the {@code LbmCt} is created, except for testing purposes.
- * Also, if creating multiple CT objects, it is generally recommended to create multiple configuration object
- * instances, one for each CT object (unless they should all share exactly the same configuration).
+ * Also, if creating multiple CT objects, it is generally recommended to create separate configuration objects,
+ * one for each CT object (unless they all share exactly the same configuration).
  *
  */
 @SuppressWarnings("WeakerAccess")  // public API.
@@ -232,14 +232,14 @@ public class LbmCtConfig {
   public int getDomainId() { return domainId; }
 
   /**
-   * Gets delay before a receiver sends its the initial connection request handshake.
+   * Gets delay, in milliseconds, before a receiver sends its the initial connection request handshake.
    * @return Time in milliseconds to delay.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
   public int getDelayCreq() { return delayCreq; }
 
   /**
-   * Gets time between handshake attempts.
+   * Gets time, in milliseconds, between handshake attempts.
    * @return  Time in milliseconds between attempts.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
