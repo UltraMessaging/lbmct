@@ -21,6 +21,19 @@ package com.latencybusters.lbmct;
  - OF THE LIKELIHOOD OF SUCH DAMAGES.
  */
 
+/**
+ * Callback interface to deliver the "connection deleted" event to a receiving application.
+ * The application supplies an implementation of this interface to {@link LbmCtRcv#start}.
+ */
 public interface LbmCtRcvConnDeleteCallback {
-  void onRcvConnDelete(LbmCtRcv rcv, LbmCtPeerInfo peerInfo, Object clientd, Object connClientd);
+  /**
+   * Receiver application callback method, called by CT, to indicate that a connection is deleted.
+   * <p>
+   * @param rcv  The CT Receiver object, that the deleted connection applies to.
+   * @param peerInfo  Useful information about the connection, such as the metadata of the connected source.
+   * @param cbArg  Application-specific object supplied by the application to {@link LbmCtRcv#start}.
+   * @param connCbArg  Application-specific object associated with the connection, supplied by the application as
+   *     the return value from {@link LbmCtRcvConnCreateCallback#onRcvConnCreate}.
+   */
+  void onRcvConnDelete(LbmCtRcv rcv, LbmCtPeerInfo peerInfo, Object cbArg, Object connCbArg);
 }

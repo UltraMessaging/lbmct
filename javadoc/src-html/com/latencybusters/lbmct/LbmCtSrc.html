@@ -34,7 +34,7 @@
 <span class="sourceLineNo">026</span><a name="line.26"></a>
 <span class="sourceLineNo">027</span>/**<a name="line.27"></a>
 <span class="sourceLineNo">028</span> * A connected source.<a name="line.28"></a>
-<span class="sourceLineNo">029</span> * Creates an underlying UM source, which is available with the {@link #getUmSrc()} method.<a name="line.29"></a>
+<span class="sourceLineNo">029</span> * Maintains an underlying UM source, which is available with the {@link #getUmSrc()} method.<a name="line.29"></a>
 <span class="sourceLineNo">030</span> * When an {@code LbmCtSrc} is created, its full initialization is deferred until its {@link #start} method is called.<a name="line.30"></a>
 <span class="sourceLineNo">031</span> */<a name="line.31"></a>
 <span class="sourceLineNo">032</span>@SuppressWarnings("WeakerAccess")  // public API.<a name="line.32"></a>
@@ -60,263 +60,265 @@
 <span class="sourceLineNo">052</span>   * Creation of a CT Source object creates an underlying UM source.<a name="line.52"></a>
 <span class="sourceLineNo">053</span>   * Unlike a UM source, creation a CT Source object is not a two step process.<a name="line.53"></a>
 <span class="sourceLineNo">054</span>   * (A UM source requires first allocating a UM topic object, and then creating the source.<a name="line.54"></a>
-<span class="sourceLineNo">055</span>   * A CT source combines the two steps in it's {@link #start} method.)<a name="line.55"></a>
+<span class="sourceLineNo">055</span>   * A CT source combines the two steps in its {@link #start} method.)<a name="line.55"></a>
 <span class="sourceLineNo">056</span>   * Note that to send a message, the application must access the underlying UM source<a name="line.56"></a>
 <span class="sourceLineNo">057</span>   * with the {@link #getUmSrc()} method.<a name="line.57"></a>
 <span class="sourceLineNo">058</span>   * &lt;p&gt;<a name="line.58"></a>
 <span class="sourceLineNo">059</span>   * This constructor only creates the object.<a name="line.59"></a>
 <span class="sourceLineNo">060</span>   * Its full initialization is deferred until its {@code start} method is called.<a name="line.60"></a>
 <span class="sourceLineNo">061</span>   */<a name="line.61"></a>
-<span class="sourceLineNo">062</span>  public LbmCtSrc() {<a name="line.62"></a>
-<span class="sourceLineNo">063</span>  }<a name="line.63"></a>
-<span class="sourceLineNo">064</span><a name="line.64"></a>
-<span class="sourceLineNo">065</span>  // Getters.<a name="line.65"></a>
-<span class="sourceLineNo">066</span>  LbmCt getCt() { return ct; }<a name="line.66"></a>
-<span class="sourceLineNo">067</span>  String getTopicStr() { return topicStr; }<a name="line.67"></a>
-<span class="sourceLineNo">068</span>  LbmCtSrcConnCreateCallback getConnCreateCb() { return connCreateCb; }<a name="line.68"></a>
-<span class="sourceLineNo">069</span>  LbmCtSrcConnDeleteCallback getConnDeleteCb() { return connDeleteCb; }<a name="line.69"></a>
-<span class="sourceLineNo">070</span>  Object getCbArg() { return cbArg; }<a name="line.70"></a>
-<span class="sourceLineNo">071</span>  boolean isStopping() { return stopping; }<a name="line.71"></a>
-<span class="sourceLineNo">072</span><a name="line.72"></a>
-<span class="sourceLineNo">073</span>  /**<a name="line.73"></a>
-<span class="sourceLineNo">074</span>   * Obtain a reference to a CT Source's underlying UM source.<a name="line.74"></a>
-<span class="sourceLineNo">075</span>   * This is needed so that the application can send messages.<a name="line.75"></a>
-<span class="sourceLineNo">076</span>   * @return  reference to underlying UM source.<a name="line.76"></a>
-<span class="sourceLineNo">077</span>   */<a name="line.77"></a>
-<span class="sourceLineNo">078</span>  @SuppressWarnings("WeakerAccess")  // public API.<a name="line.78"></a>
-<span class="sourceLineNo">079</span>  public LBMSource getUmSrc() { return umSrc; }<a name="line.79"></a>
-<span class="sourceLineNo">080</span><a name="line.80"></a>
-<span class="sourceLineNo">081</span>  /**<a name="line.81"></a>
-<span class="sourceLineNo">082</span>   * Initializes a CT Source object.<a name="line.82"></a>
-<span class="sourceLineNo">083</span>   * This is typically called immediately after the object is created ({@link #LbmCtSrc() constructor}).<a name="line.83"></a>
-<span class="sourceLineNo">084</span>   * The {@code start} method can return before any connections are made.<a name="line.84"></a>
-<span class="sourceLineNo">085</span>   * Any messages sent to the source prior to the first connection event may not be received by any receivers.<a name="line.85"></a>
-<span class="sourceLineNo">086</span>   * &lt;p&gt;<a name="line.86"></a>
-<span class="sourceLineNo">087</span>   * When the application is finished using this CT Source, it should be stopped ({@link #stop} API).<a name="line.87"></a>
-<span class="sourceLineNo">088</span>   * &lt;p&gt;<a name="line.88"></a>
-<span class="sourceLineNo">089</span>   * @param inCt  CT object to associate with this CT Source.<a name="line.89"></a>
-<span class="sourceLineNo">090</span>   * @param topicStr  Topic string.<a name="line.90"></a>
-<span class="sourceLineNo">091</span>   *     This is the same as the {@code symbol} parameter when creating a UM source topic with<a name="line.91"></a>
-<span class="sourceLineNo">092</span>   *     &lt;a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMTopic.html#ab728a34e695bfccc73c8fa1a33b0e70d"&gt;LBMTopic&lt;/a&gt;.<a name="line.92"></a>
-<span class="sourceLineNo">093</span>   * @param srcAttr  Attributes object used to initialize the underlying UM source.<a name="line.93"></a>
-<span class="sourceLineNo">094</span>   *     This is the same as the {@code lbmsattr} parameter when creating a UM source topic with<a name="line.94"></a>
-<span class="sourceLineNo">095</span>   *     &lt;a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMTopic.html#ab728a34e695bfccc73c8fa1a33b0e70d"&gt;LBMTopic&lt;/a&gt;.<a name="line.95"></a>
-<span class="sourceLineNo">096</span>   * @param srcCb  An object implementing the &lt;a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/interfacecom_1_1latencybusters_1_1lbm_1_1LBMSourceEventCallback.html"&gt;LBMSourceEventCallback&lt;/a&gt;<a name="line.96"></a>
-<span class="sourceLineNo">097</span>   *     This is the same as the {@code cb} parameter when creating a UM source with<a name="line.97"></a>
-<span class="sourceLineNo">098</span>   *     &lt;a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMSource.html#ab8e3998370398ea2929bfaf814d79457"&gt;LBMSource&lt;/a&gt;.<a name="line.98"></a>
-<span class="sourceLineNo">099</span>   *     It is used to deliver UM source events to the application.<a name="line.99"></a>
-<span class="sourceLineNo">100</span>   *     This parameter is optional (null should be passed if not needed).<a name="line.100"></a>
-<span class="sourceLineNo">101</span>   *     Note that the SRC_EVENT_CONNECT and SRC_EVENT_DISCONNECT events should be ignored.<a name="line.101"></a>
-<span class="sourceLineNo">102</span>   *     The CT connect and disconnect callbacks should be used instead.<a name="line.102"></a>
-<span class="sourceLineNo">103</span>   * @param connCreateCb  Callback object invoked when a CT Receiver connects to this CT source.<a name="line.103"></a>
-<span class="sourceLineNo">104</span>   *     Technically this parameter is optional (null should be passed if not needed), but its use is central to the<a name="line.104"></a>
-<span class="sourceLineNo">105</span>   *     Connected Topics paradigm.<a name="line.105"></a>
-<span class="sourceLineNo">106</span>   * @param connDeleteCb  Callback object invoked when a CT receiver disconnects from this CT source.<a name="line.106"></a>
-<span class="sourceLineNo">107</span>   *     Technically this parameter is optional (null should be passed if not needed), but its use is central to the<a name="line.107"></a>
-<span class="sourceLineNo">108</span>   *     Connected Topics paradigm.<a name="line.108"></a>
-<span class="sourceLineNo">109</span>   * @param cbArg  Application-specific object which is passed to the three callbacks ({@code srcCb},<a name="line.109"></a>
-<span class="sourceLineNo">110</span>   *     {@code connCreateCb}, {@code connDeleteCb}).<a name="line.110"></a>
-<span class="sourceLineNo">111</span>   *     This parameter is optional (null should be passed if not needed).<a name="line.111"></a>
-<span class="sourceLineNo">112</span>   * @throws Exception  LBMException thrown.<a name="line.112"></a>
-<span class="sourceLineNo">113</span>   */<a name="line.113"></a>
-<span class="sourceLineNo">114</span>  public void start(LbmCt inCt, String topicStr, LBMSourceAttributes srcAttr, LBMSourceEventCallback srcCb,<a name="line.114"></a>
-<span class="sourceLineNo">115</span>                    LbmCtSrcConnCreateCallback connCreateCb, LbmCtSrcConnDeleteCallback connDeleteCb, Object cbArg)<a name="line.115"></a>
-<span class="sourceLineNo">116</span>      throws Exception<a name="line.116"></a>
-<span class="sourceLineNo">117</span>  {<a name="line.117"></a>
-<span class="sourceLineNo">118</span>    ct = inCt;<a name="line.118"></a>
-<span class="sourceLineNo">119</span>    ctrlr = ct.getCtrlr();<a name="line.119"></a>
-<span class="sourceLineNo">120</span>    ctx = ct.getCtx();<a name="line.120"></a>
-<span class="sourceLineNo">121</span><a name="line.121"></a>
-<span class="sourceLineNo">122</span>    LbmCtCtrlrCmd nextCmd = ctrlr.cmdGet();<a name="line.122"></a>
-<span class="sourceLineNo">123</span>    nextCmd.setCtSrcStart(this, topicStr, srcAttr, srcCb, connCreateCb, connDeleteCb, cbArg);<a name="line.123"></a>
-<span class="sourceLineNo">124</span>    ctrlr.submitWait(nextCmd);  // This "calls" cmdCtSrcStart below.<a name="line.124"></a>
-<span class="sourceLineNo">125</span><a name="line.125"></a>
-<span class="sourceLineNo">126</span>    Exception e = nextCmd.getE();  // Save exception to be re-thrown after command free.<a name="line.126"></a>
-<span class="sourceLineNo">127</span>    ctrlr.cmdFree(nextCmd);  // Return command object to free pool.<a name="line.127"></a>
-<span class="sourceLineNo">128</span>    if (e != null) {<a name="line.128"></a>
-<span class="sourceLineNo">129</span>      throw(new Exception(e));<a name="line.129"></a>
-<span class="sourceLineNo">130</span>    }<a name="line.130"></a>
-<span class="sourceLineNo">131</span>  }<a name="line.131"></a>
-<span class="sourceLineNo">132</span><a name="line.132"></a>
-<span class="sourceLineNo">133</span>  // THREAD: ctrlr<a name="line.133"></a>
-<span class="sourceLineNo">134</span>  boolean cmdCtSrcStart(LbmCtCtrlrCmd cmd) throws Exception {<a name="line.134"></a>
-<span class="sourceLineNo">135</span>    topicStr = cmd.getSrcTopicStr();<a name="line.135"></a>
-<span class="sourceLineNo">136</span>    LBMSourceEventCallback srcCb = cmd.getSrcCb();<a name="line.136"></a>
-<span class="sourceLineNo">137</span>    connCreateCb = cmd.getSrcConnCreateCb();<a name="line.137"></a>
-<span class="sourceLineNo">138</span>    connDeleteCb = cmd.getSrcConnDeleteCb();<a name="line.138"></a>
-<span class="sourceLineNo">139</span>    cbArg = cmd.getSrcCbArg();<a name="line.139"></a>
-<span class="sourceLineNo">140</span>    srcConnSet = new HashSet&lt;&gt;();<a name="line.140"></a>
-<span class="sourceLineNo">141</span><a name="line.141"></a>
-<span class="sourceLineNo">142</span>    ct.addToCtSrcSet(this);<a name="line.142"></a>
+<span class="sourceLineNo">062</span>  public LbmCtSrc() { }<a name="line.62"></a>
+<span class="sourceLineNo">063</span><a name="line.63"></a>
+<span class="sourceLineNo">064</span>  // Getters.<a name="line.64"></a>
+<span class="sourceLineNo">065</span>  LbmCt getCt() { return ct; }<a name="line.65"></a>
+<span class="sourceLineNo">066</span>  String getTopicStr() { return topicStr; }<a name="line.66"></a>
+<span class="sourceLineNo">067</span>  LbmCtSrcConnCreateCallback getConnCreateCb() { return connCreateCb; }<a name="line.67"></a>
+<span class="sourceLineNo">068</span>  LbmCtSrcConnDeleteCallback getConnDeleteCb() { return connDeleteCb; }<a name="line.68"></a>
+<span class="sourceLineNo">069</span>  Object getCbArg() { return cbArg; }<a name="line.69"></a>
+<span class="sourceLineNo">070</span>  boolean isStopping() { return stopping; }<a name="line.70"></a>
+<span class="sourceLineNo">071</span><a name="line.71"></a>
+<span class="sourceLineNo">072</span>  /**<a name="line.72"></a>
+<span class="sourceLineNo">073</span>   * Obtain a reference to a CT Source's underlying UM source.<a name="line.73"></a>
+<span class="sourceLineNo">074</span>   * This is needed so that the application can send messages.<a name="line.74"></a>
+<span class="sourceLineNo">075</span>   * @return  reference to underlying UM source.<a name="line.75"></a>
+<span class="sourceLineNo">076</span>   */<a name="line.76"></a>
+<span class="sourceLineNo">077</span>  @SuppressWarnings("WeakerAccess")  // public API.<a name="line.77"></a>
+<span class="sourceLineNo">078</span>  public LBMSource getUmSrc() { return umSrc; }<a name="line.78"></a>
+<span class="sourceLineNo">079</span><a name="line.79"></a>
+<span class="sourceLineNo">080</span>  /**<a name="line.80"></a>
+<span class="sourceLineNo">081</span>   * Initializes a CT Source object.<a name="line.81"></a>
+<span class="sourceLineNo">082</span>   * This is typically called immediately after the object is created ({@link #LbmCtSrc} constructor).<a name="line.82"></a>
+<span class="sourceLineNo">083</span>   * The {@code start} method can return before any connections are made.<a name="line.83"></a>
+<span class="sourceLineNo">084</span>   * Any messages sent to the source prior to the first connection event may not be received by any receivers.<a name="line.84"></a>
+<span class="sourceLineNo">085</span>   * &lt;p&gt;<a name="line.85"></a>
+<span class="sourceLineNo">086</span>   * When the application is finished using this CT Source, it should be stopped ({@link #stop} API).<a name="line.86"></a>
+<span class="sourceLineNo">087</span>   * &lt;p&gt;<a name="line.87"></a>
+<span class="sourceLineNo">088</span>   * @param inCt  CT object to associate with this CT Source.<a name="line.88"></a>
+<span class="sourceLineNo">089</span>   * @param topicStr  Topic string.<a name="line.89"></a>
+<span class="sourceLineNo">090</span>   *     This is the same as the {@code symbol} parameter when allocating a UM source topic object with<a name="line.90"></a>
+<span class="sourceLineNo">091</span>   *     &lt;a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMTopic.html#ab728a34e695bfccc73c8fa1a33b0e70d"&gt;LBMTopic&lt;/a&gt;.<a name="line.91"></a>
+<span class="sourceLineNo">092</span>   * @param srcAttr  Attributes object used to configure the underlying UM source.<a name="line.92"></a>
+<span class="sourceLineNo">093</span>   *     This is the same as the {@code lbmsattr} parameter when allocating a UM source topic object with<a name="line.93"></a>
+<span class="sourceLineNo">094</span>   *     &lt;a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMTopic.html#ab728a34e695bfccc73c8fa1a33b0e70d"&gt;LBMTopic&lt;/a&gt;.<a name="line.94"></a>
+<span class="sourceLineNo">095</span>   * @param srcCb  An object implementing the<a name="line.95"></a>
+<span class="sourceLineNo">096</span>   *     &lt;a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/interfacecom_1_1latencybusters_1_1lbm_1_1LBMSourceEventCallback.html"&gt;LBMSourceEventCallback&lt;/a&gt;<a name="line.96"></a>
+<span class="sourceLineNo">097</span>   *     interface.<a name="line.97"></a>
+<span class="sourceLineNo">098</span>   *     This is the same as the {@code cb} parameter when creating a UM source with<a name="line.98"></a>
+<span class="sourceLineNo">099</span>   *     &lt;a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMSource.html#ab8e3998370398ea2929bfaf814d79457"&gt;LBMSource&lt;/a&gt;.<a name="line.99"></a>
+<span class="sourceLineNo">100</span>   *     It is used to deliver UM source events to the application.<a name="line.100"></a>
+<span class="sourceLineNo">101</span>   *     This parameter is optional (null should be passed if not needed).<a name="line.101"></a>
+<span class="sourceLineNo">102</span>   *     Note that the {@code SRC_EVENT_CONNECT} and {@code SRC_EVENT_DISCONNECT} events should be ignored.<a name="line.102"></a>
+<span class="sourceLineNo">103</span>   *     The CT connection create and delete callbacks should be used instead.<a name="line.103"></a>
+<span class="sourceLineNo">104</span>   * @param connCreateCb  Callback object invoked when a CT Receiver connects to this CT source.<a name="line.104"></a>
+<span class="sourceLineNo">105</span>   *     Technically this parameter is optional (null should be passed if not needed), but its use is central to the<a name="line.105"></a>
+<span class="sourceLineNo">106</span>   *     Connected Topics paradigm.<a name="line.106"></a>
+<span class="sourceLineNo">107</span>   * @param connDeleteCb  Callback object invoked when a CT receiver disconnects from this CT source.<a name="line.107"></a>
+<span class="sourceLineNo">108</span>   *     Technically this parameter is optional (null should be passed if not needed), but its use is central to the<a name="line.108"></a>
+<span class="sourceLineNo">109</span>   *     Connected Topics paradigm.<a name="line.109"></a>
+<span class="sourceLineNo">110</span>   * @param cbArg  Application-specific object to be associated with the connected source, which is passed to the three<a name="line.110"></a>
+<span class="sourceLineNo">111</span>   *     callbacks ({@code srcCb}, {@code connCreateCb}, and {@code connDeleteCb}).<a name="line.111"></a>
+<span class="sourceLineNo">112</span>   *     Note that the CT Source maintains a reference to the cbArg object until the CT Source is stopped.<a name="line.112"></a>
+<span class="sourceLineNo">113</span>   *     This parameter is optional (null should be passed if not needed).<a name="line.113"></a>
+<span class="sourceLineNo">114</span>   * @throws Exception  LBMException thrown.<a name="line.114"></a>
+<span class="sourceLineNo">115</span>   */<a name="line.115"></a>
+<span class="sourceLineNo">116</span>  public void start(LbmCt inCt, String topicStr, LBMSourceAttributes srcAttr, LBMSourceEventCallback srcCb,<a name="line.116"></a>
+<span class="sourceLineNo">117</span>                    LbmCtSrcConnCreateCallback connCreateCb, LbmCtSrcConnDeleteCallback connDeleteCb, Object cbArg)<a name="line.117"></a>
+<span class="sourceLineNo">118</span>      throws Exception<a name="line.118"></a>
+<span class="sourceLineNo">119</span>  {<a name="line.119"></a>
+<span class="sourceLineNo">120</span>    ct = inCt;<a name="line.120"></a>
+<span class="sourceLineNo">121</span>    ctrlr = ct.getCtrlr();<a name="line.121"></a>
+<span class="sourceLineNo">122</span>    ctx = ct.getCtx();<a name="line.122"></a>
+<span class="sourceLineNo">123</span><a name="line.123"></a>
+<span class="sourceLineNo">124</span>    LbmCtCtrlrCmd nextCmd = ctrlr.cmdGet();<a name="line.124"></a>
+<span class="sourceLineNo">125</span>    nextCmd.setCtSrcStart(this, topicStr, srcAttr, srcCb, connCreateCb, connDeleteCb, cbArg);<a name="line.125"></a>
+<span class="sourceLineNo">126</span>    ctrlr.submitWait(nextCmd);  // This "calls" cmdCtSrcStart below.<a name="line.126"></a>
+<span class="sourceLineNo">127</span><a name="line.127"></a>
+<span class="sourceLineNo">128</span>    Exception e = nextCmd.getE();  // Save exception to be re-thrown after command free.<a name="line.128"></a>
+<span class="sourceLineNo">129</span>    ctrlr.cmdFree(nextCmd);  // Return command object to free pool.<a name="line.129"></a>
+<span class="sourceLineNo">130</span>    if (e != null) {<a name="line.130"></a>
+<span class="sourceLineNo">131</span>      throw(new Exception(e));<a name="line.131"></a>
+<span class="sourceLineNo">132</span>    }<a name="line.132"></a>
+<span class="sourceLineNo">133</span>  }<a name="line.133"></a>
+<span class="sourceLineNo">134</span><a name="line.134"></a>
+<span class="sourceLineNo">135</span>  // THREAD: ctrlr<a name="line.135"></a>
+<span class="sourceLineNo">136</span>  boolean cmdCtSrcStart(LbmCtCtrlrCmd cmd) throws Exception {<a name="line.136"></a>
+<span class="sourceLineNo">137</span>    topicStr = cmd.getSrcTopicStr();<a name="line.137"></a>
+<span class="sourceLineNo">138</span>    LBMSourceEventCallback srcCb = cmd.getSrcCb();<a name="line.138"></a>
+<span class="sourceLineNo">139</span>    connCreateCb = cmd.getSrcConnCreateCb();<a name="line.139"></a>
+<span class="sourceLineNo">140</span>    connDeleteCb = cmd.getSrcConnDeleteCb();<a name="line.140"></a>
+<span class="sourceLineNo">141</span>    cbArg = cmd.getSrcCbArg();<a name="line.141"></a>
+<span class="sourceLineNo">142</span>    srcConnSet = new HashSet&lt;&gt;();<a name="line.142"></a>
 <span class="sourceLineNo">143</span><a name="line.143"></a>
-<span class="sourceLineNo">144</span>    LBMTopic topicObj = ctx.allocTopic(topicStr, cmd.getSrcAttr());<a name="line.144"></a>
-<span class="sourceLineNo">145</span>    if (srcCb == null) {<a name="line.145"></a>
-<span class="sourceLineNo">146</span>      umSrc = new LBMSource(ctx, topicObj);<a name="line.146"></a>
-<span class="sourceLineNo">147</span>    } else {<a name="line.147"></a>
-<span class="sourceLineNo">148</span>      umSrc = new LBMSource(ctx, topicObj, srcCb, cbArg);<a name="line.148"></a>
-<span class="sourceLineNo">149</span>    }<a name="line.149"></a>
-<span class="sourceLineNo">150</span><a name="line.150"></a>
-<span class="sourceLineNo">151</span>    ct.addToSrcMap(this);<a name="line.151"></a>
-<span class="sourceLineNo">152</span>    return true;<a name="line.152"></a>
-<span class="sourceLineNo">153</span>  }<a name="line.153"></a>
-<span class="sourceLineNo">154</span><a name="line.154"></a>
-<span class="sourceLineNo">155</span>  /**<a name="line.155"></a>
-<span class="sourceLineNo">156</span>   * Stops this CT source object.<a name="line.156"></a>
-<span class="sourceLineNo">157</span>   * Calling this method performs a graceful disconnection of any active connections, blocking the caller until<a name="line.157"></a>
-<span class="sourceLineNo">158</span>   * the disconnections are completed.<a name="line.158"></a>
-<span class="sourceLineNo">159</span>   * &lt;p&gt;<a name="line.159"></a>
-<span class="sourceLineNo">160</span>   * @throws Exception  LBMException thrown.<a name="line.160"></a>
-<span class="sourceLineNo">161</span>   */<a name="line.161"></a>
-<span class="sourceLineNo">162</span>  @SuppressWarnings("WeakerAccess")  // public API.<a name="line.162"></a>
-<span class="sourceLineNo">163</span>  public void stop() throws Exception {<a name="line.163"></a>
-<span class="sourceLineNo">164</span>    LbmCtCtrlr ctrlr = this.ctrlr;  // get a local copy since the command will delete the ctSrc.<a name="line.164"></a>
-<span class="sourceLineNo">165</span><a name="line.165"></a>
-<span class="sourceLineNo">166</span>    LbmCtCtrlrCmd nextCmd = ctrlr.cmdGet();<a name="line.166"></a>
-<span class="sourceLineNo">167</span>    nextCmd.setCtSrcStop(this);<a name="line.167"></a>
-<span class="sourceLineNo">168</span>    ctrlr.submitWait(nextCmd);  // This "calls" cmdCtSrcStop below.<a name="line.168"></a>
-<span class="sourceLineNo">169</span><a name="line.169"></a>
-<span class="sourceLineNo">170</span>    Exception e = nextCmd.getE();  // Save exception to be re-thrown after cmd free.<a name="line.170"></a>
-<span class="sourceLineNo">171</span>    ctrlr.cmdFree(nextCmd);  // Return command object to free pool.<a name="line.171"></a>
-<span class="sourceLineNo">172</span>    if (e != null) {<a name="line.172"></a>
-<span class="sourceLineNo">173</span>      throw(new Exception(e));<a name="line.173"></a>
-<span class="sourceLineNo">174</span>    }<a name="line.174"></a>
-<span class="sourceLineNo">175</span><a name="line.175"></a>
-<span class="sourceLineNo">176</span>    // No longer need to "find" this conn as UIM handshakes are received.<a name="line.176"></a>
-<span class="sourceLineNo">177</span>    ct.removeFromSrcMap(this);<a name="line.177"></a>
-<span class="sourceLineNo">178</span><a name="line.178"></a>
-<span class="sourceLineNo">179</span>    // Release any references to other objects.<a name="line.179"></a>
-<span class="sourceLineNo">180</span>    clear();<a name="line.180"></a>
-<span class="sourceLineNo">181</span>  }<a name="line.181"></a>
-<span class="sourceLineNo">182</span><a name="line.182"></a>
-<span class="sourceLineNo">183</span>  // THREAD: ctrlr<a name="line.183"></a>
-<span class="sourceLineNo">184</span>  boolean cmdCtSrcStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {<a name="line.184"></a>
-<span class="sourceLineNo">185</span>    stopping = true;<a name="line.185"></a>
-<span class="sourceLineNo">186</span>    pendingStopCmd = cmd;<a name="line.186"></a>
-<span class="sourceLineNo">187</span><a name="line.187"></a>
-<span class="sourceLineNo">188</span>    for (LbmCtSrcConn srcConn : srcConnSet) {<a name="line.188"></a>
-<span class="sourceLineNo">189</span>      // These disconnects are submitted to the command queue.<a name="line.189"></a>
-<span class="sourceLineNo">190</span>      srcConn.disconnect();<a name="line.190"></a>
-<span class="sourceLineNo">191</span>    }<a name="line.191"></a>
-<span class="sourceLineNo">192</span><a name="line.192"></a>
-<span class="sourceLineNo">193</span>    if ((numActiveConns == 0) &amp;&amp; (!umSourceStopSubmitted)) {<a name="line.193"></a>
-<span class="sourceLineNo">194</span>      // Since stopping is true, no new connections should become active.<a name="line.194"></a>
-<span class="sourceLineNo">195</span>      // There might be some connection-related commands queued.  Queue the UM source stop behind them.<a name="line.195"></a>
-<span class="sourceLineNo">196</span>      LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.196"></a>
-<span class="sourceLineNo">197</span>      nextCmd.setCtSrcUmSourceStop(this);<a name="line.197"></a>
-<span class="sourceLineNo">198</span>      ctrlr.submitNowait(nextCmd);<a name="line.198"></a>
-<span class="sourceLineNo">199</span>      umSourceStopSubmitted = true;<a name="line.199"></a>
-<span class="sourceLineNo">200</span>    }<a name="line.200"></a>
-<span class="sourceLineNo">201</span><a name="line.201"></a>
-<span class="sourceLineNo">202</span>    return false;<a name="line.202"></a>
-<span class="sourceLineNo">203</span>  }<a name="line.203"></a>
-<span class="sourceLineNo">204</span><a name="line.204"></a>
-<span class="sourceLineNo">205</span>  // This is called when there are no more "active" connections.<a name="line.205"></a>
-<span class="sourceLineNo">206</span>  // There can still be some connection-related commands queued.<a name="line.206"></a>
-<span class="sourceLineNo">207</span>  // THREAD: ctrlr<a name="line.207"></a>
-<span class="sourceLineNo">208</span>  boolean cmdCtSrcUmSourceStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {<a name="line.208"></a>
-<span class="sourceLineNo">209</span>    if (umSrc != null) {<a name="line.209"></a>
-<span class="sourceLineNo">210</span>      umSrc.close();<a name="line.210"></a>
-<span class="sourceLineNo">211</span>      umSrc = null;<a name="line.211"></a>
-<span class="sourceLineNo">212</span>    }<a name="line.212"></a>
-<span class="sourceLineNo">213</span><a name="line.213"></a>
-<span class="sourceLineNo">214</span>    // At this point, no new connections will be created.  But there might be some commands in the<a name="line.214"></a>
-<span class="sourceLineNo">215</span>    // queue waiting to be processed.  Submit the final stop to be behind those.<a name="line.215"></a>
-<span class="sourceLineNo">216</span>    if ((numActiveConns != 0) || (! srcConnSet.isEmpty())) {<a name="line.216"></a>
-<span class="sourceLineNo">217</span>      // This should never happen.  Log warning and continue.<a name="line.217"></a>
-<span class="sourceLineNo">218</span>      LBMPubLog.pubLog(LBM.LOG_WARNING, "Internal error: cmdCtSrcUmSourceStop: numActiveConns=" + numActiveConns + " (should be 0), srcConnSet.isEmpty=" + srcConnSet.isEmpty() + " (should be true)\n");<a name="line.218"></a>
-<span class="sourceLineNo">219</span>    } else {<a name="line.219"></a>
-<span class="sourceLineNo">220</span>      if (!finalStopSubmitted) {  // Don't submit another one if one is already pending.<a name="line.220"></a>
-<span class="sourceLineNo">221</span>        LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.221"></a>
-<span class="sourceLineNo">222</span>        nextCmd.setCtSrcFinalStop(this);<a name="line.222"></a>
-<span class="sourceLineNo">223</span>        ctrlr.submitNowait(nextCmd);  // This "calls" cmdSrcConnStop below.<a name="line.223"></a>
-<span class="sourceLineNo">224</span><a name="line.224"></a>
-<span class="sourceLineNo">225</span>        finalStopSubmitted = true;<a name="line.225"></a>
-<span class="sourceLineNo">226</span>      }<a name="line.226"></a>
-<span class="sourceLineNo">227</span>    }<a name="line.227"></a>
-<span class="sourceLineNo">228</span>    return true;<a name="line.228"></a>
-<span class="sourceLineNo">229</span>  }<a name="line.229"></a>
-<span class="sourceLineNo">230</span><a name="line.230"></a>
-<span class="sourceLineNo">231</span>  // There should be no more connections of any kind.<a name="line.231"></a>
-<span class="sourceLineNo">232</span>  // THREAD: ctrlr<a name="line.232"></a>
-<span class="sourceLineNo">233</span>  boolean cmdCtSrcFinalStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {<a name="line.233"></a>
-<span class="sourceLineNo">234</span>    synchronized (this) {<a name="line.234"></a>
-<span class="sourceLineNo">235</span>      // There should be no connections left at all.<a name="line.235"></a>
-<span class="sourceLineNo">236</span>      try {<a name="line.236"></a>
-<span class="sourceLineNo">237</span>        if (! srcConnSet.isEmpty()) {<a name="line.237"></a>
-<span class="sourceLineNo">238</span>          throw new LBMException("Internal error, cmdCtSrcFinalStop: srcConnSet not empty");<a name="line.238"></a>
-<span class="sourceLineNo">239</span>        }<a name="line.239"></a>
-<span class="sourceLineNo">240</span>      } catch (Exception e) {<a name="line.240"></a>
-<span class="sourceLineNo">241</span>        // Pass the exception back to the application.<a name="line.241"></a>
-<span class="sourceLineNo">242</span>        pendingStopCmd.setE(e);<a name="line.242"></a>
-<span class="sourceLineNo">243</span>      }<a name="line.243"></a>
-<span class="sourceLineNo">244</span><a name="line.244"></a>
-<span class="sourceLineNo">245</span>      ct.removeFromCtSrcSet(this);<a name="line.245"></a>
-<span class="sourceLineNo">246</span>      // This ct source is now fully removed from the LbmCt.<a name="line.246"></a>
-<span class="sourceLineNo">247</span><a name="line.247"></a>
-<span class="sourceLineNo">248</span>      // Wake up ctSrc stop().<a name="line.248"></a>
-<span class="sourceLineNo">249</span>      ctrlr.cmdComplete(pendingStopCmd);<a name="line.249"></a>
-<span class="sourceLineNo">250</span>    }<a name="line.250"></a>
-<span class="sourceLineNo">251</span>    return true;<a name="line.251"></a>
-<span class="sourceLineNo">252</span>  }<a name="line.252"></a>
-<span class="sourceLineNo">253</span><a name="line.253"></a>
-<span class="sourceLineNo">254</span>  // Release references to other objects.  This is in case the<a name="line.254"></a>
-<span class="sourceLineNo">255</span>  // application is holding a reference to the CT source.<a name="line.255"></a>
-<span class="sourceLineNo">256</span>  private void clear() {<a name="line.256"></a>
-<span class="sourceLineNo">257</span>    ct = null;<a name="line.257"></a>
-<span class="sourceLineNo">258</span>    ctrlr = null;<a name="line.258"></a>
-<span class="sourceLineNo">259</span>    ctx = null;<a name="line.259"></a>
-<span class="sourceLineNo">260</span>    umSrc = null;<a name="line.260"></a>
-<span class="sourceLineNo">261</span>    topicStr = null;<a name="line.261"></a>
-<span class="sourceLineNo">262</span>    connCreateCb = null;<a name="line.262"></a>
-<span class="sourceLineNo">263</span>    connDeleteCb = null;<a name="line.263"></a>
-<span class="sourceLineNo">264</span>    cbArg = null;<a name="line.264"></a>
-<span class="sourceLineNo">265</span>    srcConnSet = null;<a name="line.265"></a>
-<span class="sourceLineNo">266</span>    pendingStopCmd = null;<a name="line.266"></a>
-<span class="sourceLineNo">267</span>  }<a name="line.267"></a>
-<span class="sourceLineNo">268</span><a name="line.268"></a>
-<span class="sourceLineNo">269</span>  void addToSrcConnSet(LbmCtSrcConn srcConn) {<a name="line.269"></a>
-<span class="sourceLineNo">270</span>    srcConnSet.add(srcConn);<a name="line.270"></a>
-<span class="sourceLineNo">271</span>  }<a name="line.271"></a>
-<span class="sourceLineNo">272</span><a name="line.272"></a>
-<span class="sourceLineNo">273</span>  void removeFromSrcConnSet(LbmCtSrcConn srcConn) {<a name="line.273"></a>
-<span class="sourceLineNo">274</span>    srcConnSet.remove(srcConn);<a name="line.274"></a>
-<span class="sourceLineNo">275</span>    if (isStopping() &amp;&amp; srcConnSet.isEmpty()) {<a name="line.275"></a>
-<span class="sourceLineNo">276</span>      if (!umSourceStopSubmitted) {<a name="line.276"></a>
-<span class="sourceLineNo">277</span>        LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.277"></a>
-<span class="sourceLineNo">278</span>        nextCmd.setCtSrcUmSourceStop(this);<a name="line.278"></a>
-<span class="sourceLineNo">279</span>        ctrlr.submitNowait(nextCmd);<a name="line.279"></a>
-<span class="sourceLineNo">280</span><a name="line.280"></a>
-<span class="sourceLineNo">281</span>        umSourceStopSubmitted = true;<a name="line.281"></a>
-<span class="sourceLineNo">282</span>      }<a name="line.282"></a>
-<span class="sourceLineNo">283</span>      else if (!finalStopSubmitted) {<a name="line.283"></a>
-<span class="sourceLineNo">284</span>        // At this point, no new connections will be created.  But there might be some commands in the<a name="line.284"></a>
-<span class="sourceLineNo">285</span>        // queue waiting to be processed.  Submit the final stop to be behind those.<a name="line.285"></a>
-<span class="sourceLineNo">286</span>        LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.286"></a>
-<span class="sourceLineNo">287</span>        nextCmd.setCtSrcFinalStop(this);<a name="line.287"></a>
-<span class="sourceLineNo">288</span>        ctrlr.submitNowait(nextCmd);<a name="line.288"></a>
-<span class="sourceLineNo">289</span><a name="line.289"></a>
-<span class="sourceLineNo">290</span>        finalStopSubmitted = true;<a name="line.290"></a>
-<span class="sourceLineNo">291</span>      }<a name="line.291"></a>
-<span class="sourceLineNo">292</span>    }<a name="line.292"></a>
-<span class="sourceLineNo">293</span>  }<a name="line.293"></a>
-<span class="sourceLineNo">294</span><a name="line.294"></a>
-<span class="sourceLineNo">295</span>  void incrementActiveConns() {<a name="line.295"></a>
-<span class="sourceLineNo">296</span>    numActiveConns++;<a name="line.296"></a>
-<span class="sourceLineNo">297</span>  }<a name="line.297"></a>
-<span class="sourceLineNo">298</span><a name="line.298"></a>
-<span class="sourceLineNo">299</span>  void decrementActiveConns() {<a name="line.299"></a>
-<span class="sourceLineNo">300</span>    numActiveConns--;<a name="line.300"></a>
-<span class="sourceLineNo">301</span>    if (isStopping()) {<a name="line.301"></a>
-<span class="sourceLineNo">302</span>      if ((numActiveConns == 0) &amp;&amp; (!umSourceStopSubmitted)) {<a name="line.302"></a>
-<span class="sourceLineNo">303</span>        // There might be some connection-related commands queued.  Queue the UM receiver stop behind.<a name="line.303"></a>
-<span class="sourceLineNo">304</span>        LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.304"></a>
-<span class="sourceLineNo">305</span>        nextCmd.setCtSrcUmSourceStop(this);<a name="line.305"></a>
-<span class="sourceLineNo">306</span>        ctrlr.submitNowait(nextCmd);<a name="line.306"></a>
-<span class="sourceLineNo">307</span>        umSourceStopSubmitted = true;<a name="line.307"></a>
-<span class="sourceLineNo">308</span>      }<a name="line.308"></a>
-<span class="sourceLineNo">309</span>    }<a name="line.309"></a>
-<span class="sourceLineNo">310</span>  }<a name="line.310"></a>
-<span class="sourceLineNo">311</span>}<a name="line.311"></a>
+<span class="sourceLineNo">144</span>    ct.addToCtSrcSet(this);<a name="line.144"></a>
+<span class="sourceLineNo">145</span><a name="line.145"></a>
+<span class="sourceLineNo">146</span>    LBMTopic topicObj = ctx.allocTopic(topicStr, cmd.getSrcAttr());<a name="line.146"></a>
+<span class="sourceLineNo">147</span>    if (srcCb == null) {<a name="line.147"></a>
+<span class="sourceLineNo">148</span>      umSrc = new LBMSource(ctx, topicObj);<a name="line.148"></a>
+<span class="sourceLineNo">149</span>    } else {<a name="line.149"></a>
+<span class="sourceLineNo">150</span>      umSrc = new LBMSource(ctx, topicObj, srcCb, cbArg);<a name="line.150"></a>
+<span class="sourceLineNo">151</span>    }<a name="line.151"></a>
+<span class="sourceLineNo">152</span><a name="line.152"></a>
+<span class="sourceLineNo">153</span>    ct.addToSrcMap(this);<a name="line.153"></a>
+<span class="sourceLineNo">154</span>    return true;<a name="line.154"></a>
+<span class="sourceLineNo">155</span>  }<a name="line.155"></a>
+<span class="sourceLineNo">156</span><a name="line.156"></a>
+<span class="sourceLineNo">157</span>  /**<a name="line.157"></a>
+<span class="sourceLineNo">158</span>   * Stops this CT source object.<a name="line.158"></a>
+<span class="sourceLineNo">159</span>   * Calling this method performs a graceful disconnection of any active connections, blocking the caller until<a name="line.159"></a>
+<span class="sourceLineNo">160</span>   * the disconnections are completed.<a name="line.160"></a>
+<span class="sourceLineNo">161</span>   * &lt;p&gt;<a name="line.161"></a>
+<span class="sourceLineNo">162</span>   * @throws Exception  LBMException thrown.<a name="line.162"></a>
+<span class="sourceLineNo">163</span>   */<a name="line.163"></a>
+<span class="sourceLineNo">164</span>  @SuppressWarnings("WeakerAccess")  // public API.<a name="line.164"></a>
+<span class="sourceLineNo">165</span>  public void stop() throws Exception {<a name="line.165"></a>
+<span class="sourceLineNo">166</span>    LbmCtCtrlr ctrlr = this.ctrlr;  // get a local copy since the command will delete the ctSrc.<a name="line.166"></a>
+<span class="sourceLineNo">167</span><a name="line.167"></a>
+<span class="sourceLineNo">168</span>    LbmCtCtrlrCmd nextCmd = ctrlr.cmdGet();<a name="line.168"></a>
+<span class="sourceLineNo">169</span>    nextCmd.setCtSrcStop(this);<a name="line.169"></a>
+<span class="sourceLineNo">170</span>    ctrlr.submitWait(nextCmd);  // This "calls" cmdCtSrcStop below.<a name="line.170"></a>
+<span class="sourceLineNo">171</span><a name="line.171"></a>
+<span class="sourceLineNo">172</span>    Exception e = nextCmd.getE();  // Save exception to be re-thrown after cmd free.<a name="line.172"></a>
+<span class="sourceLineNo">173</span>    ctrlr.cmdFree(nextCmd);  // Return command object to free pool.<a name="line.173"></a>
+<span class="sourceLineNo">174</span>    if (e != null) {<a name="line.174"></a>
+<span class="sourceLineNo">175</span>      throw(new Exception(e));<a name="line.175"></a>
+<span class="sourceLineNo">176</span>    }<a name="line.176"></a>
+<span class="sourceLineNo">177</span><a name="line.177"></a>
+<span class="sourceLineNo">178</span>    // No longer need to "find" this conn as UIM handshakes are received.<a name="line.178"></a>
+<span class="sourceLineNo">179</span>    ct.removeFromSrcMap(this);<a name="line.179"></a>
+<span class="sourceLineNo">180</span><a name="line.180"></a>
+<span class="sourceLineNo">181</span>    // Release any references to other objects.<a name="line.181"></a>
+<span class="sourceLineNo">182</span>    clear();<a name="line.182"></a>
+<span class="sourceLineNo">183</span>  }<a name="line.183"></a>
+<span class="sourceLineNo">184</span><a name="line.184"></a>
+<span class="sourceLineNo">185</span>  // THREAD: ctrlr<a name="line.185"></a>
+<span class="sourceLineNo">186</span>  boolean cmdCtSrcStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {<a name="line.186"></a>
+<span class="sourceLineNo">187</span>    stopping = true;<a name="line.187"></a>
+<span class="sourceLineNo">188</span>    pendingStopCmd = cmd;<a name="line.188"></a>
+<span class="sourceLineNo">189</span><a name="line.189"></a>
+<span class="sourceLineNo">190</span>    for (LbmCtSrcConn srcConn : srcConnSet) {<a name="line.190"></a>
+<span class="sourceLineNo">191</span>      // These disconnects are submitted to the command queue.<a name="line.191"></a>
+<span class="sourceLineNo">192</span>      srcConn.disconnect();<a name="line.192"></a>
+<span class="sourceLineNo">193</span>    }<a name="line.193"></a>
+<span class="sourceLineNo">194</span><a name="line.194"></a>
+<span class="sourceLineNo">195</span>    if ((numActiveConns == 0) &amp;&amp; (!umSourceStopSubmitted)) {<a name="line.195"></a>
+<span class="sourceLineNo">196</span>      // Since stopping is true, no new connections should become active.<a name="line.196"></a>
+<span class="sourceLineNo">197</span>      // There might be some connection-related commands queued.  Queue the UM source stop behind them.<a name="line.197"></a>
+<span class="sourceLineNo">198</span>      LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.198"></a>
+<span class="sourceLineNo">199</span>      nextCmd.setCtSrcUmSourceStop(this);<a name="line.199"></a>
+<span class="sourceLineNo">200</span>      ctrlr.submitNowait(nextCmd);<a name="line.200"></a>
+<span class="sourceLineNo">201</span>      umSourceStopSubmitted = true;<a name="line.201"></a>
+<span class="sourceLineNo">202</span>    }<a name="line.202"></a>
+<span class="sourceLineNo">203</span><a name="line.203"></a>
+<span class="sourceLineNo">204</span>    return false;<a name="line.204"></a>
+<span class="sourceLineNo">205</span>  }<a name="line.205"></a>
+<span class="sourceLineNo">206</span><a name="line.206"></a>
+<span class="sourceLineNo">207</span>  // This is called when there are no more "active" connections.<a name="line.207"></a>
+<span class="sourceLineNo">208</span>  // There can still be some connection-related commands queued.<a name="line.208"></a>
+<span class="sourceLineNo">209</span>  // THREAD: ctrlr<a name="line.209"></a>
+<span class="sourceLineNo">210</span>  boolean cmdCtSrcUmSourceStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) throws Exception {<a name="line.210"></a>
+<span class="sourceLineNo">211</span>    if (umSrc != null) {<a name="line.211"></a>
+<span class="sourceLineNo">212</span>      umSrc.close();<a name="line.212"></a>
+<span class="sourceLineNo">213</span>      umSrc = null;<a name="line.213"></a>
+<span class="sourceLineNo">214</span>    }<a name="line.214"></a>
+<span class="sourceLineNo">215</span><a name="line.215"></a>
+<span class="sourceLineNo">216</span>    // At this point, no new connections will be created.  But there might be some commands in the<a name="line.216"></a>
+<span class="sourceLineNo">217</span>    // queue waiting to be processed.  Submit the final stop to be behind those.<a name="line.217"></a>
+<span class="sourceLineNo">218</span>    if ((numActiveConns != 0) || (! srcConnSet.isEmpty())) {<a name="line.218"></a>
+<span class="sourceLineNo">219</span>      // This should never happen.  Log warning and continue.<a name="line.219"></a>
+<span class="sourceLineNo">220</span>      LBMPubLog.pubLog(LBM.LOG_WARNING, "Internal error: cmdCtSrcUmSourceStop: numActiveConns=" + numActiveConns + " (should be 0), srcConnSet.isEmpty=" + srcConnSet.isEmpty() + " (should be true)\n");<a name="line.220"></a>
+<span class="sourceLineNo">221</span>    } else {<a name="line.221"></a>
+<span class="sourceLineNo">222</span>      if (!finalStopSubmitted) {  // Don't submit another one if one is already pending.<a name="line.222"></a>
+<span class="sourceLineNo">223</span>        LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.223"></a>
+<span class="sourceLineNo">224</span>        nextCmd.setCtSrcFinalStop(this);<a name="line.224"></a>
+<span class="sourceLineNo">225</span>        ctrlr.submitNowait(nextCmd);  // This "calls" cmdSrcConnStop below.<a name="line.225"></a>
+<span class="sourceLineNo">226</span><a name="line.226"></a>
+<span class="sourceLineNo">227</span>        finalStopSubmitted = true;<a name="line.227"></a>
+<span class="sourceLineNo">228</span>      }<a name="line.228"></a>
+<span class="sourceLineNo">229</span>    }<a name="line.229"></a>
+<span class="sourceLineNo">230</span>    return true;<a name="line.230"></a>
+<span class="sourceLineNo">231</span>  }<a name="line.231"></a>
+<span class="sourceLineNo">232</span><a name="line.232"></a>
+<span class="sourceLineNo">233</span>  // There should be no more connections of any kind.<a name="line.233"></a>
+<span class="sourceLineNo">234</span>  // THREAD: ctrlr<a name="line.234"></a>
+<span class="sourceLineNo">235</span>  boolean cmdCtSrcFinalStop(@SuppressWarnings("unused") LbmCtCtrlrCmd cmd) {<a name="line.235"></a>
+<span class="sourceLineNo">236</span>    synchronized (this) {<a name="line.236"></a>
+<span class="sourceLineNo">237</span>      // There should be no connections left at all.<a name="line.237"></a>
+<span class="sourceLineNo">238</span>      try {<a name="line.238"></a>
+<span class="sourceLineNo">239</span>        if (! srcConnSet.isEmpty()) {<a name="line.239"></a>
+<span class="sourceLineNo">240</span>          throw new LBMException("Internal error, cmdCtSrcFinalStop: srcConnSet not empty");<a name="line.240"></a>
+<span class="sourceLineNo">241</span>        }<a name="line.241"></a>
+<span class="sourceLineNo">242</span>      } catch (Exception e) {<a name="line.242"></a>
+<span class="sourceLineNo">243</span>        // Pass the exception back to the application.<a name="line.243"></a>
+<span class="sourceLineNo">244</span>        pendingStopCmd.setE(e);<a name="line.244"></a>
+<span class="sourceLineNo">245</span>      }<a name="line.245"></a>
+<span class="sourceLineNo">246</span><a name="line.246"></a>
+<span class="sourceLineNo">247</span>      ct.removeFromCtSrcSet(this);<a name="line.247"></a>
+<span class="sourceLineNo">248</span>      // This ct source is now fully removed from the LbmCt.<a name="line.248"></a>
+<span class="sourceLineNo">249</span><a name="line.249"></a>
+<span class="sourceLineNo">250</span>      // Wake up ctSrc stop().<a name="line.250"></a>
+<span class="sourceLineNo">251</span>      ctrlr.cmdComplete(pendingStopCmd);<a name="line.251"></a>
+<span class="sourceLineNo">252</span>    }<a name="line.252"></a>
+<span class="sourceLineNo">253</span>    return true;<a name="line.253"></a>
+<span class="sourceLineNo">254</span>  }<a name="line.254"></a>
+<span class="sourceLineNo">255</span><a name="line.255"></a>
+<span class="sourceLineNo">256</span>  // Release references to other objects.  This is in case the<a name="line.256"></a>
+<span class="sourceLineNo">257</span>  // application is holding a reference to the CT source.<a name="line.257"></a>
+<span class="sourceLineNo">258</span>  private void clear() {<a name="line.258"></a>
+<span class="sourceLineNo">259</span>    ct = null;<a name="line.259"></a>
+<span class="sourceLineNo">260</span>    ctrlr = null;<a name="line.260"></a>
+<span class="sourceLineNo">261</span>    ctx = null;<a name="line.261"></a>
+<span class="sourceLineNo">262</span>    umSrc = null;<a name="line.262"></a>
+<span class="sourceLineNo">263</span>    topicStr = null;<a name="line.263"></a>
+<span class="sourceLineNo">264</span>    connCreateCb = null;<a name="line.264"></a>
+<span class="sourceLineNo">265</span>    connDeleteCb = null;<a name="line.265"></a>
+<span class="sourceLineNo">266</span>    cbArg = null;<a name="line.266"></a>
+<span class="sourceLineNo">267</span>    srcConnSet = null;<a name="line.267"></a>
+<span class="sourceLineNo">268</span>    pendingStopCmd = null;<a name="line.268"></a>
+<span class="sourceLineNo">269</span>  }<a name="line.269"></a>
+<span class="sourceLineNo">270</span><a name="line.270"></a>
+<span class="sourceLineNo">271</span>  void addToSrcConnSet(LbmCtSrcConn srcConn) {<a name="line.271"></a>
+<span class="sourceLineNo">272</span>    srcConnSet.add(srcConn);<a name="line.272"></a>
+<span class="sourceLineNo">273</span>  }<a name="line.273"></a>
+<span class="sourceLineNo">274</span><a name="line.274"></a>
+<span class="sourceLineNo">275</span>  void removeFromSrcConnSet(LbmCtSrcConn srcConn) {<a name="line.275"></a>
+<span class="sourceLineNo">276</span>    srcConnSet.remove(srcConn);<a name="line.276"></a>
+<span class="sourceLineNo">277</span>    if (isStopping() &amp;&amp; srcConnSet.isEmpty()) {<a name="line.277"></a>
+<span class="sourceLineNo">278</span>      if (!umSourceStopSubmitted) {<a name="line.278"></a>
+<span class="sourceLineNo">279</span>        LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.279"></a>
+<span class="sourceLineNo">280</span>        nextCmd.setCtSrcUmSourceStop(this);<a name="line.280"></a>
+<span class="sourceLineNo">281</span>        ctrlr.submitNowait(nextCmd);<a name="line.281"></a>
+<span class="sourceLineNo">282</span><a name="line.282"></a>
+<span class="sourceLineNo">283</span>        umSourceStopSubmitted = true;<a name="line.283"></a>
+<span class="sourceLineNo">284</span>      }<a name="line.284"></a>
+<span class="sourceLineNo">285</span>      else if (!finalStopSubmitted) {<a name="line.285"></a>
+<span class="sourceLineNo">286</span>        // At this point, no new connections will be created.  But there might be some commands in the<a name="line.286"></a>
+<span class="sourceLineNo">287</span>        // queue waiting to be processed.  Submit the final stop to be behind those.<a name="line.287"></a>
+<span class="sourceLineNo">288</span>        LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.288"></a>
+<span class="sourceLineNo">289</span>        nextCmd.setCtSrcFinalStop(this);<a name="line.289"></a>
+<span class="sourceLineNo">290</span>        ctrlr.submitNowait(nextCmd);<a name="line.290"></a>
+<span class="sourceLineNo">291</span><a name="line.291"></a>
+<span class="sourceLineNo">292</span>        finalStopSubmitted = true;<a name="line.292"></a>
+<span class="sourceLineNo">293</span>      }<a name="line.293"></a>
+<span class="sourceLineNo">294</span>    }<a name="line.294"></a>
+<span class="sourceLineNo">295</span>  }<a name="line.295"></a>
+<span class="sourceLineNo">296</span><a name="line.296"></a>
+<span class="sourceLineNo">297</span>  void incrementActiveConns() {<a name="line.297"></a>
+<span class="sourceLineNo">298</span>    numActiveConns++;<a name="line.298"></a>
+<span class="sourceLineNo">299</span>  }<a name="line.299"></a>
+<span class="sourceLineNo">300</span><a name="line.300"></a>
+<span class="sourceLineNo">301</span>  void decrementActiveConns() {<a name="line.301"></a>
+<span class="sourceLineNo">302</span>    numActiveConns--;<a name="line.302"></a>
+<span class="sourceLineNo">303</span>    if (isStopping()) {<a name="line.303"></a>
+<span class="sourceLineNo">304</span>      if ((numActiveConns == 0) &amp;&amp; (!umSourceStopSubmitted)) {<a name="line.304"></a>
+<span class="sourceLineNo">305</span>        // There might be some connection-related commands queued.  Queue the UM receiver stop behind.<a name="line.305"></a>
+<span class="sourceLineNo">306</span>        LbmCtCtrlrCmd nextCmd = ct.getCtrlr().cmdGet();<a name="line.306"></a>
+<span class="sourceLineNo">307</span>        nextCmd.setCtSrcUmSourceStop(this);<a name="line.307"></a>
+<span class="sourceLineNo">308</span>        ctrlr.submitNowait(nextCmd);<a name="line.308"></a>
+<span class="sourceLineNo">309</span>        umSourceStopSubmitted = true;<a name="line.309"></a>
+<span class="sourceLineNo">310</span>      }<a name="line.310"></a>
+<span class="sourceLineNo">311</span>    }<a name="line.311"></a>
+<span class="sourceLineNo">312</span>  }<a name="line.312"></a>
+<span class="sourceLineNo">313</span>}<a name="line.313"></a>
 
 
 

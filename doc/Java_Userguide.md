@@ -145,7 +145,20 @@ order.
 
 ## Debugging
 
-The LbmCtCtrlr object contains a blocking queue named "debugQ" which is used
-as a simple unbounded event recorder.
-Its operation is controlled by setting the
+The [LbmCtConfig](https://ultramessaging.github.io/lbmct/javadoc/com/latencybusters/lbmct/LbmCtConfig.html)
+object has an option for debugging which is set by
+[setTestBits](https://ultramessaging.github.io/lbmct/javadoc/com/latencybusters/lbmct/LbmCtConfig.html#setTestBits-int-).
+This is a bitmap of values which enable various behavior changes used for testing and debugging.
+A normal application should have no need of using this feature.
+It is intended for a maintainer of CT to diagnose problems with the package and for writing automated tests.
 
+In particular, the bitmap value
+[TEST_BITS_DEBUG](https://ultramessaging.github.io/lbmct/javadoc/com/latencybusters/lbmct/LbmCtConfig.html#TEST_BITS_DEBUG)
+enables a simple internal unbounded event recorder which can show the sequence of events that lead up to
+a misbehavior.
+The LbmCtCtrlr object contains a blocking queue named `debugQ` into which debugging strings are enqueued
+using the `LbmCt::dbg` method.
+Since it is an unbounded queue, it should not be enabled for long periods of time.
+
+To examine the queue, I've just been setting a breakpoint and using the debugger.
+It would be straight-forward to print it as well.

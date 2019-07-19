@@ -261,12 +261,7 @@ class LbmCtSrcConn {
       this.srcConn = srcConn;
     }
 
-    /**
-     * Callback when the currently-scheduled timer expires.
-     * @param tmr  the timer which is expiring.
-     * @param ctx  the UM context associated with the timer.
-     * @param cbArg  the general callback argument passed to {@link Tmr#schedule}.
-     */
+    // Not part of the public API.  Declared public to conform to interface.
     // THREAD: ctx
     public void onExpire(Tmr tmr, LBMContext ctx, Object cbArg) {
       try {

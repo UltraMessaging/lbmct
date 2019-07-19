@@ -35,7 +35,9 @@ package com.latencybusters.lbmct;
 public class LbmCtConfig {
   /**
    * Bit set in {@code testBits} to enable debug event logging.
-   * This bit controls the operation of {@link LbmCt#dbg}.
+   * This bit controls the operation of {@code dbg} and {@code debugQ}.
+   * See <a href="https://ultramessaging.github.io/lbmct/doc/Java_Userguide.html#debugging">Debugging</a>
+   * for information on using this debugging feature.
    * See {@link #setTestBits}.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
@@ -43,42 +45,42 @@ public class LbmCtConfig {
   /**
    * Bit set in {@code testBits} to disable sending of CREQ handshake.
    * This is to test retry logic.
-   * See {@link LbmCt#dbg}.
+   * See {@link #setTestBits}.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int TEST_BITS_NO_CREQ = 0x00000002;
   /**
    * Bit set in {@code testBits} to disable sending of CRSP handshake.
    * This is to test retry logic.
-   * See {@link LbmCt#dbg}.
+   * See {@link #setTestBits}.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int TEST_BITS_NO_CRSP = 0x00000004;
   /**
    * Bit set in {@code testBits} to disable sending of COK handshake.
    * This is to test retry logic.
-   * See {@link LbmCt#dbg}.
+   * See {@link #setTestBits}.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int TEST_BITS_NO_COK  = 0x00000008;
   /**
    * Bit set in {@code testBits} to disable sending of DREQ handshake.
    * This is to test retry logic.
-   * See {@link LbmCt#dbg}.
+   * See {@link #setTestBits}.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int TEST_BITS_NO_DREQ = 0x00000010;
   /**
    * Bit set in {@code testBits} to disable sending of DRSP handshake.
    * This is to test retry logic.
-   * See {@link LbmCt#dbg}.
+   * See {@link #setTestBits}.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int TEST_BITS_NO_DRSP = 0x00000020;
   /**
    * Bit set in {@code testBits} to disable sending of DOK handshake.
    * This is to test retry logic.
-   * See {@link LbmCt#dbg}.
+   * See {@link #setTestBits}.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int TEST_BITS_NO_DOK  = 0x00000040;
@@ -142,34 +144,118 @@ public class LbmCtConfig {
   }
 
   /**
-   * Override the default value for the configuration object's testBits.
+   * Override the default value for the configuration object's test bits.
    * See {@link #CT_CONFIG_DEFAULT_TEST_BITS}.
    * <p>
-   * @param testBits  Integer bit map of
+   * @param testBits  Integer bit map of debug behaviors to enable.
+   *     One or more of the following ORed together:
+   *     {@link #TEST_BITS_DEBUG}, {@link #TEST_BITS_NO_CREQ}, {@link #TEST_BITS_NO_CRSP}, {@link #TEST_BITS_NO_COK},
+   *     {@link #TEST_BITS_NO_DREQ}, {@link #TEST_BITS_NO_DRSP}, {@link #TEST_BITS_NO_DOK}.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
   public void setTestBits(int testBits) { this.testBits = testBits; }
+
+  /**
+   * Override the default value for the configuration object's Topic Resolution Domain ID.
+   * If not set (defaults to -1), the CT layer does not assume a domain ID, and will rely on the
+   * <a href="https://ultramessaging.github.io/currdoc/doc/Design/umobjects.html#sendingtosources">sending to sources</a>
+   * feature.
+   * See <a href="https://ultramessaging.github.io/lbmct/doc/Domain_ID.html">Domain ID</a> for more information.
+   * <p>
+   * @param domainId  Topic Resolution Domain ID.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public void setDomainId(int domainId) { this.domainId = domainId; }
+
+  /**
+   * Override the default value for the configuration object's delay before a receiver sends its the initial connection
+   * request handshake.
+   * <p>
+   * @param delayCreq  Time in milliseconds to delay.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public void setDelayCreq(int delayCreq) { this.delayCreq = delayCreq; }
+
+  /**
+   * Override the default value for the configuration object's time between handshake attempts.
+   * When a connected source and receiver are connecting or disconnecting, they exchange handshake messages to
+   * synchronize state.
+   * If a CT source or receiver sends a handshake and expects a response but does not get one within
+   * {@code retryIvl} milliseconds, the operation will be retried.
+   * See also {@link #setMaxTries}.
+   * <p>
+   * @param retryIvl  Time in milliseconds to wait.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public void setRetryIvl(int retryIvl) { this.retryIvl = retryIvl; }
+
+  /**
+   * Override the default value for the configuration object's number of tries.
+   * When a connected source and receiver are connecting or disconnecting, they exchange handshake messages to
+   * synchronize state.
+   * If a CT source or receiver sends a handshake and expects a response but does not get one within
+   * {@code retryIvl} milliseconds, the operation will be retried.
+   * After {@code maxTries} attempts, CT will give up, log an error, and stop retrying.
+   * <p>
+   * @param maxTries  Number of times to attempt handshakes.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public void setMaxTries(int maxTries) { this.maxTries = maxTries; }
+
+  /**
+   * Override the default value for the configuration object's received message pre-connected delivery behavior.
+   * Normally, a Connected Topics Receiver will not deliver messages received prior to a connection being established.
+   * Setting {@code preDelivery} to 1 enables the CT receiver to deliver messages received outside of the connected
+   * state.
+   * This can enable a CT receiver to get messages from a non-CT source,
+   * although this use case is not recommended. See <a href="https://ultramessaging.github.io/lbmct/#interoperability"></a>.
+   *
+   * @param preDelivery  1=deliver messages outside of connection; 0=do not deliver.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public void setPreDelivery(int preDelivery) { this.preDelivery = preDelivery; }
 
+  /**
+   * Gets the current value for the configuration object's test bits.
+   * This is important for cases where the user wants to set or clear an individual bit, leaving the rest of the bits
+   * undisturbed.
+   * @return  Current value for test bits.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public int getTestBits() { return testBits; }
+
+  /**
+   * Gets domain ID.
+   * @return  Current domain ID.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public int getDomainId() { return domainId; }
+
+  /**
+   * Gets delay before a receiver sends its the initial connection request handshake.
+   * @return Time in milliseconds to delay.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public int getDelayCreq() { return delayCreq; }
+
+  /**
+   * Gets time between handshake attempts.
+   * @return  Time in milliseconds between attempts.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public int getRetryIvl() { return retryIvl; }
+
+  /**
+   * Gets maximum number of handshake attempts.
+   * @return  Maximum number of attempts.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public int getMaxTries() { return maxTries; }
+
+  /**
+   * Gets message delivery with non-connected sources.
+   * @return  1=deliver messages outside of connection; 0=do not deliver.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public int getPreDelivery() { return preDelivery; }
 }

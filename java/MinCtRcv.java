@@ -74,11 +74,12 @@ class MinCtRcv {
     @Override
     public int onReceive(Object cbArg, LBMMessage msg) {
       LbmCtRcvConn rcvConn = (LbmCtRcvConn) msg.sourceClientObject();  // CT uses the per-source client obj.
-      Object perConnStateObj = rcvConn.getRcvConnCbArg();
+      String perConnectionStateObj = (String)rcvConn.getRcvConnCbArg();
 
       System.out.println("onRecieve: type=" + msg.type() +
           ", sequenceNumber=" + msg.sequenceNumber() +
-          ", isHandshakeMessage=" + rcvConn.isHandshakeMessage());
+          ", isHandshakeMessage=" + rcvConn.isHandshakeMessage() +
+          ", perConnectionStateObj=" + perConnectionStateObj);
       return 0;
     }
   }
@@ -88,15 +89,20 @@ class MinCtRcv {
   class MyRcvConnCreateCbClass implements LbmCtRcvConnCreateCallback {
     @Override
     public Object onRcvConnCreate(LbmCtRcv ctRcv, LbmCtPeerInfo peerInfo, Object cbArg) {
-      // Put your connect code here.
+      // Put your "new connection" code here.
       try {
+        // Print the metadata of the source.
         System.out.println("onRcvConnCreate: src metadata=" +
             new String(peerInfo.getSrcMetadata().array(), StandardCharsets.ISO_8859_1));
+        // Print the starting sequence number received (the "CRSP" handshake).
+        System.out.println("onRcvConnCreate: rcv starting sequence num=" +
+            peerInfo.getRcvStartSequenceNumber());
       } catch (Exception e) { System.out.println("Exception: " + e.toString()); }
 
       // It is typical to return an application-specific, per-connection state object here.
       // It can be retrieved in the message receiver and is passed to the connection delete callback.
-      return null;
+      String perConnectionStateObj = "connection state";
+      return perConnectionStateObj;
     }
   }
 
@@ -107,8 +113,9 @@ class MinCtRcv {
     public void onRcvConnDelete(LbmCtRcv ctRcv, LbmCtPeerInfo peerInfo, Object cbArg, Object connCbArg) {
       // Put your disconnect code here.  Note that connCbArg is the object returned by onRcvConnCreate.
       try {
-        System.out.println("onRcvConnDelete: src metadata=" +
-            new String(peerInfo.getSrcMetadata().array(), StandardCharsets.ISO_8859_1));
+        // Print the ending sequence number received (the "DRSP" handshake).
+        System.out.println("onRcvConnDelete: rcv ending sequence num=" +
+            peerInfo.getRcvEndSequenceNumber());
       } catch (Exception e) { System.out.println("Exception: " + e.toString()); }
     }
   }

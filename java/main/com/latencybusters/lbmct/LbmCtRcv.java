@@ -24,6 +24,11 @@ package com.latencybusters.lbmct;
 import java.util.*;
 import com.latencybusters.lbm.*;
 
+/**
+ * A connected receiver.
+ * Maintains an underlying UM receiver.
+ * When an {@code LbmCtRcv} is created, its full initialization is deferred until its {@link #start} method is called.
+ */
 @SuppressWarnings("WeakerAccess")  // public API.
 public class LbmCtRcv {
   private Object lock = new Object();
@@ -44,6 +49,18 @@ public class LbmCtRcv {
   private boolean umReceiverStopSubmitted = false;
   private boolean finalStopSubmitted = false;
 
+  /**
+   * Creates a Connected Topic Receiver object.
+   * Creation of a CT Receiver object creates an underlying UM Receiver.
+   * Unlike a UM receiver, creation of a CT Receiver object is not a two step process.
+   * (A UM receiver requires first looking up a UM topic object, and then creating the receiver.
+   * A CT receiver combines the two steps in its {@link #start} method.)
+   * <p>
+   * This constructor only creates the object.
+   * Its full initialization is deferred until its {@code start} method is called.
+   */
+  public LbmCtRcv() { }
+
   // Getters.
   Object getLock() { return lock; }
   LbmCt getCt() { return ct; }
@@ -54,7 +71,40 @@ public class LbmCtRcv {
   Object getCbArg() { return cbArg; }
   boolean isStopping() { return stopping; }
 
-  // Public API for actual creation of UM receiver.  Just hand off to ctrlr thread.
+  /**
+   * Initilaizes a CT Receiver object.
+   * This is typically called immediately after the object is created ({@link #LbmCtRcv} constructor).
+   * The {@code start} method can return before any connections are made.
+   * <p>
+   * When the application is finished using this CT Receiver, it should be stopped ({@link #stop} API).
+   * <p>
+   * @param inCt  CT object to associate with this CT Source.
+   * @param topicStr  Topic string.
+   *     This is the same as the {@code symbol} parameter when looking up a UM receiver topic object with
+   *     <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMTopic.html#aad9c1f2065be4fd8e357f55063268b22">LBMTopic</a>.
+   * @param rcvAttr  Attributes object used to configure the underlying UM receiver.
+   *     This is the same as the {@code lbmrattr} parameter when looking up a UM receiver topic object with
+   *     <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMTopic.html#aad9c1f2065be4fd8e357f55063268b22">LBMTopic</a>.
+   * @param rcvCb  An object implementing the <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/interfacecom_1_1latencybusters_1_1lbm_1_1LBMReceiverCallback.html">LBMReceiverCallback</a>
+   *     interface.
+   *     This is the same as the {@code cb} parameter when creating a UM receiver with
+   *     <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMReceiver.html#ac913d4f6f0b710711c56e6d1c43596ba">LBMReceiver</a>.
+   *     It is used to deliver messages and other receiver-related events to the application.
+   *     Note that the {@code LBM_BOS} and {@code LBM_EOS} events are filtered out and are not delivered to the
+   *     application.
+   *     The CT connection create and delete callbacks should be used instead.
+   * @param connCreateCb  Callback object invoked when a CT source connects to this CT receiver.
+   *     Technically this parameter is optional (null should be passed if not needed), but its use is central to the
+   *     Connected Topics paradigm.
+   * @param connDeleteCb  Callback object invoked when a CT source disconnects from this CT receiver.
+   *     Technically this parameter is optional (null should be passed if not needed), but its use is central to the
+   *     Connected Topics paradigm.
+   * @param cbArg  Application-specific object to be associated with the connected receiver, which is passed to the
+   *     three callbacks ({@code rcvCb}, {@code connCreateCb}, and {@code connDeleteCb}).
+   *     Note that the CT Receiver maintains a reference to the cbArg object until the CT Receiver is stopped.
+   *     This parameter is optional (null should be passed if not needed).
+   * @throws Exception  LBMException thrown.
+   */
   public void start(LbmCt inCt, String topicStr, LBMReceiverAttributes rcvAttr, LBMReceiverCallback rcvCb,
                     LbmCtRcvConnCreateCallback connCreateCb, LbmCtRcvConnDeleteCallback connDeleteCb, Object cbArg)
       throws Exception
@@ -110,7 +160,13 @@ public class LbmCtRcv {
     return true;
   }
 
-  // Public API for deleting a CT receiver.
+  /**
+   * Stops this CT receiver object.
+   * Calling this method performs a graceful disconnection of any active connections, blocking the caller until
+   * the disconnections are completed.
+   * <p>
+   * @throws Exception  LBMException thrown.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public void stop() throws Exception {
     LbmCtCtrlr ctrlr = this.ctrlr;  // get a local copy since the command will delete the ctSrc.
@@ -284,7 +340,7 @@ public class LbmCtRcv {
       this.ctrlr = ctrlr;
     }
 
-    // Not part of public API.
+    // Not part of public API.  Declared public to conform to interface.
     // THREAD: ctx
     public Object onNewSource(String sourceStr, Object cbObj) {
       LbmCtRcvConn rcvConn = new LbmCtRcvConn(ctRcv);
@@ -295,11 +351,11 @@ public class LbmCtRcv {
       } catch (Exception e) {
         LBMPubLog.pubLog(LBM.LOG_WARNING, "LbmCtRcv:OnNewSource(" + sourceStr + "): " + LbmCt.exDetails(e) + "\n");
       }
-      // Return the rcvConn object as the per-source clientd.
+      // Return the rcvConn object as the per-source callback argument.
       return rcvConn;
     }
 
-    // Not part of public API.
+    // Not part of public API.  Declared public to conform to interface.
     // THREAD: ctx
     public int onSourceDelete(String source, Object cbObj, Object sourceCbObj) {
       LbmCtRcvConn rcvConn = (LbmCtRcvConn)sourceCbObj;
@@ -323,7 +379,7 @@ public class LbmCtRcv {
       this.ctrlr = ctrlr;
     }
 
-    // Not part of public API.
+    // Not part of public API.  Declared public to conform to interface.
     // THREAD: ctx
     public int onReceive(Object cbArgs, LBMMessage umMsg) {
       // Connected Topics receivers don't use BOS/EOS for anything.

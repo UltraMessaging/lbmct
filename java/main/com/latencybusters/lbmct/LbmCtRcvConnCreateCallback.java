@@ -21,6 +21,20 @@ package com.latencybusters.lbmct;
  - OF THE LIKELIHOOD OF SUCH DAMAGES.
  */
 
+/**
+ * Callback interface to deliver the "connection created" event to a receiving application.
+ * The application supplies an implementation of this interface to {@link LbmCtRcv#start}.
+ */
 public interface LbmCtRcvConnCreateCallback {
-  Object onRcvConnCreate(LbmCtRcv rcv, LbmCtPeerInfo peerInfo, Object clientd);
+  /**
+   * Receiver application callback method, called by CT, to indicate that a new connection is created.
+   * <p>
+   * @param rcv  The CT Receiver object that the new connection applies to.
+   * @param peerInfo  Useful information about the connection, such as the metadata of the connected source.
+   * @param cbArg  Application-specific object supplied by the application to {@link LbmCtRcv#start}.
+   * @return  Application-specific object to be associated with the connection, which is made available to the
+   *     application when messages are delivered, and {@link LbmCtRcvConnDeleteCallback#onRcvConnDelete}.
+   *     This allows per-connection state to be maintained.
+   */
+  Object onRcvConnCreate(LbmCtRcv rcv, LbmCtPeerInfo peerInfo, Object cbArg);
 }

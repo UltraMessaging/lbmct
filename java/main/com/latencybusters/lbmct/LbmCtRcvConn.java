@@ -25,8 +25,12 @@ import java.nio.*;
 
 import com.latencybusters.lbm.*;
 
-// This class is part of the public API *only* for the getRcvConnCbArg() method.  That is needed because the
-// per-source clientd carries the ct src connection, and the app wants to get its own per-connection clientd.
+/**
+ * Connection object, mostly for internal use by CT.
+ * Application must NOT create, start, or stop this object directly; it is fully managed by CT internally.
+ * There are only two public APIs associated with this object: {@link #getRcvConnCbArg} and {@link #isHandshakeMessage}.
+ * Those APIs should only be called from inside the receiver callback.
+ */
 @SuppressWarnings("WeakerAccess")  // public API.
 public class LbmCtRcvConn {
   enum States {
@@ -91,10 +95,22 @@ public class LbmCtRcvConn {
   long getStartSequenceNum() { return startSequenceNum; }
   long getEndSequenceNum() { return endSequenceNum; }
 
-  // These getters are part of the public API.
-  // THREAD: user
+  /**
+   * Retrieve the application-specific object associated with the connection, supplied by the application as
+   *     the return value from {@link LbmCtRcvConnCreateCallback#onRcvConnCreate}.
+   *     This API can only be called synchronously from inside the receiver callback.
+   * <p>
+   * @return  application-specific object.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public Object getRcvConnCbArg() { return rcvConnCbArg; }
+
+  /**
+   * Determine if a delivered message is a CT handshake message.
+   *     Typically an application ignores CT handshake messages, except that they consume sequence numbers.
+   *     This API can only be called synchronously from inside the receiver callback.
+   * @return  True=delivered message is a CT handshake, false=delivered message is an application message.
+   */
   @SuppressWarnings("WeakerAccess")  // public API.
   public boolean isHandshakeMessage() { return handshakeMessage; }
 
@@ -203,7 +219,7 @@ public class LbmCtRcvConn {
       this.rcvConn = rcvConn;
     }
 
-    // Not part of public API.
+    // Not part of public API.  Declared public to conform to interface.
     // THREAD: ctx
     public void onExpire(Tmr tmr, LBMContext ctx, Object cbArg) {
       // Transition to rcvConn object.
@@ -323,7 +339,7 @@ public class LbmCtRcvConn {
     LbmCtHandshakeParser.makeCreq(outgoingHandshake, this);
     /* The UIM send can fail due to "CoreApi-9901-02: target SOURCE type:
      * transport not found".  This is a race condition where a delivery
-     * controller is created and the per-source clientd create is called,
+     * controller is created and the per-source create is called,
      * which enqueues a conn create command, but before that command can
      * execute, the transport session dies and the TR cache is cleared,
      * so that when this send creq function is called, that source is no
@@ -445,8 +461,8 @@ public class LbmCtRcvConn {
 
   // THREAD: ctx
   private void handleCrsp(LbmCtHandshakeParser handshakeParser, long umSequenceNum) throws Exception {
-    /* This message came across the connection associated with this per-source
-     * clientd.  However, there can be multiple receivers with connections to
+    /* This message came across the connection associated with this per-source callback argument.
+     * However, there can be multiple receivers with connections to
      * this transport session, so only pay attention to this handshake if it
      * is for *this* connection.
      */

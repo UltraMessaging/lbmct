@@ -24,12 +24,20 @@ package com.latencybusters.lbmct;
 import java.nio.*;
 import com.latencybusters.lbm.*;
 
+/**
+ * A passive object that provides useful information to a Connected Topics application.
+ * The object is offered to the application at the connect and disconnect events, as delivered by
+ * {@link}
+ * There are multiple fields of potential interest in the object, and they are not all valid at all times (for
+ * example, the "end" sequence number is not known when the connection is first made).
+ * The {@link #getFlags} method allows
+ */
 @SuppressWarnings("WeakerAccess")  // public API.
 public class LbmCtPeerInfo {
   @SuppressWarnings("WeakerAccess")  // public API.
-  public final static int STATUS_OK=0;
+  public final static int STATUS_OK = 0;
   @SuppressWarnings("WeakerAccess")  // public API.
-  public final static int STATUS_BAD_STOP =-1;
+  public final static int STATUS_BAD_STOP = -1;
 
 
   // Flag bits for "flags" field.

@@ -82,7 +82,8 @@ class MinCtSrc {
 
       // It is typical to return an application-specific, per-connection state object here.
       // It is passed to the connection delete callback.
-      return null;
+      String perConnectionStateObj = "connection state";
+      return perConnectionStateObj;
     }
   }
 
@@ -92,9 +93,14 @@ class MinCtSrc {
     @Override
     public void onSrcConnDelete(LbmCtSrc ctSrc, LbmCtPeerInfo peerInfo, Object cbArg, Object connCbArg) {
       // Put your disconnect code here.  Note that connCbArg is the object returned by onSrcConnCreate.
+      String perConnectionStateObj = (String)connCbArg;  // Retrieve per-connection state object.
       try {
+        // Print the metadata of the receiver.
         System.out.println("onSrcConnDelete: rcv metadata=" +
             new String(peerInfo.getRcvMetadata().array(), StandardCharsets.ISO_8859_1));
+        // Print the starting sequence number received (the "CRSP" handshake).
+        System.out.println("onSrcConnDelete: rcv ending sequence num=" +
+            peerInfo.getRcvEndSequenceNumber());
       } catch (Exception e) { System.out.println("Exception: " + e.toString()); }
     }
   }
