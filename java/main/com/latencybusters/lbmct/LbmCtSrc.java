@@ -28,6 +28,8 @@ import com.latencybusters.lbm.*;
  * A connected source.
  * Maintains an underlying UM source, which is available with the {@link #getUmSrc()} method.
  * When an <tt>LbmCtSrc</tt> is created, its full initialization is deferred until its {@link #start} method is called.
+ * Since it is an active object, it must be explicitly stopped when it is no longer needed, using the {@link #stop}
+ * method.
  */
 @SuppressWarnings("WeakerAccess")  // public API.
 public class LbmCtSrc {

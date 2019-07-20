@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.15"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>LbmCt Java API: Main Page</title>
+<title>LbmCt Java API: lbmct v0.6 Connected Topics for Ultra Messaging</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -62,11 +62,30 @@ $(document).ready(function(){initNavTree('index.html','');});
 /* @license-end */
 </script>
 <div id="doc-content">
-<div class="header">
+<div class="PageDoc"><div class="header">
   <div class="headertitle">
-<div class="title">LbmCt Java API Documentation</div>  </div>
+<div class="title">lbmct v0.6 Connected Topics for Ultra Messaging </div>  </div>
 </div><!--header-->
 <div class="contents">
+<div class="textblock"><p>The "lbmct" package is an API wrapper around the Ultra Messaging library which adds the concept of end-to-end connectedness to UM's normal pub/sub messaging model. These "Connected Topics" (CTs) help Publisher and Subscriber applications keep track of each other.</p>
+<p>See <a href="https://ultramessaging.github.io/lbmct/">lbmct documentation</a> for overview and user manual. This API reference assumes familiarity with the information in that documentation.</p>
+<p>The main classes of the public API are: </p><ul>
+<li>
+<a class="el" href="classcom_1_1latencybusters_1_1lbmct_1_1LbmCt.html">com.latencybusters.lbmct.LbmCt</a> - an "instance" of the connected topics wrapper. Can contain any number of CT sources and receivers.  </li>
+<li>
+<a class="el" href="classcom_1_1latencybusters_1_1lbmct_1_1LbmCtSrc.html">com.latencybusters.lbmct.LbmCtSrc</a> - a connected receiver, associated with a UM topic.  </li>
+<li>
+<a class="el" href="classcom_1_1latencybusters_1_1lbmct_1_1LbmCtRcv.html">com.latencybusters.lbmct.LbmCtRcv</a> - a connected source, associated with a UM topic.  </li>
+</ul>
+<p>Supporting classes are: </p><ul>
+<li>
+<a class="el" href="classcom_1_1latencybusters_1_1lbmct_1_1LbmCtConfig.html">com.latencybusters.lbmct.LbmCtConfig</a> - configure the CT wrapper.  </li>
+<li>
+<a class="el" href="classcom_1_1latencybusters_1_1lbmct_1_1LbmCtPeerInfo.html">com.latencybusters.lbmct.LbmCtPeerInfo</a> - holds information about the source and receiver applications.  </li>
+<li>
+<a class="el" href="classcom_1_1latencybusters_1_1lbmct_1_1LbmCtRcvConn.html">com.latencybusters.lbmct.LbmCtRcvConn</a> - minor class provided to give access to some additional information.  </li>
+</ul>
+</div></div><!-- PageDoc -->
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

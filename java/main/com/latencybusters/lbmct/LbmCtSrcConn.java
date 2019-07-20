@@ -55,10 +55,6 @@ class LbmCtSrcConn {
   private boolean wasAppConnCreateCalled = false;
   private boolean wasAppConnDeleteCalled = false;
 
-  /**
-   * Creates a source-side connection object.
-   * When an <tt>LbmCtSrcConn</tt> is created, its full initialization is deferred until its {@link #start} method is called.
-   */
   LbmCtSrcConn(LbmCtSrc ctSrc) {
     this.ctSrc = ctSrc;
     ct = ctSrc.getCt();

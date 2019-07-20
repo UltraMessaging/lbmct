@@ -37,7 +37,10 @@ import com.latencybusters.lbm.*;
  * called.
  * <p>
  * A Connected Topics instance has an independent thread associated with it.
- * Since it is an active object, it must be explicitly deleted when it is no longer needed, using the {@link #stop} method.
+ * Since it is an active object, it must be explicitly stopped when it is no longer needed, using the {@link #stop}
+ * method.
+ * All CT receivers and sources associated with the <tt>LbmCt</tt> must be stopped before the <tt>LbmCt</tt> itself
+ * can be stopped.
  */
 public class LbmCt {
   final static String HANDSHAKE_TOPIC_STR = "LbmCt.h";
