@@ -53,4 +53,5 @@ $JAVA_HOME/java -cp .:$JAR_DEST/lbmct.jar:$UM_DEPS -Djava.library.path="$LBM_PLA
 
 # Test.  It uses junit, although the tests are not really unit tests.
 
+cd $JAR_DEST/test/com/latencybusters/lbmct
 $JAVA_HOME/java -cp $JAR_DEST/test.jar:$TEST_DEPS -Djava.library.path="$LBM_PLATFORM/lib" -Djava.security.egd="file:/dev/./urandom" org.junit.runner.JUnitCore com.latencybusters.lbmct.LbmCtTest

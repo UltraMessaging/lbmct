@@ -28,7 +28,12 @@ import com.latencybusters.lbm.*;
 import com.latencybusters.lbmct.*;
 
 class MinCtSrc {
-  // Have "main" create an object instance for this program and run it.
+  public static void main(String[] args) throws Exception {
+    // The body of the program is in the "run" method.
+    MinCtSrc application = new MinCtSrc();
+    application.run(args);
+  }
+
   private void run(String[] args) throws Exception {
     // Create context, making sure "response_tcp_nodelay" is set (speed up).
     LBMContextAttributes myCtxAttr = new LBMContextAttributes();
@@ -103,11 +108,5 @@ class MinCtSrc {
             peerInfo.getRcvEndSequenceNumber());
       } catch (Exception e) { System.out.println("Exception: " + e.toString()); }
     }
-  }
-
-
-  public static void main(String[] args) throws Exception {
-    MinCtSrc application = new MinCtSrc();
-    application.run(args);
   }
 }
