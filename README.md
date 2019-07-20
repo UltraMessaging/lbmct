@@ -41,7 +41,8 @@ You can also jump to other pages:
 * [Release Notes](doc/Release_notes.md)
 * [User Guide](doc/Userguide.md) - explains how to write Connected
 Topic applications.
-* [API Reference](doc/API.md) - details on each API.
+* [C API Reference](doc/c/index.html) - details on the C API.
+* [Java API Reference](doc/java/index.html) - details on the C API.
 * [Internal Design](doc/Internal_Design.md) - details of the CT implementation.
 
 ### Source Code
