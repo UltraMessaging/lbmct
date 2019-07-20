@@ -5,7 +5,7 @@ For C, see the [C User Guide](Userguide.md).
 
 ## Publisher Code Outline
 
-See [MinCtSrc.java](../java/MinCtSrc.java) for a compilable example.
+See [MinCtSrc.java](../java/MinCtSrc.java) for a compilable and runnable example.
 
 A publisher of a connected topic needs to perform the following:
 
@@ -14,25 +14,29 @@ A publisher of a connected topic needs to perform the following:
 * Create a context object with the normal API:
 [LBMContext](https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMContext.html#ad6173b302534ee9011ce56897a6952ac).
 
-* Create a CT object with the CT API:
-[LbmCt](https://ultramessaging.github.io/lbmct/javadoc/com/latencybusters/lbmct/LbmCt.html#LbmCt--).
-This only creates the object; it still needs to be initialized, which is done with the CT API:
-[LbmCt::start](https://ultramessaging.github.io/lbmct/javadoc/com/latencybusters/lbmct/LbmCt.html#start-com.latencybusters.lbm.LBMContext-com.latencybusters.lbmct.LbmCtConfig-java.nio.ByteBuffer-).
+* Create a CT object with the constructor:
+[LbmCt](https://ultramessaging.github.io/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCt.html#a4f632556d3bc12700fff65cc260bf4f5).
+This only creates the object.
+It still needs to be initialized, which is done with the method:
+[LbmCt.start](https://ultramessaging.github.io/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCt.html#a7e3e89cbf93427d5d7595207a4424574).
 This CT object is associated with a context and should be thought of as
 analogous to a context.
 For example, most applications have only one CT object which can host any
 number of CT Sources and CT Receivers.
 
-* Create a CT Source object with a CT API:
-[lbmct_src_create()](#lbmct_src_create).
+* Create a CT Source object with the constructor:
+[LbmCtSrc](https://ultramessaging.github.io/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCtSrc.html#aa1acb15c5da336056f614342a8b731e0).
+This only creates the object.
+It still needs to be initialized, which is done with the method:
+[LbmCtSrc.start](https://ultramessaging.github.io/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCtSrc.html#a7f81963b12b3122f03ee3e2675b362d0).
 Note that the normal source APIs involve allocating a source topic,
 and then creating the source object.
 The CT API combines those two operations into a single API.
 Also, the publisher provides two application callback functions
 that the CT Source executes as connections are established and closed.
 
-* Get the underlying UM Source object with the CT API:
-[lbmct_src_get_um_src()](#lbmct_src_get_um_src).
+* Get the underlying UM Source object with the method:
+[LbmCtSrc.getUmSrc](https://ultramessaging.github.io/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCtSrc.html#a5338bd2f7377d9190c6b0e18c9117524).
 
 * Optionally wait for a connection to be created.
 This is signaled by the CT Source executing the connection creation application
@@ -40,27 +44,26 @@ callback function.
 
 **Steady State**
 
-* Send messages with the normal API:
-[lbm_src_send()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a91f4b9cb04fe1323ec56833211cc5cb7)
-(or other normal UM send methods).
+* Send messages with one of the standard UM <tt>send</tt> methods of the
+[LBMSource](https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMSource.html)
+class.
+(The example uses the
+[send(byte[], int, int)](https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMSource.html#ab2f7919b79f87d18beac4d26843afed7)
+method.)
 
 **Cleanup**
 
-* Delete a CT Source object with a CT API:
-[lbmct_src_delete()](#lbmct_src_delete).
+* Delete the CT source with the:
+[LbmCtSource.stop](https://ultramessaging.github.io/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCtSrc.html#a8ad1eb28a391b343cffe72fcd011df0f)
+method.
 This API will gracefully close any open connections associated with that
 source.
 
-* Optionally wait for any open connections to be deleted.
-This is signaled by the CT Source executing the connection deletion application
-callback function.
-
-* Delete the CT object with the CT API:
-[lbmct_delete()](#lbmct_delete).
+* Delete the CT object with the
+[LbmCt.stop](https://ultramessaging.github.io/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCt.html#a33aca22355565f7c05e189248e23ee95)
+method.
 Note that if there are still existing CT Sources (or Receivers),
-or if CT connections are still in the process of gracefully closing,
-the call to delete will fail,
-requiring the application to wait and re-try.
+the call to delete will fail.
 
 * Delete the context with the normal API:
 [lbm_context_delete()](https://ultramessaging.github.io/currdoc/doc/API/lbm_8h.html#a962bfceb336c65191ba08497ac70602b).

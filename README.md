@@ -39,10 +39,12 @@ deliver deletion events.
 The rest of this page provides a high-level description of the CT package.
 You can also jump to other pages:
 * [Release Notes](doc/Release_notes.md)
-* [User Guide](doc/Userguide.md) - explains how to write Connected
+* [C User Guide](doc/Userguide.md) - explains how to write C-language Connected
 Topic applications.
-* [C API Reference](doc/c/index.html) - details on the C API.
-* [Java API Reference](doc/java/index.html) - details on the C API.
+* [Java User Guide](doc/Java_Userguide.md) - explains how to write Java-language
+Connected Topic applications.
+* [C API Reference](doc/c/index.html) - details on each C API.
+* [Java API Reference](doc/Java/index.html) - details on each Java API.
 * [Internal Design](doc/Internal_Design.md) - details of the CT implementation.
 
 ### Source Code
@@ -217,6 +219,9 @@ There is no “force quit” API, although the process can simply exit.
 
 ## Interoperability
 
+* CT version 0.6 and beyond is not wire-compatible with CT version 0.5 and prior.
+It is believed that version 0.5 is not in use by anybody.
+
 * CT Receivers make use of the “send to source” feature,
 which first became available in UM 6.10.
 Note that pre-6.10 versions of UM are still able to receive messages from
@@ -249,7 +254,6 @@ You can now jump to other pages:
 Topic applications.
 * [Java User Guide](doc/Java_Userguide.md) - explains how to write Java-language
 Connected Topic applications.
-* [C API Reference](doc/API.md) - details on each C API function and structure.
-* [Java API Reference](doc/Java_API.md) - details on each Java API function
-and structure.
+* [C API Reference](doc/c/index.html) - details on each C API.
+* [Java API Reference](doc/Java/index.html) - details on each Java API.
 * [Internal Design](doc/Internal_Design.md) - details of the CT implementation.
