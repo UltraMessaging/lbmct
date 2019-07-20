@@ -27,7 +27,7 @@ import com.latencybusters.lbm.*;
 /**
  * A connected receiver.
  * Maintains an underlying UM receiver.
- * When an {@code LbmCtRcv} is created, its full initialization is deferred until its {@link #start} method is called.
+ * When an <tt>LbmCtRcv</tt> is created, its full initialization is deferred until its {@link #start} method is called.
  */
 @SuppressWarnings("WeakerAccess")  // public API.
 public class LbmCtRcv {
@@ -57,7 +57,7 @@ public class LbmCtRcv {
    * A CT receiver combines the two steps in its {@link #start} method.)
    * <p>
    * This constructor only creates the object.
-   * Its full initialization is deferred until its {@code start} method is called.
+   * Its full initialization is deferred until its <tt>start</tt> method is called.
    */
   public LbmCtRcv() { }
 
@@ -74,23 +74,23 @@ public class LbmCtRcv {
   /**
    * Initilaizes a CT Receiver object.
    * This is typically called immediately after the object is created ({@link #LbmCtRcv} constructor).
-   * The {@code start} method can return before any connections are made.
+   * The <tt>start</tt> method can return before any connections are made.
    * <p>
    * When the application is finished using this CT Receiver, it should be stopped ({@link #stop} API).
    * <p>
    * @param inCt  CT object to associate with this CT Source.
    * @param topicStr  Topic string.
-   *     This is the same as the {@code symbol} parameter when looking up a UM receiver topic object with
+   *     This is the same as the <tt>symbol</tt> parameter when looking up a UM receiver topic object with
    *     <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMTopic.html#aad9c1f2065be4fd8e357f55063268b22">LBMTopic</a>.
    * @param rcvAttr  Attributes object used to configure the underlying UM receiver.
-   *     This is the same as the {@code lbmrattr} parameter when looking up a UM receiver topic object with
+   *     This is the same as the <tt>lbmrattr</tt> parameter when looking up a UM receiver topic object with
    *     <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMTopic.html#aad9c1f2065be4fd8e357f55063268b22">LBMTopic</a>.
    * @param rcvCb  An object implementing the <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/interfacecom_1_1latencybusters_1_1lbm_1_1LBMReceiverCallback.html">LBMReceiverCallback</a>
    *     interface.
-   *     This is the same as the {@code cb} parameter when creating a UM receiver with
+   *     This is the same as the <tt>cb</tt> parameter when creating a UM receiver with
    *     <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMReceiver.html#ac913d4f6f0b710711c56e6d1c43596ba">LBMReceiver</a>.
    *     It is used to deliver messages and other receiver-related events to the application.
-   *     Note that the {@code LBM_BOS} and {@code LBM_EOS} events are filtered out and are not delivered to the
+   *     Note that the <tt>LBM_BOS</tt> and <tt>LBM_EOS</tt> events are filtered out and are not delivered to the
    *     application.
    *     The CT connection create and delete callbacks should be used instead.
    * @param connCreateCb  Callback object invoked when a CT source connects to this CT receiver.
@@ -100,7 +100,7 @@ public class LbmCtRcv {
    *     Technically this parameter is optional (null should be passed if not needed), but its use is central to the
    *     Connected Topics paradigm.
    * @param cbArg  Application-specific object to be associated with the connected receiver, which is passed to the
-   *     three callbacks ({@code rcvCb}, {@code connCreateCb}, and {@code connDeleteCb}).
+   *     three callbacks (<tt>rcvCb</tt>, <tt>connCreateCb</tt>, and <tt>connDeleteCb</tt>).
    *     Note that the CT Receiver maintains a reference to the cbArg object until the CT Receiver is stopped.
    *     This parameter is optional (null should be passed if not needed).
    * @throws Exception  LBMException thrown.
@@ -167,7 +167,6 @@ public class LbmCtRcv {
    * <p>
    * @throws Exception  LBMException thrown.
    */
-  @SuppressWarnings("WeakerAccess")  // public API.
   public void stop() throws Exception {
     LbmCtCtrlr ctrlr = this.ctrlr;  // get a local copy since the command will delete the ctSrc.
 

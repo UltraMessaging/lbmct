@@ -22,11 +22,11 @@ package com.latencybusters.lbmct;
  */
 
 /**
- * Container object holding configuration of an instance of {@code LbmCt}.
+ * Container object holding configuration of an instance of <tt>LbmCt</tt>.
  * The caller creates an config instance and sets desired options, and then passes it to {@link LbmCt#start}.
  * <p>
  * Note that the CT object retains a reference to the passed-in configuration object, so it is not recommended to modify
- * options after the {@code LbmCt} is created, except for testing purposes.
+ * options after the <tt>LbmCt</tt> is created, except for testing purposes.
  * Also, if creating multiple CT objects, it is generally recommended to create separate configuration objects,
  * one for each CT object (unless they all share exactly the same configuration).
  *
@@ -34,8 +34,8 @@ package com.latencybusters.lbmct;
 @SuppressWarnings("WeakerAccess")  // public API.
 public class LbmCtConfig {
   /**
-   * Bit set in {@code testBits} to enable debug event logging.
-   * This bit controls the operation of {@code dbg} and {@code debugQ}.
+   * Bit set in <tt>testBits</tt> to enable debug event logging.
+   * This bit controls the operation of <tt>dbg</tt> and <tt>debugQ</tt>.
    * See <a href="https://ultramessaging.github.io/lbmct/doc/Java_Userguide.html#debugging">Debugging</a>
    * for information on using this debugging feature.
    * See {@link #setTestBits}.
@@ -43,42 +43,42 @@ public class LbmCtConfig {
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int TEST_BITS_DEBUG   = 0x00000001;
   /**
-   * Bit set in {@code testBits} to disable sending of CREQ handshake.
+   * Bit set in <tt>testBits</tt> to disable sending of CREQ handshake.
    * This is to test retry logic.
    * See {@link #setTestBits}.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int TEST_BITS_NO_CREQ = 0x00000002;
   /**
-   * Bit set in {@code testBits} to disable sending of CRSP handshake.
+   * Bit set in <tt>testBits</tt> to disable sending of CRSP handshake.
    * This is to test retry logic.
    * See {@link #setTestBits}.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int TEST_BITS_NO_CRSP = 0x00000004;
   /**
-   * Bit set in {@code testBits} to disable sending of COK handshake.
+   * Bit set in <tt>testBits</tt> to disable sending of COK handshake.
    * This is to test retry logic.
    * See {@link #setTestBits}.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int TEST_BITS_NO_COK  = 0x00000008;
   /**
-   * Bit set in {@code testBits} to disable sending of DREQ handshake.
+   * Bit set in <tt>testBits</tt> to disable sending of DREQ handshake.
    * This is to test retry logic.
    * See {@link #setTestBits}.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int TEST_BITS_NO_DREQ = 0x00000010;
   /**
-   * Bit set in {@code testBits} to disable sending of DRSP handshake.
+   * Bit set in <tt>testBits</tt> to disable sending of DRSP handshake.
    * This is to test retry logic.
    * See {@link #setTestBits}.
    */
   @SuppressWarnings("WeakerAccess")  // public API.
   public final static int TEST_BITS_NO_DRSP = 0x00000020;
   /**
-   * Bit set in {@code testBits} to disable sending of DOK handshake.
+   * Bit set in <tt>testBits</tt> to disable sending of DOK handshake.
    * This is to test retry logic.
    * See {@link #setTestBits}.
    */
@@ -87,45 +87,51 @@ public class LbmCtConfig {
 
   // Default values for config options.
   /**
-   * Initial value for {@code testBits}; all testing behavior disabled.
+   * Initial value for <tt>testBits</tt>; all testing behavior disabled.
    * See {@link #setTestBits}.
    */
-  final static int CT_CONFIG_DEFAULT_TEST_BITS  = 0x00000000;
+  @SuppressWarnings("WeakerAccess")  // public API.
+  public final static int CT_CONFIG_DEFAULT_TEST_BITS  = 0x00000000;
   /**
-   * Initial value for {@code domainId}; no UM domain ID used.
+   * Initial value for <tt>domainId</tt>; no UM domain ID used.
    * See {@link #setDomainId}.
    */
-  final static int CT_CONFIG_DEFAULT_DOMAIN_ID  = -1;
+  @SuppressWarnings("WeakerAccess")  // public API.
+  public final static int CT_CONFIG_DEFAULT_DOMAIN_ID  = -1;
   /**
-   * Initial value for {@code delayCreq}; receiver waits this long before
+   * Initial value for <tt>delayCreq</tt>; receiver waits this long before
    * sending CREQ handshake.
    * The default value should be long enough to allow the transport session to be established, and even in those
    * cases where more time is needed, the retry logic will provide that time.
    * See {@link #setDelayCreq}.
    */
-  final static int CT_CONFIG_DEFAULT_DELAY_CREQ = 10;    // 10 ms
+  @SuppressWarnings("WeakerAccess")  // public API.
+  public final static int CT_CONFIG_DEFAULT_DELAY_CREQ = 10;    // 10 ms
   /**
-   * Initial value for {@code retryIvl}; wait this long for a handshake
+   * Initial value for <tt>retryIvl</tt>; wait this long for a handshake
    * operation before re-trying.
    * Retries should happen only very rarely.
    * See {@link #setRetryIvl}.
    */
-  final static int CT_CONFIG_DEFAULT_RETRY_IVL  = 1000;  // 1 sec
+  @SuppressWarnings("WeakerAccess")  // public API.
+  public final static int CT_CONFIG_DEFAULT_RETRY_IVL  = 1000;  // 1 sec
   /**
-   * Initial value for {@code maxTries}; try a handshake operation this
+   * Initial value for <tt>maxTries</tt>; try a handshake operation this
    * many times before giving up.
-   * Be aware that if a network outage lasts longer than {@code maxTries} * {@code retryIvl}, but the transport
+   * Be aware that if a network outage lasts longer than <tt>maxTries</tt> * <tt>retryIvl</tt>, but the transport
    * session does not time out, the connection could fail to be established.
    * The defaults were chosen to be longer than the default transport session timeouts for LBT-RM and LBT-RU.
    * See {@link #setMaxTries}.
    */
-  final static int CT_CONFIG_DEFAULT_MAX_TRIES  = 35;
+  @SuppressWarnings("WeakerAccess")  // public API.
+  public final static int CT_CONFIG_DEFAULT_MAX_TRIES  = 35;
   /**
-   * Initial value for {@code preDelivery}; disable delivery of UM messages
+   * Initial value for <tt>preDelivery</tt>; disable delivery of UM messages
    * to receiver when not connected.
    * See {@link #setPreDelivery}.
    */
-  final static int CT_CONFIG_DEFAULT_PRE_DELIVERY = 0;
+  @SuppressWarnings("WeakerAccess")  // public API.
+  public final static int CT_CONFIG_DEFAULT_PRE_DELIVERY = 0;
 
   // Bit map of options used for testing or debugging
   private int testBits = CT_CONFIG_DEFAULT_TEST_BITS;
@@ -181,7 +187,7 @@ public class LbmCtConfig {
    * When a connected source and receiver are connecting or disconnecting, they exchange handshake messages to
    * synchronize state.
    * If a CT source or receiver sends a handshake and expects a response but does not get one within
-   * {@code retryIvl} milliseconds, the operation will be retried.
+   * <tt>retryIvl</tt> milliseconds, the operation will be retried.
    * See also {@link #setMaxTries}.
    * <p>
    * @param retryIvl  Time in milliseconds to wait.
@@ -194,8 +200,8 @@ public class LbmCtConfig {
    * When a connected source and receiver are connecting or disconnecting, they exchange handshake messages to
    * synchronize state.
    * If a CT source or receiver sends a handshake and expects a response but does not get one within
-   * {@code retryIvl} milliseconds, the operation will be retried.
-   * After {@code maxTries} attempts, CT will give up, log an error, and stop retrying.
+   * <tt>retryIvl</tt> milliseconds, the operation will be retried.
+   * After <tt>maxTries</tt> attempts, CT will give up, log an error, and stop retrying.
    * <p>
    * @param maxTries  Number of times to attempt handshakes.
    */
@@ -205,7 +211,7 @@ public class LbmCtConfig {
   /**
    * Override the default value for the configuration object's received message pre-connected delivery behavior.
    * Normally, a Connected Topics Receiver will not deliver messages received prior to a connection being established.
-   * Setting {@code preDelivery} to 1 enables the CT receiver to deliver messages received outside of the connected
+   * Setting <tt>preDelivery</tt> to 1 enables the CT receiver to deliver messages received outside of the connected
    * state.
    * This can enable a CT receiver to get messages from a non-CT source,
    * although this use case is not recommended. See <a href="https://ultramessaging.github.io/lbmct/#interoperability"></a>.

@@ -23,9 +23,10 @@ package com.latencybusters.lbmct;
 
 import com.latencybusters.lbm.*;
 
-/**
- * Interface for timer callbacks associated with {@code Tmr}.
+/*
+ * Callback interface to deliver timer expiration events to an application.
+ * The application supplies an implementation of this interface to Tmr.schedule.
  */
-public interface TmrCallback {
+interface TmrCallback {
   void onExpire(Tmr tmr, LBMContext ctx, Object cbArg);
 }

@@ -27,7 +27,7 @@ import com.latencybusters.lbm.*;
 /**
  * A connected source.
  * Maintains an underlying UM source, which is available with the {@link #getUmSrc()} method.
- * When an {@code LbmCtSrc} is created, its full initialization is deferred until its {@link #start} method is called.
+ * When an <tt>LbmCtSrc</tt> is created, its full initialization is deferred until its {@link #start} method is called.
  */
 @SuppressWarnings("WeakerAccess")  // public API.
 public class LbmCtSrc {
@@ -57,7 +57,7 @@ public class LbmCtSrc {
    * with the {@link #getUmSrc()} method.
    * <p>
    * This constructor only creates the object.
-   * Its full initialization is deferred until its {@code start} method is called.
+   * Its full initialization is deferred until its <tt>start</tt> method is called.
    */
   public LbmCtSrc() { }
 
@@ -80,26 +80,26 @@ public class LbmCtSrc {
   /**
    * Initializes a CT Source object.
    * This is typically called immediately after the object is created ({@link #LbmCtSrc} constructor).
-   * The {@code start} method can return before any connections are made.
+   * The <tt>start</tt> method can return before any connections are made.
    * Any messages sent to the source prior to the first connection event may not be received by any receivers.
    * <p>
    * When the application is finished using this CT Source, it should be stopped ({@link #stop} API).
    * <p>
    * @param inCt  CT object to associate with this CT Source.
    * @param topicStr  Topic string.
-   *     This is the same as the {@code symbol} parameter when allocating a UM source topic object with
+   *     This is the same as the <tt>symbol</tt> parameter when allocating a UM source topic object with
    *     <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMTopic.html#ab728a34e695bfccc73c8fa1a33b0e70d">LBMTopic</a>.
    * @param srcAttr  Attributes object used to configure the underlying UM source.
-   *     This is the same as the {@code lbmsattr} parameter when allocating a UM source topic object with
+   *     This is the same as the <tt>lbmsattr</tt> parameter when allocating a UM source topic object with
    *     <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMTopic.html#ab728a34e695bfccc73c8fa1a33b0e70d">LBMTopic</a>.
    * @param srcCb  An object implementing the
    *     <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/interfacecom_1_1latencybusters_1_1lbm_1_1LBMSourceEventCallback.html">LBMSourceEventCallback</a>
    *     interface.
-   *     This is the same as the {@code cb} parameter when creating a UM source with
+   *     This is the same as the <tt>cb</tt> parameter when creating a UM source with
    *     <a href="https://ultramessaging.github.io/currdoc/doc/JavaAPI/classcom_1_1latencybusters_1_1lbm_1_1LBMSource.html#ab8e3998370398ea2929bfaf814d79457">LBMSource</a>.
    *     It is used to deliver UM source events to the application.
    *     This parameter is optional (null should be passed if not needed).
-   *     Note that the {@code SRC_EVENT_CONNECT} and {@code SRC_EVENT_DISCONNECT} events should be ignored.
+   *     Note that the <tt>SRC_EVENT_CONNECT</tt> and <tt>SRC_EVENT_DISCONNECT</tt> events should be ignored.
    *     The CT connection create and delete callbacks should be used instead.
    * @param connCreateCb  Callback object invoked when a CT Receiver connects to this CT source.
    *     Technically this parameter is optional (null should be passed if not needed), but its use is central to the
@@ -108,7 +108,7 @@ public class LbmCtSrc {
    *     Technically this parameter is optional (null should be passed if not needed), but its use is central to the
    *     Connected Topics paradigm.
    * @param cbArg  Application-specific object to be associated with the connected source, which is passed to the three
-   *     callbacks ({@code srcCb}, {@code connCreateCb}, and {@code connDeleteCb}).
+   *     callbacks (<tt>srcCb</tt>, <tt>connCreateCb</tt>, and <tt>connDeleteCb</tt>).
    *     Note that the CT Source maintains a reference to the cbArg object until the CT Source is stopped.
    *     This parameter is optional (null should be passed if not needed).
    * @throws Exception  LBMException thrown.
@@ -161,7 +161,6 @@ public class LbmCtSrc {
    * <p>
    * @throws Exception  LBMException thrown.
    */
-  @SuppressWarnings("WeakerAccess")  // public API.
   public void stop() throws Exception {
     LbmCtCtrlr ctrlr = this.ctrlr;  // get a local copy since the command will delete the ctSrc.
 

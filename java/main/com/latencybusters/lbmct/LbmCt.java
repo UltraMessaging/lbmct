@@ -39,7 +39,6 @@ import com.latencybusters.lbm.*;
  * A Connected Topics instance has an independent thread associated with it.
  * Since it is an active object, it must be explicitly deleted when it is no longer needed, using the {@link #stop} method.
  */
-@SuppressWarnings("WeakerAccess")
 public class LbmCt {
   final static String HANDSHAKE_TOPIC_STR = "LbmCt.h";
 
@@ -89,7 +88,7 @@ public class LbmCt {
   /**
    * Initializes a CT object.
    * This is typically called immediately after the object is created ({@link #LbmCt()} constructor).
-   * When {@code start} returns, the CT is ready for connected source and receiver creation.
+   * When <tt>start</tt> returns, the CT is ready for connected source and receiver creation.
    * <p>
    * When the application is finished using Connected Topics functionality, the CT should be stopped
    * ({@link #stop} API).
@@ -101,6 +100,9 @@ public class LbmCt {
    *     used for each CT.
    * @param inMetadata  Application-specific data, delivered to the remote connecting peers.
    *     This metadata must be wrapped in a ByteBuffer and flipped so that it can be read by the CT.
+   *     CT does not retain a reference to the inMetadata object; a deep copy of the data is made.
+   *     If the application makes changes to the contents of <tt>inMetadata</tt>, those changes will not be
+   *     seen by CT.
    * @throws Exception  LBMException thrown.
    */
   public void start(LBMContext inCtx, LbmCtConfig inConfig, ByteBuffer inMetadata) throws Exception {
@@ -172,7 +174,6 @@ public class LbmCt {
    * @throws Exception  LBMException thrown.
    */
   // THREAD: user
-  @SuppressWarnings("WeakerAccess")  // public API.
   public void stop() throws Exception {
     if (! ctSrcSet.isEmpty()) {
       throw new LBMException("Must delete sources and receivers");
@@ -323,7 +324,7 @@ public class LbmCt {
   }
 
   /*
-   * Implementation of {@code LBMReceiver} callback interface for UM receiver events.
+   * Implementation of LBMReceiver callback interface for UM receiver events.
    * See https://ultramessaging.github.io/currdoc/doc/JavaAPI/interfacecom_1_1latencybusters_1_1lbm_1_1LBMReceiverCallback.html
    */
   private static class SrcSideMsgRcvCb implements LBMReceiverCallback {

@@ -57,7 +57,7 @@ class LbmCtSrcConn {
 
   /**
    * Creates a source-side connection object.
-   * When an {@code LbmCtSrcConn} is created, its full initialization is deferred until its {@link #start} method is called.
+   * When an <tt>LbmCtSrcConn</tt> is created, its full initialization is deferred until its {@link #start} method is called.
    */
   LbmCtSrcConn(LbmCtSrc ctSrc) {
     this.ctSrc = ctSrc;
@@ -247,7 +247,7 @@ class LbmCtSrcConn {
   }
 
   /**
-   * Implementation of {@code Tmr} callback interface for source-side connections.
+   * Implementation of <tt>Tmr</tt> callback interface for source-side connections.
    */
   private static class SrcConnTmrCallback implements TmrCallback {
     LbmCtSrcConn srcConn;
@@ -314,7 +314,7 @@ class LbmCtSrcConn {
         } else {
           // Too many retries, force-delete the connection.
           LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up stopping connection from receiver for topic '" + ctSrc.getTopicStr() + "'\n");
-          peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_STOP);
+          peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_DISCONNECT);
 
           setConnState(States.STOP_WAIT);
         }

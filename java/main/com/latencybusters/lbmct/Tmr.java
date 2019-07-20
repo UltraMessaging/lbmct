@@ -105,7 +105,7 @@ class Tmr {
   }
 
   // Normal timer expiration.
-  public class TmrExpireCallback implements LBMTimerCallback {
+  class TmrExpireCallback implements LBMTimerCallback {
     Tmr tmr;
     LBMContext ctx;
 
@@ -115,6 +115,7 @@ class Tmr {
       this.ctx = ctx;
     }
 
+    // Not part of public API.  Declared public to conform to interface.
     // THREAD: ctx
     public void onExpiration(Object cbArg) {
       try {

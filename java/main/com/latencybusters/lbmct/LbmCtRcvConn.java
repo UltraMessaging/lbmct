@@ -294,7 +294,7 @@ public class LbmCtRcvConn {
             nextAction = RcvConnTmrExpireActions.SEND_DREQ;
           } else {
             LBMPubLog.pubLog(LBM.LOG_WARNING, "giving up stopping connection to source '" + sourceStr + "' for topic '" + ctRcv.getTopicStr() + "'\n");
-            peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_STOP);
+            peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_DISCONNECT);
 
             setConnState(States.STOP_WAIT);
           }
@@ -637,7 +637,7 @@ public class LbmCtRcvConn {
     synchronized (ctRcv.getLock()) {
       if (connState != States.STOP_WAIT) {
         // Tell app that the connection stopped abnormally.
-        peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_STOP);
+        peerInfo.setStatus(LbmCtPeerInfo.STATUS_BAD_DISCONNECT);
         setConnState(States.STOP_WAIT);
       }
 
