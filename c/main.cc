@@ -140,6 +140,61 @@ int test_log_cb(int level, const char *message, void *clientd)
   return 0;
 }  /* test_log_cb */
 
+int test_rcv_channel_cb(lbm_rcv_t *rcv, lbm_msg_t *msg, void *clientd)
+{
+  int i;
+  unsigned long long log_time;
+  int elapsed_time;
+  lbm_msg_properties_iter_t *prop_iter;
+  char prop_str[1024];
+  int err;
+
+  MSEC_CLOCK(log_time);
+  elapsed_time = (int)(log_time - test_start_time);
+
+  PRT_MUTEX_LOCK(msg_lock);
+  i = msg_cnt;
+  msg_cnt ++;
+  PRT_MUTEX_UNLOCK(msg_lock);
+
+  if (msg->type == LBM_MSG_DATA) {
+    prop_str[0] = '\0';  /* Empty the prop string. */
+    if (msg->properties != NULL) {
+      snprintf(prop_str, sizeof(prop_str), ", props=");
+
+      err = lbm_msg_properties_iter_create(&prop_iter);
+      LBM_ERR(err);
+      err = lbm_msg_properties_iter_first(prop_iter, msg->properties);
+      LBM_ERR(err);
+
+      do {
+        ASSRT(prop_iter->type == LBM_MSG_PROPERTY_INT);
+        snprintf(&prop_str[strlen(prop_str)], sizeof(prop_str)-strlen(prop_str),
+          "%s:%d,", prop_iter->name, *((lbm_uint32_t *)(prop_iter->data)));
+        err = lbm_msg_properties_iter_next(prop_iter);
+      } while (err == LBM_OK);
+
+      prop_str[strlen(prop_str)-1] = '.';  /* Replace trailing ',' with '.'. */
+
+      err = lbm_msg_properties_iter_delete(prop_iter);
+      LBM_ERR(err);
+    }  /* if properties */
+
+    snprintf(msg_buffer[i % NUM_LOGS], LOG_SZ, "{%d} %d ms test_rcv_channel_cb: type=%d, sqn=%d, source='%s', properties=%s, clientd='%s', source_clientd='%s', data='%s'%s\n",
+       i, elapsed_time, msg->type, msg->sequence_number, msg->source,
+       ((msg->properties == NULL) ? "(nil)" : "(non-nil)"),
+       (char *)clientd, (char *)msg->source_clientd, msg->data, prop_str);
+  }  /* if msg type data */
+  else {
+    snprintf(msg_buffer[i % NUM_LOGS], LOG_SZ, "{%d} %d ms test_rcv_channel_cb: type=%d, sqn=%d, source='%s', properties=%s, clientd='%s', source_clientd='%s'\n",
+       i, elapsed_time, msg->type, msg->sequence_number, msg->source,
+       (msg->properties == NULL) ? "(nil)" : "(non-nil)",
+       (char *)clientd, (char *)msg->source_clientd);
+  }
+  printf("%s", msg_buffer[i % NUM_LOGS]);  fflush(stdout);
+
+  return 0;
+}  /* test_rcv_channel_cb */
 
 int test_rcv_cb(lbm_rcv_t *rcv, lbm_msg_t *msg, void *clientd)
 {
@@ -1281,6 +1336,110 @@ TEST(Ct,CtSimpleMessages2) {
   ASSERT_EQ(4, msg_cnt);
 }  /* CtSimpleMessages2 */
 
+/* set nullbehavior as LBM_RCV_TOPIC_ATTR_CHANNEL_BEHAVIOR_DISCARD_MSGS with channel*/
+TEST(Ct,Ctnullchannel) {
+  lbmct_t *s_ct = NULL;
+  lbmct_t *r_ct = NULL;
+  lbmct_src_t *ct_src;
+  lbmct_rcv_t *ct_rcv;
+  lbmct_config_t ct_config;
+  int err;
+  lbm_rcv_topic_attr_t *rcv_attr = NULL;
+  int behavior = LBM_RCV_TOPIC_ATTR_CHANNEL_BEHAVIOR_DISCARD_MSGS;
+  lbm_src_channel_info_t *chn = NULL;
+  lbm_src_send_ex_info_t info;
+
+#ifndef _WIN32
+  signal(SIGPIPE, SIG_IGN);
+#endif
+  SLEEP_MSEC(100);
+  log_cnt = 0;
+  msg_cnt = 0;
+  MSEC_CLOCK(test_start_time);
+  ASSERT_EQ(0, sync_sem_cnt);
+
+  /* When they want to race, make receiver timeout before source. */
+  ct_config.flags = LBMCT_CT_CONFIG_FLAGS_RETRY_IVL;
+  ct_config.retry_ivl = 1300;
+
+  err = lbmct_create(&s_ct, ctx1, &ct_config, NULL, 0);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+  err = lbmct_create(&r_ct, ctx2, NULL, "Meta r_ct", 10);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  err = lbm_rcv_topic_attr_create(&rcv_attr);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+  err = lbm_rcv_topic_attr_setopt(rcv_attr, "null_channel_behavior", &behavior, sizeof(int));
+  ASSERT_EQ(0, err) << lbm_errmsg();
+  
+  err = lbmct_rcv_create(&ct_rcv, r_ct, "Ctnullchannel", rcv_attr, test_rcv_cb,
+    test_rcv_conn_create_cb, test_rcv_conn_delete_cb, rcv_clientd);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  err = lbm_rcv_subscribe_channel(lbmct_rcv_get_um_rcv(ct_rcv), 500, test_rcv_channel_cb, NULL);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  SLEEP_MSEC(10);
+
+  r_ct->active_config.test_bits |= LBMCT_TEST_BITS_NO_CREQ;
+  err = lbmct_src_create(&ct_src, s_ct, "Ctnullchannel", NULL, NULL,
+    test_src_conn_create_cb, test_src_conn_delete_cb, src_clientd);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  err = lbm_src_channel_create(&chn, lbmct_src_get_um_src(ct_src), 500);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+  memset(&info, 0, sizeof(lbm_src_send_ex_info_t));
+  info.flags = LBM_SRC_SEND_EX_FLAG_CHANNEL;
+  info.channel_info = chn;
+
+  SLEEP_MSEC(100);
+  r_ct->active_config.test_bits &= ~LBMCT_TEST_BITS_NO_CREQ;
+
+  ASSERT_NE(null_ptr, strstr(log_buffer[0], "lbmct does not support nullbehavior as LBM_RCV_TOPIC_ATTR_CHANNEL_BEHAVIOR_DISCARD_MSGS. No change, Using default LBM_RCV_TOPIC_ATTR_CHANNEL_BEHAVIOR_DELIVER_MSGS."));
+
+  ASSERT_NE(null_ptr, strstr(log_buffer[1], "LBMCT_TEST_BITS_NO_CREQ"));
+  ASSERT_EQ(2, log_cnt);
+
+  /* Wait for src and rcv connect events. */
+  PRT_SEM_WAIT(sync_sem);  sync_sem_cnt --;
+  PRT_SEM_WAIT(sync_sem);  sync_sem_cnt --;
+  ASSERT_EQ(0, sync_sem_cnt);
+
+  ASSERT_NE(null_ptr, strstr(log_buffer[2], "test_rcv_conn_create_cb, clientd='RcvClientd', peer:  status=0, flags=0x3f, src_metadata=none, rcv_metadata='Meta r_ct', rcv_source_name='TCP:"));
+
+  ASSERT_NE(null_ptr, strstr(msg_buffer[0], "test_rcv_cb: type=0, sqn=0, source='TCP:"));
+
+  ASSERT_NE(null_ptr, strstr(log_buffer[3], "test_src_conn_create_cb, clientd='SrcClientd', peer:  status=0, flags=0x2f, src_metadata=none, rcv_metadata='Meta r_ct', no rcv_source_name,"));
+
+  ASSERT_EQ(1, msg_cnt);
+  ASSERT_EQ(4, log_cnt);
+
+  err = lbm_src_send_ex(lbmct_src_get_um_src(ct_src), "msg0", 5, LBM_MSG_FLUSH, &info);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+  SLEEP_MSEC(10);
+
+  ASSERT_NE(null_ptr, strstr(msg_buffer[1], "test_rcv_channel_cb: type=0, sqn=1, source='TCP"));
+  ASSERT_NE(null_ptr, strstr(msg_buffer[1], "properties=(nil), clientd='(null)', source_clientd='', data='msg0'"));
+  ASSERT_EQ(2, msg_cnt);
+
+  err = lbmct_rcv_delete(ct_rcv);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  SLEEP_MSEC(20);
+
+  err = lbmct_src_delete(ct_src);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  SLEEP_MSEC(20);
+
+  err = lbmct_delete(s_ct);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+  err = lbmct_delete(r_ct);
+  ASSERT_EQ(0, err) << lbm_errmsg();
+
+  ASSERT_EQ(6, log_cnt);
+  ASSERT_EQ(3, msg_cnt);
+}  /* Ctnullchannel */
 
 int main(int argc, char **argv) {
   lbm_context_attr_t *ctx_attr;

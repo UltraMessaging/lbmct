@@ -530,6 +530,11 @@ int lbmct_rcv_create(lbmct_rcv_t **ct_rcvp, lbmct_t *ct, const char *topic_str,
   return LBM_OK;
 }  /* lbmct_rcv_create */
 
+/* Public API to get the underlying UM receive object. */
+lbm_rcv_t *lbmct_rcv_get_um_rcv(lbmct_rcv_t *ct_rcv)
+{
+  return ct_rcv->um_rcv;
+}  /* lbmct_rcv_get_um_rcv */
 
 /* Public API to delete a receiver object. */
 int lbmct_rcv_delete(lbmct_rcv_t *ct_rcv)
@@ -932,6 +937,8 @@ int lbmct_ctrlr_cmd_ct_rcv_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
   lbm_rcv_topic_attr_t *rcv_attr = NULL;
   lbm_rcv_src_notification_func_t src_notif_func;  /* config option */
   int err;
+  int nullbehavior = 0;
+  size_t optlen = sizeof(int);
 
   /* Sanity checks. */
   if (ct->sig != LBMCT_SIG_CT) E_RTN(E_BAD_SIG(ct), -1);
@@ -981,6 +988,19 @@ int lbmct_ctrlr_cmd_ct_rcv_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
   err = lbm_rcv_topic_attr_setopt(rcv_attr, "source_notification_function",
     &src_notif_func, sizeof(src_notif_func));
   if (err != LBM_OK) LBMCT_RCV_CREATE_CLEANUP_E_RTN(lbm_errmsg());
+
+  /* check spectrum null_channel_behavior setup */
+  err = lbm_rcv_topic_attr_getopt(rcv_attr, "null_channel_behavior", &nullbehavior, &optlen);
+  if (err != LBM_OK) LBMCT_RCV_CREATE_CLEANUP_E_RTN(lbm_errmsg());
+
+  if (nullbehavior == LBM_RCV_TOPIC_ATTR_CHANNEL_BEHAVIOR_DISCARD_MSGS) {
+    int behavior = LBM_RCV_TOPIC_ATTR_CHANNEL_BEHAVIOR_DELIVER_MSGS;
+
+    lbm_logf(LBM_LOG_WARNING, "Warning at %s:%d, lbmct does not support nullbehavior as LBM_RCV_TOPIC_ATTR_CHANNEL_BEHAVIOR_DISCARD_MSGS. "
+			   "No change, Using default LBM_RCV_TOPIC_ATTR_CHANNEL_BEHAVIOR_DELIVER_MSGS.\n", BASENAME(__FILE__), __LINE__);
+    err = lbm_rcv_topic_attr_setopt(rcv_attr, "null_channel_behavior", &behavior, sizeof(int));
+    if (err != LBM_OK) LBMCT_RCV_CREATE_CLEANUP_E_RTN(lbm_errmsg());
+  }
 
   /* Create the UM receiver object. */
   err = lbm_rcv_topic_lookup(&lbm_topic, ct->ctx, ct_rcv->topic_str, rcv_attr);
