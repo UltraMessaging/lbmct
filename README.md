@@ -44,7 +44,7 @@ Topic applications.
 * [Java User Guide](doc/Java_Userguide.md) - explains how to write Java-language
 Connected Topic applications.
 * [C API Reference](doc/c/index.html) - details on each C API.
-* [Java API Reference](doc/Java/index.html) - details on each Java API.
+* [Java API Reference](doc/java/index.html) - details on each Java API.
 * [Internal Design](doc/Internal_Design.md) - details of the CT implementation.
 
 ### Source Code
@@ -255,5 +255,5 @@ Topic applications.
 * [Java User Guide](doc/Java_Userguide.md) - explains how to write Java-language
 Connected Topic applications.
 * [C API Reference](doc/c/index.html) - details on each C API.
-* [Java API Reference](doc/Java/index.html) - details on each Java API.
+* [Java API Reference](doc/java/index.html) - details on each Java API.
 * [Internal Design](doc/Internal_Design.md) - details of the CT implementation.

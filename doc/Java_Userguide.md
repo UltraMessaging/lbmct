@@ -89,11 +89,11 @@ For example, most applications have only one CT object which can host any
 number of CT Sources and CT Receivers.
 
 * Create a CT Receiver object with the constructor
-[LbmCtRcv](file:///Users/sford/Documents/GitHub/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCtRcv.html#a53b8fa9db0ee57ab4e00d31dbb4f5c88).
+[LbmCtRcv](https://ultramessaging.github.io/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCtRcv.html).
 This only creates the object.
 It still needs to be initialized, which is done with the method
-[LbmCtRcv.start](file:///Users/sford/Documents/GitHub/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCtRcv.html#a7a6a9246fc34dbaf21f6e5fba5eab548).
-Note that the normal UM source APIs involve looking up a source topic,
+[LbmCtRcv.start](https://ultramessaging.github.io/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCtRcv.html#a7a6a9246fc34dbaf21f6e5fba5eab548).
+Note that the normal UM receiver APIs involve looking up a source topic,
 and then creating the receiver object.
 The CT API combines those two operations into a single API.
 Also, the subscriber provides two application callback functions
@@ -127,8 +127,8 @@ the call to delete will fail.
 
 ## Application Metadata
 
-When a publisher or subscriber create a CT object
-(with [lbmct_create()](#lbmct_create)),
+When a publisher or subscriber create a CT object (with
+[LbmCt](https://ultramessaging.github.io/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCt.html#a4f632556d3bc12700fff65cc260bf4f5)),
 the application can optionally pass in a block of binary application metadata.
 This block of data is delivered to the connected peer in its connection
 create application callback.
@@ -139,27 +139,27 @@ identification information so that each application knows "who" the peer is.
 
 No attempt is made to interpret this data.
 Many applications supply a simple string.
-If C binary structures are supplied, be aware that the fields will not be
-marshalled; if platforms of different "endian" are used,
-it is the application's responsibility to convert between host and network
-order.
+
+Note that when the CT object is created, the passed-in metadata is <i>copied</i>.
+I.e. CT does not retain a reference to the passed-in object.
+Changes made to the object after CT creation are not seen by CT.
 
 ## Debugging
 
-The [LbmCtConfig](https://ultramessaging.github.io/lbmct/javadoc/com/latencybusters/lbmct/LbmCtConfig.html)
-object has an option for debugging which is set by
-[setTestBits](https://ultramessaging.github.io/lbmct/javadoc/com/latencybusters/lbmct/LbmCtConfig.html#setTestBits-int-).
+The [LbmCtConfig](https://ultramessaging.github.io/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCtConfig.html)
+class has an option for debugging which is set by
+[setTestBits](https://ultramessaging.github.io/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCtConfig.html#ad0980cbc7c90be701ac60c68465fb018).
 This is a bitmap of values which enable various behavior changes used for testing and debugging.
 A normal application should have no need of using this feature.
 It is intended for a maintainer of CT to diagnose problems with the package and for writing automated tests.
 
 In particular, the bitmap value
-[TEST_BITS_DEBUG](https://ultramessaging.github.io/lbmct/javadoc/com/latencybusters/lbmct/LbmCtConfig.html#TEST_BITS_DEBUG)
+[TEST_BITS_DEBUG](https://ultramessaging.github.io/lbmct/doc/java/classcom_1_1latencybusters_1_1lbmct_1_1LbmCtConfig.html#a353b6bb36272b65de60be778ef4f86e8)
 enables a simple internal unbounded event recorder which can show the sequence of events that lead up to
 a misbehavior.
 The LbmCtCtrlr object contains a blocking queue named `debugQ` into which debugging strings are enqueued
 using the method <tt>LbmCt.dbg(String)</tt>.
 Since it is an unbounded queue, it should not be enabled for long periods of time.
 
-To examine the queue, I've just been setting a breakpoint and using the debugger.
-It would be straight-forward to print it as well.
+To examine the queue, the Java debugger can be used to set breakpoints
+and display its contents.
