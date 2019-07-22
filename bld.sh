@@ -34,10 +34,9 @@ export LBM_LICENSE_INFO
 export LD_LIBRARY_PATH
 export PATH
 
-cd java
-
-# The built jar files will go in the java directory.
-JAR_DEST=`/bin/pwd`
+CT_HOME=`/bin/pwd`
+HTML_DEST="$CT_HOME/html"
+JAR_DEST="$CT_HOME/java"
 
 # Many tool chains take care of the dependencies automatically.
 # For this minimal build, dependencies must be handled explicitly.
@@ -47,9 +46,38 @@ UM_DEPS=$UM_JARS/UMS.jar:$JAR_DEST/lbmext.jar
 TEST_DEPS=$UM_DEPS:$JUNIT:$HAMCREST:$JAR_DEST/lbmct.jar
 
 # Clean out previous build results.
-rm -rf ../doc/java
+cd $CT_HOME
+rm -rf html
+mkdir html
+cd $JAR_DEST
 find . -name '*.class' -print0 | xargs -0 rm -f
 rm -f *.jar
+
+# Build doc.
+
+# Switched from javadoc to Doxygen.
+###cd $JAR_DEST/main
+###$JAVA_HOME/javadoc -d ../../javadoc -quiet -cp ".:$UM_DEPS" -linksource com.latencybusters.lbmct
+
+# First pass: just generate tag files.  Ignore errors.
+cd $CT_HOME/manual
+doxygen >/dev/null 2>&1
+rm -rf html
+
+cd $JAR_DEST
+doxygen Doxyfile >/dev/null 2>&1
+rm -rf html
+
+# Second pass: generate doc.
+cd $CT_HOME/manual
+doxygen
+mv html $CT_HOME/html/manual
+
+cd $JAR_DEST
+doxygen Doxyfile |
+  sed '/^[A-Za-z][a-z]*ing /d;/^lookup cache used/d;/^finished/d;/^Add /d;/^Search /d'
+mv html $CT_HOME/html/java
+exit
 
 # Build the logging extension to UM.
 
@@ -70,17 +98,6 @@ if [ $? -ne 0 ]; then exit; fi
 cd ../../..
 jar -cf $JAR_DEST/lbmct.jar com/latencybusters/lbmct/*.class
 if [ $? -ne 0 ]; then exit; fi
-
-# Build doc.
-
-# Switched from javadoc to Doxygen.
-###cd $JAR_DEST/main
-###$JAVA_HOME/javadoc -d ../../javadoc -quiet -cp ".:$UM_DEPS" -linksource com.latencybusters.lbmct
-
-cd $JAR_DEST/..
-doxygen java/Doxyfile |
-  sed '/^[A-Za-z][a-z]*ing /d;/^lookup cache used/d;/^finished/d;/^Add /d;/^Search /d'
-mv html doc/java
 
 # Minimal examples
 

@@ -21,8 +21,7 @@
  */
 
 /**
- * Provides "Connected Topics" semantics for Ultra Messaging; see
- * <a href="https://ultramessaging.github.io/lbmct">https://ultramessaging.github.io/lbmct</a> for overview and user manual.
+ * Provides "Connected Topics" semantics for Ultra Messaging; see \ref overview user manual.
  * The Github repository lives at <a href="https://github.com/UltraMessaging/lbmct">https://github.com/UltraMessaging/lbmct</a>.
  */
 package com.latencybusters.lbmct;

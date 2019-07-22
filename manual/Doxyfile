@@ -1,0 +1,35 @@
+PROJECT_NAME           = "LbmCt: Connected Topics"
+PROJECT_LOGO           =
+OUTPUT_DIRECTORY       = .
+INPUT                  = index.doc
+HTML_HEADER       =
+HTML_FOOTER       = footer.html
+QUIET             = YES
+WARNINGS          = YES
+DISABLE_INDEX     = YES
+GENERATE_TREEVIEW = YES
+EXTRACT_ALL       = NO
+EXTRACT_PRIVATE   = NO
+GENERATE_MAN      = NO
+GENERATE_LATEX    = NO
+GENERATE_HTML     = YES
+GENERATE_HTMLHELP = NO
+GENERATE_RTF      = NO
+GENERATE_XML      = NO
+HTML_COLORSTYLE_SAT = 0
+ENABLED_SECTIONS  = logo_on
+ENABLE_PREPROCESSING = NO
+CASE_SENSE_NAMES  = NO
+IMAGE_PATH        = .
+FILE_PATTERNS     = *.cpp *.h *.doc
+# EXAMPLE_PATH      = ../examples
+RECURSIVE         = NO
+
+GENERATE_TAGFILE  = ../html/manual.tag
+TAGFILES          = ../html/java.tag=../java
+ALLEXTERNALS      = NO
+PERL_PATH         = /usr/bin/perl
+SEARCHENGINE      = NO
+PDF_HYPERLINKS    = YES
+STRIP_CODE_COMMENTS = NO
+HTML_STYLESHEET   = doxygen_manual.css

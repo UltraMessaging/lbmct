@@ -74,6 +74,14 @@ public class LbmCtRcv {
   boolean isStopping() { return stopping; }
 
   /**
+   * Obtain a reference to a CT Source's underlying UM receiver.
+   * This is needed so that the application can send messages.
+   * @return  reference to underlying UM source.
+   */
+  @SuppressWarnings("WeakerAccess")  // public API.
+  public LBMReceiver getUmRcv() { return umRcv; }
+
+  /**
    * Initilaizes a CT Receiver object.
    * This is typically called immediately after the object is created ({@link #LbmCtRcv} constructor).
    * The <tt>start</tt> method can return before any connections are made.
