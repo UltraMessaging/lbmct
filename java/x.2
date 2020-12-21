@@ -1,0 +1,580 @@
+JUnit version 4.13-beta-3
+.Test t0000
+UM versionUMP 6.12.1 [UMP-6.12.1] [64-bit] Build: Nov  1 2019, 14:18:00 ( DEBUG license LBT-RM LBT-RU LBT-IPC LBT-SMX ) WC[PCRE 7.4 2007-09-21, regex, appcb] HRT[mach_absolute_time(),timebase=(1,1)]
+LOG[0]=WARNING: (541535023817965) Core-9401-4: WARNING: default_interface for a context should be set to a valid network interface.
+LOG[1]=WARNING: (541535023945413) Core-5688-1833: WARNING: Host has multiple multicast-capable interfaces; going to use [en0][192.168.1.63].
+LOG[2]=WARNING: (541535026214113) Core-5688-3273: WARNING: could not set multicast SO_RCVBUF to requested value 8388608
+LOG[3]=WARNING: (541535027824720) Core-5688-3273: WARNING: could not set multicast SO_RCVBUF to requested value 8388608
+LOG[4]=WARNING: (541535028106358) Core-9401-4: WARNING: default_interface for a context should be set to a valid network interface.
+LOG[5]=WARNING: (541535028143728) Core-5688-1833: WARNING: Host has multiple multicast-capable interfaces; going to use [en0][192.168.1.63].
+LOG[6]=WARNING: (541535028682603) Core-5688-3273: WARNING: could not set multicast SO_RCVBUF to requested value 8388608
+LOG[7]=WARNING: (541535030120175) Core-5688-3273: WARNING: could not set multicast SO_RCVBUF to requested value 8388608
+.Test t0003
+.Test t0007
+.Test t0010
+LOG[0]=INFO: (541535071399919) cmdTest: Testing...0
+LOG[1]=INFO: (541535574873965) cmdTest: Testing...1
+.Test t0013
+LOG[0]=INFO: (541536092399036) Test0013RcvCb: type=20, position=0, limit=0
+LOG[1]=INFO: (541536245266306) Test0013RcvCb: type=0, position=0, limit=6
+LOG[2]=INFO: (541536245577186) Test0013RcvCb: t0013GlobalBB.toString=java.nio.HeapByteBuffer[pos=0 lim=6 cap=100], sb.toString=Hello1
+LOG[3]=INFO: (541536245647024) Test0013RcvCb: dataLength=6, position=6, limit=6
+LOG[4]=INFO: (541536245743139) Test0013RcvCb: type=0, position=0, limit=6
+LOG[5]=INFO: (541536245807095) Test0013RcvCb: t0013GlobalBB.toString=java.nio.HeapByteBuffer[pos=0 lim=6 cap=100], sb.toString=Hello2
+LOG[6]=INFO: (541536245846803) Test0013RcvCb: dataLength=6, position=6, limit=6
+LOG[7]=INFO: (541536245905267) Test0013RcvCb: type=0, position=0, limit=6
+LOG[8]=INFO: (541536245954508) Test0013RcvCb: t0013GlobalBB.toString=java.nio.HeapByteBuffer[pos=0 lim=6 cap=100], sb.toString=Hello3
+LOG[9]=INFO: (541536245996206) Test0013RcvCb: dataLength=6, position=6, limit=6
+LOG[10]=INFO: (541536349067067) Test0013RcvCb: type=1, position=0, limit=0
+.Test t0015
+type=20, position=0, limit=0
+type=0, position=0, limit=21
+dataLength=21, c=java.nio.HeapByteBuffer[pos=20 lim=21 cap=100]
+magic=2064878592, l=0, sb.toString=Test0015 string, s=0000: 7b 13 8c 00 0f 54 65 73  {....Tes
+0008: 74 30 30 31 35 20 73 74  t0015 st
+0016: 72 69 6e 67 30 00 00 00  ring0...
+0024: 00 00 00 00 00 00 00 00  ........
+0032: 00 00 00 00 00 00 00 00  ........
+0040: 00 00 00 00 00 00 00 00  ........
+0048: 00 00 00 00 00 00 00 00  ........
+0056: 00 00 00 00 00 00 00 00  ........
+0064: 00 00 00 00 00 00 00 00  ........
+0072: 00 00 00 00 00 00 00 00  ........
+0080: 00 00 00 00 00 00 00 00  ........
+0088: 00 00 00 00 00 00 00 00  ........
+0096: 00 00 00 00              ....    
+
+.Test t0020
+.Test t0022
+.Test t0030
+.Test t0032
+.Test t0040
+LOG[0]=INFO: (541537300963575) Test0040RcvConnCreateCb::onRcvConnCreate: rcvCbArg=ctRcvA cbArg, metadata=
+0000: 4d 79 4d 65 74 61        MyMeta  
+LOG[1]=INFO: (541537302953688) Test0040RcvCb::onReceive: type=0, topic='abc', sqn=0, position=50, limit=50, prop=com.latencybusters.lbm.LBMMessageProperties@48246721, rcvCbArg=ctRcvA cbArg, rcvConnCbArg=Test0040RcvConnCreateCb rtn, handshakeMessage=true, msg=
+0000: 7b 13 8c 02 a0 f9 69 bb  {.....i.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 00 a0 f9  /;......
+0024: 69 bb ff ff ff ff c0 a8  i.......
+0032: 01 3f 2f 3b 00 00 00 01  .?/;....
+0040: 00 00 00 06 4d 79 4d 65  ....MyMe
+0048: 74 61                    ta      
+LOG[2]=INFO: (541537303807181) Test0040SrcConnCreateCb::onSrcConnCreate: srcCbArg=ctSrcA cbArg, metadata=
+0000: 4d 79 4d 65 74 61        MyMeta  
+LOG[3]=INFO: (541538286071308) Test0040RcvCb::onReceive: type=0, topic='abc', sqn=1, position=7, limit=7, prop=null, rcvCbArg=ctRcvA cbArg, rcvConnCbArg=Test0040RcvConnCreateCb rtn, handshakeMessage=false, msg=
+0000: 6d 73 67 30 30 34 30     msg0040 
+LOG[4]=INFO: (541539294836991) Test0040RcvCb::onReceive: type=0, topic='abc', sqn=2, position=40, limit=40, prop=com.latencybusters.lbm.LBMMessageProperties@48246721, rcvCbArg=ctRcvA cbArg, rcvConnCbArg=Test0040RcvConnCreateCb rtn, handshakeMessage=true, msg=
+0000: 7b 13 8c 05 a0 f9 69 bb  {.....i.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 00 a0 f9  /;......
+0024: 69 bb ff ff ff ff c0 a8  i.......
+0032: 01 3f 2f 3b 00 00 00 01  .?/;....
+LOG[5]=INFO: (541539295494332) Test0040RcvConnDeleteCb::onRcvConnDelete: rcvCbArg=ctRcvA cbArg, rcvConnCbArg=Test0040RcvConnCreateCb rtn, metadata=
+0000: 4d 79 4d 65 74 61        MyMeta  
+LOG[6]=INFO: (541539298913912) Test0040SrcConnDeleteCb::onSrcConnDelete: rcvCbArg=ctSrcA cbArg, srcConnCbArg=Test0040SrcConnCreateCb rtn, metadata=
+0000: 4d 79 4d 65 74 61        MyMeta  
+.Test t0052
+.Test t0054
+.Test t0100
+{0} (541544150415865) test_rcv_cb: type=0, sqn=0, source='TCP:192.168.1.63:12003:9608ecee[2291528040]', properties=(nil), clientd='RcvClientd', source_clientd='(null)', handshakeMessage=false, data:
+0000: 6d 73 67 30              msg0    
+
+LOG[0]=WARNING: (541544396654920) giving up connecting to source 'TCP:192.168.1.63:12003:9608ecee[2291528040]' for topic 'CtOldSrc'
+{1} (541544625495309) test_rcv_cb: type=0, sqn=1, source='TCP:192.168.1.63:12003:9608ecee[2291528040]', properties=(nil), clientd='RcvClientd', source_clientd='(null)', handshakeMessage=false, data:
+0000: 6d 73 67 31              msg1    
+
+.Test t0110
+LOG[0]=INFO: (541544772867711) test_rcv_conn_create_cb, clientd='RcvClientd', peer: status=0, flags=0xf, src_metadata='Meta s_ct', rcv_metadata='Meta r_ct', rcv_source_name='TCP:192.168.1.63:12003:afee9bb4[2291528041]', rcv_start_seq_num=0, no rcv_end_seq_num
+LOG[1]=INFO: (541544773004129) LBMCT_TEST_BITS_NO_COK, skipping send of CRSP to CtRetryExceed2
+{0} (541544772982411) test_rcv_cb: type=0, sqn=0, source='TCP:192.168.1.63:12003:afee9bb4[2291528041]', properties=(non-nil), clientd='RcvClientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 0f ed a7 a3  {.......
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 00 62 5c  /<....b\
+0024: 8a 4a ff ff ff ff c0 a8  .J......
+0032: 01 3f 2f 3b 00 00 00 00  .?/;....
+0040: 00 00 00 09 4d 65 74 61  ....Meta
+0048: 20 73 5f 63 74            s_ct   
+, props=LbmCt.h:1.
+LOG[2]=INFO: (541545270006620) LBMCT_TEST_BITS_NO_COK, skipping send of CRSP to CtRetryExceed2
+{1} (541545269916178) test_rcv_cb: type=0, sqn=1, source='TCP:192.168.1.63:12003:afee9bb4[2291528041]', properties=(non-nil), clientd='RcvClientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 0f ed a7 a3  {.......
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 00 62 5c  /<....b\
+0024: 8a 4a ff ff ff ff c0 a8  .J......
+0032: 01 3f 2f 3b 00 00 00 00  .?/;....
+0040: 00 00 00 09 4d 65 74 61  ....Meta
+0048: 20 73 5f 63 74            s_ct   
+, props=LbmCt.h:1.
+LOG[3]=INFO: (541545771000461) LBMCT_TEST_BITS_NO_COK, skipping send of CRSP to CtRetryExceed2
+{2} (541545770928976) test_rcv_cb: type=0, sqn=2, source='TCP:192.168.1.63:12003:afee9bb4[2291528041]', properties=(non-nil), clientd='RcvClientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 0f ed a7 a3  {.......
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 00 62 5c  /<....b\
+0024: 8a 4a ff ff ff ff c0 a8  .J......
+0032: 01 3f 2f 3b 00 00 00 00  .?/;....
+0040: 00 00 00 09 4d 65 74 61  ....Meta
+0048: 20 73 5f 63 74            s_ct   
+, props=LbmCt.h:1.
+LOG[4]=WARNING: (541546270271913) giving up accepting connection from receiver 'CtRetryExceed2'
+LOG[5]=INFO: (541547071933906) test_rcv_conn_delete_cb, clientd='RcvClientd', conn_clientd='RcvConnClientd', peer: status=-1, flags=0xf, src_metadata='Meta s_ct', rcv_metadata='Meta r_ct', rcv_source_name='TCP:192.168.1.63:12003:afee9bb4[2291528041]', rcv_start_seq_num=0, no rcv_end_seq_num
+.Test t0120
+LOG[0]=INFO: (541547812858870) LBMCT_TEST_BITS_NO_CRSP, skipping send of CRSP to CtRetryExceed2
+LOG[1]=INFO: (541547917631805) LBMCT_TEST_BITS_NO_CRSP, skipping send of CRSP to CtRetryExceed2
+LOG[2]=INFO: (541548412539268) LBMCT_TEST_BITS_NO_CRSP, skipping send of CRSP to CtRetryExceed2
+LOG[3]=WARNING: (541548903468402) giving up connecting to source 'TCP:192.168.1.63:12004:9565d846[2291528042]' for topic 'CtRetryExceed2'
+LOG[4]=INFO: (541548913774568) LBMCT_TEST_BITS_NO_CRSP, skipping send of CRSP to CtRetryExceed2
+LOG[5]=INFO: (541549414461644) LBMCT_TEST_BITS_NO_CRSP, skipping send of CRSP to CtRetryExceed2
+LOG[6]=WARNING: (541549914456315) giving up accepting connection from receiver 'CtRetryExceed2'
+.Test t0130
+LOG[0]=INFO: (541550657326661) test_rcv_conn_create_cb, clientd='RcvClientd', peer: status=0, flags=0xf, src_metadata='Meta s_ct', rcv_metadata='Meta r_ct', rcv_source_name='TCP:192.168.1.63:12005:5044ed3b[2291528043]', rcv_start_seq_num=0, no rcv_end_seq_num
+{0} (541550657650240) test_rcv_cb: type=0, sqn=0, source='TCP:192.168.1.63:12005:5044ed3b[2291528043]', properties=(non-nil), clientd='RcvClientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 1a 64 a9 4c  {....d.L
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 00 60 30  /<....`0
+0024: dd 38 ff ff ff ff c0 a8  .8......
+0032: 01 3f 2f 3b 00 00 00 00  .?/;....
+0040: 00 00 00 09 4d 65 74 61  ....Meta
+0048: 20 73 5f 63 74            s_ct   
+, props=LbmCt.h:1.
+LOG[1]=INFO: (541550661654208) test_src_conn_create_cb, clientd='SrcClientd', peer: status=0, flags=0xb, src_metadata='Meta s_ct', rcv_metadata='Meta r_ct', no rcv_source_name, rcv_start_seq_num=0, no rcv_end_seq_num
+LOG[2]=INFO: (541550663964859) LBMCT_TEST_BITS_NO_DRSP, skipping send of DRSP to CtRetryExceed2
+LOG[3]=INFO: (541551158247882) LBMCT_TEST_BITS_NO_DRSP, skipping send of DRSP to CtRetryExceed2
+LOG[4]=INFO: (541551654087956) LBMCT_TEST_BITS_NO_DRSP, skipping send of DRSP to CtRetryExceed2
+LOG[5]=WARNING: (541552144760203) giving up stopping connection to source 'TCP:192.168.1.63:12005:5044ed3b[2291528043]' for topic 'CtRetryExceed2'
+LOG[6]=INFO: (541552144901914) test_rcv_conn_delete_cb, clientd='RcvClientd', conn_clientd='RcvConnClientd', peer: status=-1, flags=0xf, src_metadata='Meta s_ct', rcv_metadata='Meta r_ct', rcv_source_name='TCP:192.168.1.63:12005:5044ed3b[2291528043]', rcv_start_seq_num=0, no rcv_end_seq_num
+LOG[7]=INFO: (541552154371659) LBMCT_TEST_BITS_NO_DRSP, skipping send of DRSP to CtRetryExceed2
+LOG[8]=INFO: (541552654792161) LBMCT_TEST_BITS_NO_DRSP, skipping send of DRSP to CtRetryExceed2
+LOG[9]=WARNING: (541553154996764) giving up stopping connection from receiver for topic 'CtRetryExceed2'
+LOG[10]=INFO: (541553155373253) test_src_conn_delete_cb, clientd='SrcClientd', conn_clientd='SrcConnClientd', peer: status=-1, flags=0xb, src_metadata='Meta s_ct', rcv_metadata='Meta r_ct', no rcv_source_name, rcv_start_seq_num=0, no rcv_end_seq_num
+.Test t0140
+LOG[0]=INFO: (541555173562672) test_rcv_conn_create_cb, clientd='rcv1CtMultiStream1', peer: status=0, flags=0xf, src_metadata='Meta ct1', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12005:9ab2d04d[2291528044]', rcv_start_seq_num=0, no rcv_end_seq_num
+{0} (541555173751719) test_rcv_cb: type=0, sqn=0, source='TCP:192.168.1.63:12005:9ab2d04d[2291528044]', properties=(non-nil), clientd='rcv1CtMultiStream1', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 47 e8 84 e2  {...G...
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 00 47 e8  /;....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 01  .?/;....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 31               ct1    
+, props=LbmCt.h:1.
+LOG[1]=INFO: (541555178563802) test_src_conn_create_cb, clientd='src1CtMultiStream1', peer: status=0, flags=0xb, src_metadata='Meta ct1', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=0, no rcv_end_seq_num
+{1} (541555194819200) test_rcv_cb: type=0, sqn=1, source='TCP:192.168.1.63:12005:9ab2d04d[2291528044]', properties=(non-nil), clientd='rcv1CtMultiStream1', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 b9 23 7a f6  {....#z.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 00 47 e8  /<....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 02  .?/;....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 31               ct1    
+, props=LbmCt.h:1.
+LOG[2]=INFO: (541555197436144) test_rcv_conn_create_cb, clientd='rcv2CtMultiStream1', peer: status=0, flags=0xf, src_metadata='Meta ct1', rcv_metadata='Meta ct2', rcv_source_name='TCP:192.168.1.63:12005:9ab2d04d[2291528044]', rcv_start_seq_num=1, no rcv_end_seq_num
+{2} (541555197605114) test_rcv_cb: type=0, sqn=1, source='TCP:192.168.1.63:12005:9ab2d04d[2291528044]', properties=(non-nil), clientd='rcv2CtMultiStream1', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 b9 23 7a f6  {....#z.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 00 47 e8  /<....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 02  .?/;....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 31               ct1    
+, props=LbmCt.h:1.
+LOG[3]=INFO: (541555201893822) test_src_conn_create_cb, clientd='src1CtMultiStream1', peer: status=0, flags=0xb, src_metadata='Meta ct1', rcv_metadata='Meta ct2', no rcv_source_name, rcv_start_seq_num=1, no rcv_end_seq_num
+LOG[4]=INFO: (541555219409110) test_rcv_conn_create_cb, clientd='rcv3CtMultiStream2', peer: status=0, flags=0xf, src_metadata='Meta ct1', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12006:ea0bbefa[2291528045]', rcv_start_seq_num=0, no rcv_end_seq_num
+{3} (541555219577794) test_rcv_cb: type=0, sqn=0, source='TCP:192.168.1.63:12006:ea0bbefa[2291528045]', properties=(non-nil), clientd='rcv3CtMultiStream2', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 47 e8 84 e2  {...G...
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 03 47 e8  /;....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 04  .?/;....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 31               ct1    
+, props=LbmCt.h:1.
+LOG[5]=INFO: (541555222423592) test_src_conn_create_cb, clientd='src2CtMultiStream2', peer: status=0, flags=0xb, src_metadata='Meta ct1', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=0, no rcv_end_seq_num
+LOG[6]=INFO: (541555247128889) test_rcv_conn_create_cb, clientd='rcv3CtMultiStream2', peer: status=0, flags=0xf, src_metadata='Meta ct2', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12007:cbe93100[1180196304]', rcv_start_seq_num=0, no rcv_end_seq_num
+{4} (541555247277646) test_rcv_cb: type=0, sqn=0, source='TCP:192.168.1.63:12007:cbe93100[1180196304]', properties=(non-nil), clientd='rcv3CtMultiStream2', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 47 e8 84 e2  {...G...
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 05 b9 23  /;.....#
+0024: 7a f6 ff ff ff ff c0 a8  z.......
+0032: 01 3f 2f 3c 00 00 00 01  .?/<....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 32               ct2    
+, props=LbmCt.h:1.
+LOG[7]=INFO: (541555252968805) test_src_conn_create_cb, clientd='src3CtMultiStream2', peer: status=0, flags=0xb, src_metadata='Meta ct2', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=0, no rcv_end_seq_num
+LOG[8]=INFO: (541555255544285) test_rcv_conn_create_cb, clientd='rcv4CtMultiStream3', peer: status=0, flags=0xf, src_metadata='Meta ct1', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12008:5e572a56[2291528046]', rcv_start_seq_num=0, no rcv_end_seq_num
+{5} (541555255654232) test_rcv_cb: type=0, sqn=0, source='TCP:192.168.1.63:12008:5e572a56[2291528046]', properties=(non-nil), clientd='rcv4CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 47 e8 84 e2  {...G...
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 06 47 e8  /;....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 07  .?/;....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 31               ct1    
+, props=LbmCt.h:1.
+LOG[9]=INFO: (541555258133555) test_src_conn_create_cb, clientd='src4CtMultiStream3', peer: status=0, flags=0xb, src_metadata='Meta ct1', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=0, no rcv_end_seq_num
+LOG[10]=INFO: (541555272087170) test_rcv_conn_create_cb, clientd='rcv4CtMultiStream3', peer: status=0, flags=0xf, src_metadata='Meta ct2', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12009:fa39c25d[1180196305]', rcv_start_seq_num=0, no rcv_end_seq_num
+{6} (541555272227748) test_rcv_cb: type=0, sqn=0, source='TCP:192.168.1.63:12009:fa39c25d[1180196305]', properties=(non-nil), clientd='rcv4CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 47 e8 84 e2  {...G...
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 08 b9 23  /;.....#
+0024: 7a f6 ff ff ff ff c0 a8  z.......
+0032: 01 3f 2f 3c 00 00 00 02  .?/<....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 32               ct2    
+, props=LbmCt.h:1.
+LOG[11]=INFO: (541555274208139) test_src_conn_create_cb, clientd='src5CtMultiStream3', peer: status=0, flags=0xb, src_metadata='Meta ct2', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=0, no rcv_end_seq_num
+{7} (541555296693180) test_rcv_cb: type=0, sqn=1, source='TCP:192.168.1.63:12009:fa39c25d[1180196305]', properties=(non-nil), clientd='rcv4CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 b9 23 7a f6  {....#z.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 03 b9 23  /<.....#
+0024: 7a f6 ff ff ff ff c0 a8  z.......
+0032: 01 3f 2f 3c 00 00 00 05  .?/<....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 32               ct2    
+, props=LbmCt.h:1.
+{8} (541555297530572) test_rcv_cb: type=0, sqn=1, source='TCP:192.168.1.63:12008:5e572a56[2291528046]', properties=(non-nil), clientd='rcv4CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 b9 23 7a f6  {....#z.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 04 47 e8  /<....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 09  .?/;....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 31               ct1    
+, props=LbmCt.h:1.
+LOG[12]=INFO: (541555299026483) test_rcv_conn_create_cb, clientd='rcv5CtMultiStream3', peer: status=0, flags=0xf, src_metadata='Meta ct2', rcv_metadata='Meta ct2', rcv_source_name='TCP:192.168.1.63:12009:fa39c25d[1180196305]', rcv_start_seq_num=1, no rcv_end_seq_num
+{9} (541555299116655) test_rcv_cb: type=0, sqn=1, source='TCP:192.168.1.63:12009:fa39c25d[1180196305]', properties=(non-nil), clientd='rcv5CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 b9 23 7a f6  {....#z.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 03 b9 23  /<.....#
+0024: 7a f6 ff ff ff ff c0 a8  z.......
+0032: 01 3f 2f 3c 00 00 00 05  .?/<....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 32               ct2    
+, props=LbmCt.h:1.
+LOG[13]=INFO: (541555302631179) test_rcv_conn_create_cb, clientd='rcv5CtMultiStream3', peer: status=0, flags=0xf, src_metadata='Meta ct1', rcv_metadata='Meta ct2', rcv_source_name='TCP:192.168.1.63:12008:5e572a56[2291528046]', rcv_start_seq_num=1, no rcv_end_seq_num
+{10} (541555302717434) test_rcv_cb: type=0, sqn=1, source='TCP:192.168.1.63:12008:5e572a56[2291528046]', properties=(non-nil), clientd='rcv5CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 b9 23 7a f6  {....#z.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 04 47 e8  /<....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 09  .?/;....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 31               ct1    
+, props=LbmCt.h:1.
+LOG[14]=INFO: (541555304964429) test_src_conn_create_cb, clientd='src5CtMultiStream3', peer: status=0, flags=0xb, src_metadata='Meta ct2', rcv_metadata='Meta ct2', no rcv_source_name, rcv_start_seq_num=1, no rcv_end_seq_num
+LOG[15]=INFO: (541555305064067) test_src_conn_create_cb, clientd='src4CtMultiStream3', peer: status=0, flags=0xb, src_metadata='Meta ct1', rcv_metadata='Meta ct2', no rcv_source_name, rcv_start_seq_num=1, no rcv_end_seq_num
+{11} (541555329638126) test_rcv_cb: type=0, sqn=2, source='TCP:192.168.1.63:12005:9ab2d04d[2291528044]', properties=(nil), clientd='rcv2CtMultiStream1', source_clientd='RcvConnClientd', handshakeMessage=false, data:
+0000: 6d 73 67 30              msg0    
+
+{12} (541555329891491) test_rcv_cb: type=0, sqn=2, source='TCP:192.168.1.63:12005:9ab2d04d[2291528044]', properties=(nil), clientd='rcv1CtMultiStream1', source_clientd='RcvConnClientd', handshakeMessage=false, data:
+0000: 6d 73 67 30              msg0    
+
+{13} (541555341555546) test_rcv_cb: type=0, sqn=1, source='TCP:192.168.1.63:12006:ea0bbefa[2291528045]', properties=(non-nil), clientd='rcv3CtMultiStream2', source_clientd='RcvConnClientd', handshakeMessage=false, data:
+0000: 6d 73 67 31              msg1    
+, props=CtOldSrcProp:10.
+{14} (541555354543568) test_rcv_cb: type=0, sqn=1, source='TCP:192.168.1.63:12007:cbe93100[1180196304]', properties=(nil), clientd='rcv3CtMultiStream2', source_clientd='RcvConnClientd', handshakeMessage=false, data:
+0000: 6d 73 67 32              msg2    
+
+{15} (541555365215002) test_rcv_cb: type=0, sqn=2, source='TCP:192.168.1.63:12008:5e572a56[2291528046]', properties=(nil), clientd='rcv5CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=false, data:
+0000: 6d 73 67 33              msg3    
+
+{16} (541555365516127) test_rcv_cb: type=0, sqn=2, source='TCP:192.168.1.63:12008:5e572a56[2291528046]', properties=(nil), clientd='rcv4CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=false, data:
+0000: 6d 73 67 33              msg3    
+
+{17} (541555378816261) test_rcv_cb: type=0, sqn=2, source='TCP:192.168.1.63:12009:fa39c25d[1180196305]', properties=(nil), clientd='rcv5CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=false, data:
+0000: 6d 73 67 34              msg4    
+
+{18} (541555379108902) test_rcv_cb: type=0, sqn=2, source='TCP:192.168.1.63:12009:fa39c25d[1180196305]', properties=(nil), clientd='rcv4CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=false, data:
+0000: 6d 73 67 34              msg4    
+
+{19} (541555595828326) test_rcv_cb: type=0, sqn=3, source='TCP:192.168.1.63:12005:9ab2d04d[2291528044]', properties=(non-nil), clientd='rcv2CtMultiStream1', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 b9 23 7a f6  {....#z.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 00 47 e8  /<....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 02  .?/;....
+, props=LbmCt.h:1.
+LOG[16]=INFO: (541555596759114) test_rcv_conn_delete_cb, clientd='rcv2CtMultiStream1', conn_clientd='RcvConnClientd', peer: status=0, flags=0x1f, src_metadata='Meta ct1', rcv_metadata='Meta ct2', rcv_source_name='TCP:192.168.1.63:12005:9ab2d04d[2291528044]', rcv_start_seq_num=1, rcv_end_seq_num=3
+{20} (541555596652247) test_rcv_cb: type=0, sqn=3, source='TCP:192.168.1.63:12005:9ab2d04d[2291528044]', properties=(non-nil), clientd='rcv1CtMultiStream1', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 b9 23 7a f6  {....#z.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 00 47 e8  /<....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 02  .?/;....
+, props=LbmCt.h:1.
+{21} (541555597521316) test_rcv_cb: type=0, sqn=4, source='TCP:192.168.1.63:12005:9ab2d04d[2291528044]', properties=(non-nil), clientd='rcv1CtMultiStream1', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 47 e8 84 e2  {...G...
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 00 47 e8  /;....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 01  .?/;....
+, props=LbmCt.h:1.
+LOG[17]=INFO: (541555598054252) test_rcv_conn_delete_cb, clientd='rcv1CtMultiStream1', conn_clientd='RcvConnClientd', peer: status=0, flags=0x1f, src_metadata='Meta ct1', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12005:9ab2d04d[2291528044]', rcv_start_seq_num=0, rcv_end_seq_num=4
+LOG[18]=WARNING: (541555599746083) LbmCtRcvConn::handshakeSendDok: error sending DOK to SOURCE:TCP:192.168.1.63:12005:9ab2d04d[2291528044]: com.latencybusters.lbm.LBMEInvalException: CoreApi-9901-03: target malformed (SOURCE type not valid (SOURCE:TCP:192.168.1.63:12005:9ab2d04d[2291528044]))
+	at com.latencybusters.lbm.LBMContext.lbmUnicastImmediateMessage(Native Method)
+	at com.latencybusters.lbm.LBMContext.send(LBMContext.java:940)
+	at com.latencybusters.lbmct.LbmCtRcvConn.handshakeSendDok(LbmCtRcvConn.java:593)
+	at com.latencybusters.lbmct.LbmCtRcvConn.cmdRcvSendDok(LbmCtRcvConn.java:581)
+	at com.latencybusters.lbmct.LbmCtCtrlr.run(LbmCtCtrlr.java:218)
+
+LOG[19]=INFO: (541555600689363) test_src_conn_delete_cb, clientd='src1CtMultiStream1', conn_clientd='SrcConnClientd', peer: status=0, flags=0x1b, src_metadata='Meta ct1', rcv_metadata='Meta ct2', no rcv_source_name, rcv_start_seq_num=1, rcv_end_seq_num=3
+LOG[20]=INFO: (541556600315034) test_src_conn_delete_cb, clientd='src1CtMultiStream1', conn_clientd='SrcConnClientd', peer: status=0, flags=0x1b, src_metadata='Meta ct1', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=0, rcv_end_seq_num=4
+{22} (541556603147554) test_rcv_cb: type=0, sqn=2, source='TCP:192.168.1.63:12006:ea0bbefa[2291528045]', properties=(non-nil), clientd='rcv3CtMultiStream2', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 47 e8 84 e2  {...G...
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 03 47 e8  /;....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 04  .?/;....
+, props=LbmCt.h:1.
+LOG[21]=INFO: (541556603778736) test_rcv_conn_delete_cb, clientd='rcv3CtMultiStream2', conn_clientd='RcvConnClientd', peer: status=0, flags=0x1f, src_metadata='Meta ct1', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12006:ea0bbefa[2291528045]', rcv_start_seq_num=0, rcv_end_seq_num=2
+LOG[22]=INFO: (541556606862340) test_src_conn_delete_cb, clientd='src2CtMultiStream2', conn_clientd='SrcConnClientd', peer: status=0, flags=0x1b, src_metadata='Meta ct1', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=0, rcv_end_seq_num=2
+{23} (541556608846450) test_rcv_cb: type=0, sqn=2, source='TCP:192.168.1.63:12007:cbe93100[1180196304]', properties=(non-nil), clientd='rcv3CtMultiStream2', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 47 e8 84 e2  {...G...
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 05 b9 23  /;.....#
+0024: 7a f6 ff ff ff ff c0 a8  z.......
+0032: 01 3f 2f 3c 00 00 00 01  .?/<....
+, props=LbmCt.h:1.
+LOG[23]=INFO: (541556609346077) test_rcv_conn_delete_cb, clientd='rcv3CtMultiStream2', conn_clientd='RcvConnClientd', peer: status=0, flags=0x1f, src_metadata='Meta ct2', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12007:cbe93100[1180196304]', rcv_start_seq_num=0, rcv_end_seq_num=2
+LOG[24]=INFO: (541556611221957) test_src_conn_delete_cb, clientd='src3CtMultiStream2', conn_clientd='SrcConnClientd', peer: status=0, flags=0x1b, src_metadata='Meta ct2', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=0, rcv_end_seq_num=2
+{24} (541556612155752) test_rcv_cb: type=0, sqn=3, source='TCP:192.168.1.63:12008:5e572a56[2291528046]', properties=(non-nil), clientd='rcv5CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 b9 23 7a f6  {....#z.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 04 47 e8  /<....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 09  .?/;....
+, props=LbmCt.h:1.
+LOG[25]=INFO: (541556612762125) test_rcv_conn_delete_cb, clientd='rcv5CtMultiStream3', conn_clientd='RcvConnClientd', peer: status=0, flags=0x1f, src_metadata='Meta ct1', rcv_metadata='Meta ct2', rcv_source_name='TCP:192.168.1.63:12008:5e572a56[2291528046]', rcv_start_seq_num=1, rcv_end_seq_num=3
+{25} (541556612688918) test_rcv_cb: type=0, sqn=3, source='TCP:192.168.1.63:12008:5e572a56[2291528046]', properties=(non-nil), clientd='rcv4CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 b9 23 7a f6  {....#z.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 04 47 e8  /<....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 09  .?/;....
+, props=LbmCt.h:1.
+{26} (541556613310129) test_rcv_cb: type=0, sqn=4, source='TCP:192.168.1.63:12008:5e572a56[2291528046]', properties=(non-nil), clientd='rcv4CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 47 e8 84 e2  {...G...
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 06 47 e8  /;....G.
+0024: 84 e2 ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3b 00 00 00 07  .?/;....
+, props=LbmCt.h:1.
+LOG[26]=INFO: (541556613626118) test_rcv_conn_delete_cb, clientd='rcv4CtMultiStream3', conn_clientd='RcvConnClientd', peer: status=0, flags=0x1f, src_metadata='Meta ct1', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12008:5e572a56[2291528046]', rcv_start_seq_num=0, rcv_end_seq_num=4
+LOG[27]=WARNING: (541556614030784) LbmCtRcvConn::handshakeSendDok: error sending DOK to SOURCE:TCP:192.168.1.63:12008:5e572a56[2291528046]: com.latencybusters.lbm.LBMEInvalException: CoreApi-9901-03: target malformed (SOURCE type not valid (SOURCE:TCP:192.168.1.63:12008:5e572a56[2291528046]))
+	at com.latencybusters.lbm.LBMContext.lbmUnicastImmediateMessage(Native Method)
+	at com.latencybusters.lbm.LBMContext.send(LBMContext.java:940)
+	at com.latencybusters.lbmct.LbmCtRcvConn.handshakeSendDok(LbmCtRcvConn.java:593)
+	at com.latencybusters.lbmct.LbmCtRcvConn.cmdRcvSendDok(LbmCtRcvConn.java:581)
+	at com.latencybusters.lbmct.LbmCtCtrlr.run(LbmCtCtrlr.java:218)
+
+LOG[28]=INFO: (541556614941850) test_src_conn_delete_cb, clientd='src4CtMultiStream3', conn_clientd='SrcConnClientd', peer: status=0, flags=0x1b, src_metadata='Meta ct1', rcv_metadata='Meta ct2', no rcv_source_name, rcv_start_seq_num=1, rcv_end_seq_num=3
+LOG[29]=WARNING: (541557619410967) LbmCtCtrlr.complete: async cmd error: com.latencybusters.lbm.LBMException: Not idle
+	at com.latencybusters.lbmct.Tmr.schedule(Tmr.java:87)
+	at com.latencybusters.lbmct.LbmCtRcvConn.cmdRcvSendDok(LbmCtRcvConn.java:582)
+	at com.latencybusters.lbmct.LbmCtCtrlr.run(LbmCtCtrlr.java:218)
+
+LOG[30]=INFO: (541557619592531) test_src_conn_delete_cb, clientd='src4CtMultiStream3', conn_clientd='SrcConnClientd', peer: status=0, flags=0x1b, src_metadata='Meta ct1', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=0, rcv_end_seq_num=4
+LOG[31]=INFO: (541557620093335) LbtCt::srcHandshakeDok: DOK handshake received for topic null with no connection
+{27} (541557621440277) test_rcv_cb: type=0, sqn=3, source='TCP:192.168.1.63:12009:fa39c25d[1180196305]', properties=(non-nil), clientd='rcv5CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 b9 23 7a f6  {....#z.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 03 b9 23  /<.....#
+0024: 7a f6 ff ff ff ff c0 a8  z.......
+0032: 01 3f 2f 3c 00 00 00 05  .?/<....
+, props=LbmCt.h:1.
+LOG[32]=INFO: (541557622105344) test_rcv_conn_delete_cb, clientd='rcv5CtMultiStream3', conn_clientd='RcvConnClientd', peer: status=0, flags=0x1f, src_metadata='Meta ct2', rcv_metadata='Meta ct2', rcv_source_name='TCP:192.168.1.63:12009:fa39c25d[1180196305]', rcv_start_seq_num=1, rcv_end_seq_num=3
+{28} (541557622100415) test_rcv_cb: type=0, sqn=3, source='TCP:192.168.1.63:12009:fa39c25d[1180196305]', properties=(non-nil), clientd='rcv4CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 b9 23 7a f6  {....#z.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 03 b9 23  /<.....#
+0024: 7a f6 ff ff ff ff c0 a8  z.......
+0032: 01 3f 2f 3c 00 00 00 05  .?/<....
+, props=LbmCt.h:1.
+{29} (541557622583438) test_rcv_cb: type=0, sqn=4, source='TCP:192.168.1.63:12009:fa39c25d[1180196305]', properties=(non-nil), clientd='rcv4CtMultiStream3', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 47 e8 84 e2  {...G...
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 08 b9 23  /;.....#
+0024: 7a f6 ff ff ff ff c0 a8  z.......
+0032: 01 3f 2f 3c 00 00 00 02  .?/<....
+, props=LbmCt.h:1.
+LOG[33]=INFO: (541557623017863) test_rcv_conn_delete_cb, clientd='rcv4CtMultiStream3', conn_clientd='RcvConnClientd', peer: status=0, flags=0x1f, src_metadata='Meta ct2', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12009:fa39c25d[1180196305]', rcv_start_seq_num=0, rcv_end_seq_num=4
+LOG[34]=WARNING: (541557623454081) LbmCtRcvConn::handshakeSendDok: error sending DOK to SOURCE:TCP:192.168.1.63:12009:fa39c25d[1180196305]: com.latencybusters.lbm.LBMEInvalException: CoreApi-9901-03: target malformed (SOURCE type not valid (SOURCE:TCP:192.168.1.63:12009:fa39c25d[1180196305]))
+	at com.latencybusters.lbm.LBMContext.lbmUnicastImmediateMessage(Native Method)
+	at com.latencybusters.lbm.LBMContext.send(LBMContext.java:940)
+	at com.latencybusters.lbmct.LbmCtRcvConn.handshakeSendDok(LbmCtRcvConn.java:593)
+	at com.latencybusters.lbmct.LbmCtRcvConn.cmdRcvSendDok(LbmCtRcvConn.java:581)
+	at com.latencybusters.lbmct.LbmCtCtrlr.run(LbmCtCtrlr.java:218)
+
+LOG[35]=INFO: (541557624391860) test_src_conn_delete_cb, clientd='src5CtMultiStream3', conn_clientd='SrcConnClientd', peer: status=0, flags=0x1b, src_metadata='Meta ct2', rcv_metadata='Meta ct2', no rcv_source_name, rcv_start_seq_num=1, rcv_end_seq_num=3
+LOG[36]=INFO: (541558627298412) test_src_conn_delete_cb, clientd='src5CtMultiStream3', conn_clientd='SrcConnClientd', peer: status=0, flags=0x1b, src_metadata='Meta ct2', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=0, rcv_end_seq_num=4
+.Test t0150, t=541558833624976
+LOG[0]=WARNING: (541558864728311) LbmCtRcvConn::handshakeSendCreq: error sending CREQ to SOURCE:TCP:192.168.1.63:12010:1366086d[2291528047]: com.latencybusters.lbm.LBMEInvalException: CoreApi-9901-03: target malformed (SOURCE type not valid (SOURCE:TCP:192.168.1.63:12010:1366086d[2291528047]))
+	at com.latencybusters.lbm.LBMContext.lbmUnicastImmediateMessage(Native Method)
+	at com.latencybusters.lbm.LBMContext.send(LBMContext.java:940)
+	at com.latencybusters.lbmct.LbmCtRcvConn.handshakeSendCreq(LbmCtRcvConn.java:352)
+	at com.latencybusters.lbmct.LbmCtRcvConn.cmdRcvConnTmrExpire(LbmCtRcvConn.java:322)
+	at com.latencybusters.lbmct.LbmCtCtrlr.run(LbmCtCtrlr.java:202)
+
+LOG[1]=WARNING: (541558864782791) LbmCtRcvConn::handshakeSendCreq: error sending CREQ to SOURCE:TCP:192.168.1.63:12011:f164c4b5[1180196306]: com.latencybusters.lbm.LBMEInvalException: CoreApi-9901-02: target SOURCE type: transport not found (SOURCE:TCP:192.168.1.63:12011:f164c4b5[1180196306])
+	at com.latencybusters.lbm.LBMContext.lbmUnicastImmediateMessage(Native Method)
+	at com.latencybusters.lbm.LBMContext.send(LBMContext.java:940)
+	at com.latencybusters.lbmct.LbmCtRcvConn.handshakeSendCreq(LbmCtRcvConn.java:352)
+	at com.latencybusters.lbmct.LbmCtRcvConn.cmdRcvConnTmrExpire(LbmCtRcvConn.java:322)
+	at com.latencybusters.lbmct.LbmCtCtrlr.run(LbmCtCtrlr.java:202)
+
+LOG[2]=INFO: (541558867885765) test_rcv_conn_create_cb, clientd='RcvClientd', peer: status=0, flags=0xf, src_metadata='Meta ct2', rcv_metadata='Meta ct2', rcv_source_name='TCP:192.168.1.63:12011:f164c4b5[1180196306]', rcv_start_seq_num=0, no rcv_end_seq_num
+{0} (541558867976860) test_rcv_cb: type=0, sqn=0, source='TCP:192.168.1.63:12011:f164c4b5[1180196306]', properties=(non-nil), clientd='RcvClientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 d4 ee b0 cd  {.......
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 00 d4 ee  /<......
+0024: b0 cd ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3c 00 00 00 03  .?/<....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 32               ct2    
+, props=LbmCt.h:1.
+LOG[3]=INFO: (541558868941815) test_rcv_conn_create_cb, clientd='Rcv2Clientd', peer: status=0, flags=0xf, src_metadata='Meta ct1', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12010:1366086d[2291528047]', rcv_start_seq_num=0, no rcv_end_seq_num
+LOG[4]=WARNING: (541558869329526) LbmCtRcvConn::handshakeSendCok: error sending COK to SOURCE:TCP:192.168.1.63:12010:1366086d[2291528047]: com.latencybusters.lbm.LBMEInvalException: CoreApi-9901-03: target malformed (SOURCE type not valid (SOURCE:TCP:192.168.1.63:12010:1366086d[2291528047]))
+	at com.latencybusters.lbm.LBMContext.lbmUnicastImmediateMessage(Native Method)
+	at com.latencybusters.lbm.LBMContext.send(LBMContext.java:940)
+	at com.latencybusters.lbmct.LbmCtRcvConn.cmdRcvSendCok(LbmCtRcvConn.java:538)
+	at com.latencybusters.lbmct.LbmCtCtrlr.run(LbmCtCtrlr.java:214)
+
+{1} (541558869031973) test_rcv_cb: type=0, sqn=0, source='TCP:192.168.1.63:12010:1366086d[2291528047]', properties=(non-nil), clientd='Rcv2Clientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 4e 8e 79 9f  {...N.y.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 01 4e 8e  /;....N.
+0024: 79 9f ff ff ff ff c0 a8  y.......
+0032: 01 3f 2f 3b 00 00 00 05  .?/;....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 31               ct1    
+, props=LbmCt.h:1.
+LOG[5]=INFO: (541558869611984) test_src_conn_create_cb, clientd='Src2Clientd', peer: status=0, flags=0xb, src_metadata='Meta ct2', rcv_metadata='Meta ct2', no rcv_source_name, rcv_start_seq_num=0, no rcv_end_seq_num
+LOG[6]=WARNING: (541558965194076) LbmCtRcvConn::handshakeSendCreq: error sending CREQ to SOURCE:TCP:192.168.1.63:12010:1366086d[2291528047]: com.latencybusters.lbm.LBMEInvalException: CoreApi-9901-03: target malformed (SOURCE type not valid (SOURCE:TCP:192.168.1.63:12010:1366086d[2291528047]))
+	at com.latencybusters.lbm.LBMContext.lbmUnicastImmediateMessage(Native Method)
+	at com.latencybusters.lbm.LBMContext.send(LBMContext.java:940)
+	at com.latencybusters.lbmct.LbmCtRcvConn.handshakeSendCreq(LbmCtRcvConn.java:352)
+	at com.latencybusters.lbmct.LbmCtRcvConn.cmdRcvConnTmrExpire(LbmCtRcvConn.java:322)
+	at com.latencybusters.lbmct.LbmCtCtrlr.run(LbmCtCtrlr.java:202)
+
+{2} (541558968935560) test_rcv_cb: type=0, sqn=1, source='TCP:192.168.1.63:12011:f164c4b5[1180196306]', properties=(non-nil), clientd='RcvClientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 4e 8e 79 9f  {...N.y.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 00 d4 ee  /;......
+0024: b0 cd ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3c 00 00 00 04  .?/<....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 32               ct2    
+, props=LbmCt.h:1.
+LOG[7]=INFO: (541558971208613) test_rcv_conn_create_cb, clientd='Rcv2Clientd', peer: status=0, flags=0xf, src_metadata='Meta ct2', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12011:f164c4b5[1180196306]', rcv_start_seq_num=1, no rcv_end_seq_num
+{3} (541558971396890) test_rcv_cb: type=0, sqn=1, source='TCP:192.168.1.63:12011:f164c4b5[1180196306]', properties=(non-nil), clientd='Rcv2Clientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 4e 8e 79 9f  {...N.y.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 00 d4 ee  /;......
+0024: b0 cd ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3c 00 00 00 04  .?/<....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 32               ct2    
+, props=LbmCt.h:1.
+LOG[8]=INFO: (541558974889140) test_src_conn_create_cb, clientd='Src2Clientd', peer: status=0, flags=0xb, src_metadata='Meta ct2', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=1, no rcv_end_seq_num
+{4} (541559369620356) test_rcv_cb: type=0, sqn=1, source='TCP:192.168.1.63:12010:1366086d[2291528047]', properties=(non-nil), clientd='Rcv2Clientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 4e 8e 79 9f  {...N.y.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 01 4e 8e  /;....N.
+0024: 79 9f ff ff ff ff c0 a8  y.......
+0032: 01 3f 2f 3b 00 00 00 05  .?/;....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 31               ct1    
+, props=LbmCt.h:1.
+LOG[9]=INFO: (541559372929901) test_src_conn_create_cb, clientd='SrcClientd', peer: status=0, flags=0xb, src_metadata='Meta ct1', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=0, no rcv_end_seq_num
+{5} (541559461003724) test_rcv_cb: type=0, sqn=2, source='TCP:192.168.1.63:12010:1366086d[2291528047]', properties=(non-nil), clientd='Rcv2Clientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 d4 ee b0 cd  {.......
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 01 4e 8e  /<....N.
+0024: 79 9f ff ff ff ff c0 a8  y.......
+0032: 01 3f 2f 3b 00 00 00 06  .?/;....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 31               ct1    
+, props=LbmCt.h:1.
+LOG[10]=INFO: (541559463861876) test_rcv_conn_create_cb, clientd='RcvClientd', peer: status=0, flags=0xf, src_metadata='Meta ct1', rcv_metadata='Meta ct2', rcv_source_name='TCP:192.168.1.63:12010:1366086d[2291528047]', rcv_start_seq_num=2, no rcv_end_seq_num
+{6} (541559464043425) test_rcv_cb: type=0, sqn=2, source='TCP:192.168.1.63:12010:1366086d[2291528047]', properties=(non-nil), clientd='RcvClientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 02 d4 ee b0 cd  {.......
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 01 4e 8e  /<....N.
+0024: 79 9f ff ff ff ff c0 a8  y.......
+0032: 01 3f 2f 3b 00 00 00 06  .?/;....
+0040: 00 00 00 08 4d 65 74 61  ....Meta
+0048: 20 63 74 31               ct1    
+, props=LbmCt.h:1.
+LOG[11]=INFO: (541559469003794) test_src_conn_create_cb, clientd='SrcClientd', peer: status=0, flags=0xb, src_metadata='Meta ct1', rcv_metadata='Meta ct2', no rcv_source_name, rcv_start_seq_num=2, no rcv_end_seq_num
+LOG[12]=INFO: (541559672709172) LBMCT_TEST_BITS_NO_DREQ, skipping send of DREQ to CtRetryExceed2
+LOG[13]=INFO: (541559672858064) LBMCT_TEST_BITS_NO_DREQ, skipping send of DREQ to CtRetryExceed2
+{7} (541560170045218) test_rcv_cb: type=0, sqn=2, source='TCP:192.168.1.63:12011:f164c4b5[1180196306]', properties=(non-nil), clientd='Rcv2Clientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 d4 ee b0 cd  {.......
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 00 d4 ee  /<......
+0024: b0 cd ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3c 00 00 00 03  .?/<....
+, props=LbmCt.h:1.
+{8} (541560170574077) test_rcv_cb: type=0, sqn=2, source='TCP:192.168.1.63:12011:f164c4b5[1180196306]', properties=(non-nil), clientd='RcvClientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 d4 ee b0 cd  {.......
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 00 d4 ee  /<......
+0024: b0 cd ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3c 00 00 00 03  .?/<....
+, props=LbmCt.h:1.
+LOG[14]=INFO: (541560171075420) test_rcv_conn_delete_cb, clientd='RcvClientd', conn_clientd='RcvConnClientd', peer: status=0, flags=0x1f, src_metadata='Meta ct2', rcv_metadata='Meta ct2', rcv_source_name='TCP:192.168.1.63:12011:f164c4b5[1180196306]', rcv_start_seq_num=0, rcv_end_seq_num=2
+{9} (541560171025713) test_rcv_cb: type=0, sqn=3, source='TCP:192.168.1.63:12010:1366086d[2291528047]', properties=(non-nil), clientd='Rcv2Clientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 d4 ee b0 cd  {.......
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 01 4e 8e  /<....N.
+0024: 79 9f ff ff ff ff c0 a8  y.......
+0032: 01 3f 2f 3b 00 00 00 06  .?/;....
+, props=LbmCt.h:1.
+{10} (541560171469611) test_rcv_cb: type=0, sqn=3, source='TCP:192.168.1.63:12010:1366086d[2291528047]', properties=(non-nil), clientd='RcvClientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 d4 ee b0 cd  {.......
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 01 4e 8e  /<....N.
+0024: 79 9f ff ff ff ff c0 a8  y.......
+0032: 01 3f 2f 3b 00 00 00 06  .?/;....
+, props=LbmCt.h:1.
+LOG[15]=INFO: (541560171977651) test_rcv_conn_delete_cb, clientd='RcvClientd', conn_clientd='RcvConnClientd', peer: status=0, flags=0x1f, src_metadata='Meta ct1', rcv_metadata='Meta ct2', rcv_source_name='TCP:192.168.1.63:12010:1366086d[2291528047]', rcv_start_seq_num=2, rcv_end_seq_num=3
+LOG[16]=INFO: (541560174417192) test_src_conn_delete_cb, clientd='Src2Clientd', conn_clientd='SrcConnClientd', peer: status=0, flags=0x1b, src_metadata='Meta ct2', rcv_metadata='Meta ct2', no rcv_source_name, rcv_start_seq_num=0, rcv_end_seq_num=2
+LOG[17]=INFO: (541560174612761) test_src_conn_delete_cb, clientd='SrcClientd', conn_clientd='SrcConnClientd', peer: status=0, flags=0x1b, src_metadata='Meta ct1', rcv_metadata='Meta ct2', no rcv_source_name, rcv_start_seq_num=2, rcv_end_seq_num=3
+{11} (541560174897723) test_rcv_cb: type=0, sqn=3, source='TCP:192.168.1.63:12011:f164c4b5[1180196306]', properties=(non-nil), clientd='Rcv2Clientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 07 d4 ee b0 cd  {.......
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 00 d4 ee  /<......
+0024: b0 cd ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3c 00 00 00 03  .?/<....
+, props=LbmCt.h:1.
+{12} (541560175399501) test_rcv_cb: type=0, sqn=4, source='TCP:192.168.1.63:12010:1366086d[2291528047]', properties=(non-nil), clientd='Rcv2Clientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 07 d4 ee b0 cd  {.......
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3c 00 00 00 01 4e 8e  /<....N.
+0024: 79 9f ff ff ff ff c0 a8  y.......
+0032: 01 3f 2f 3b 00 00 00 06  .?/;....
+, props=LbmCt.h:1.
+{13} (541560176585584) test_rcv_cb: type=0, sqn=5, source='TCP:192.168.1.63:12010:1366086d[2291528047]', properties=(non-nil), clientd='Rcv2Clientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 4e 8e 79 9f  {...N.y.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 01 4e 8e  /;....N.
+0024: 79 9f ff ff ff ff c0 a8  y.......
+0032: 01 3f 2f 3b 00 00 00 05  .?/;....
+, props=LbmCt.h:1.
+LOG[18]=INFO: (541560176973605) test_rcv_conn_delete_cb, clientd='Rcv2Clientd', conn_clientd='RcvConnClientd', peer: status=0, flags=0x1f, src_metadata='Meta ct1', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12010:1366086d[2291528047]', rcv_start_seq_num=0, rcv_end_seq_num=5
+LOG[19]=INFO: (541560179016768) test_src_conn_delete_cb, clientd='SrcClientd', conn_clientd='SrcConnClientd', peer: status=0, flags=0x1b, src_metadata='Meta ct1', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=0, rcv_end_seq_num=5
+{14} (541560180149236) test_rcv_cb: type=0, sqn=4, source='TCP:192.168.1.63:12011:f164c4b5[1180196306]', properties=(non-nil), clientd='Rcv2Clientd', source_clientd='RcvConnClientd', handshakeMessage=true, data:
+0000: 7b 13 8c 05 4e 8e 79 9f  {...N.y.
+0008: ff ff ff ff c0 a8 01 3f  .......?
+0016: 2f 3b 00 00 00 00 d4 ee  /;......
+0024: b0 cd ff ff ff ff c0 a8  ........
+0032: 01 3f 2f 3c 00 00 00 04  .?/<....
+, props=LbmCt.h:1.
+LOG[20]=INFO: (541560180498340) test_rcv_conn_delete_cb, clientd='Rcv2Clientd', conn_clientd='RcvConnClientd', peer: status=0, flags=0x1f, src_metadata='Meta ct2', rcv_metadata='Meta ct1', rcv_source_name='TCP:192.168.1.63:12011:f164c4b5[1180196306]', rcv_start_seq_num=1, rcv_end_seq_num=4
+LOG[21]=INFO: (541560182815581) test_src_conn_delete_cb, clientd='Src2Clientd', conn_clientd='SrcConnClientd', peer: status=0, flags=0x1b, src_metadata='Meta ct2', rcv_metadata='Meta ct1', no rcv_source_name, rcv_start_seq_num=1, rcv_end_seq_num=4
+.Test t9999
+Stopping contexts
+
+Time: 26.064
+
+OK (20 tests)
+
