@@ -28,8 +28,11 @@
 /* This include file uses definitions from these include files. */
 
 #include <signal.h>
+#include <errno.h>
 #include "lbmct.h"
 #include "tmr.h"
+#include "sb.h"
+#include "err.h"
 
 /* Make use of some internal UM APIs which are not officially part of our
  * public API.
@@ -202,9 +205,9 @@ extern "C" {
  * See LBMCT_UIM_ADDR_STR_SZ
  */
 typedef struct lbmct_ctx_uim_addr_t_stct {
-  lbm_uint32_t domain_id;  /* host order */
-  lbm_uint_t ip_addr;  /* binary */
-  lbm_uint16_t port;  /* host order */
+  int domain_id;  /* host order */
+  int ip_addr;  /* binary */
+  int port;  /* host order */
 } lbmct_ctx_uim_addr_t;
 
 /* A context ID uniquely identifies a context in a UM network across space
@@ -212,7 +215,7 @@ typedef struct lbmct_ctx_uim_addr_t_stct {
  * See LBMCT_CTX_ID_STR_SZ
  */
 typedef struct lbmct_ctx_id_t_stct {
-  lbm_uint32_t rand_num;  /* host order */
+  int rand_num;  /* host order */
   lbmct_ctx_uim_addr_t uim_addr;
 } lbmct_ctx_id_t;
 
@@ -230,6 +233,7 @@ typedef struct lbmct_ctx_id_t_stct {
 #define LBMCT_SIG_CTRLR_CMD 0x04040404  /* 67,372,036 */
 #define LBMCT_SIG_SRC_CONN 0x05050505  /* 84,215,045 */
 #define LBMCT_SIG_RCV_CONN 0x06060606  /* 101,058,054 */
+#define LBMCT_SIG_HANDSHAKE_PARSER 0x07070707  /* 117,901,063 */
 #define LBMCT_SIG_DEAD 0xdeaddead  /* 3,735,936,685 */
 
 /* I set all malloced structures to 0x5a as a recognizable uninitialized
@@ -426,7 +430,7 @@ typedef struct {
 
 /* This is the Connected Topic controller.  Create one per context. */
 struct lbmct_t_stct {
-  lbm_uint32_t ct_id;  /* Random number to avoid exit/restart confusion. */
+  int ct_id;  /* Random number to avoid exit/restart confusion. */
   lbmct_ctx_uim_addr_t local_uim_addr;
   lbm_context_t *ctx;
   lbmct_config_t user_config;
@@ -436,7 +440,7 @@ struct lbmct_t_stct {
   lbmct_src_t *src_list_head;  /* List of ct sources */
   lbmct_rcv_t *rcv_list_head;  /* List of ct receivers */
   lbm_rcv_t *um_handshake_rcv;  /* UM receiver for peer handshake messages. */
-  lbm_uint32_t next_conn_id;  /* Receive-side connection ID for new conn. */
+  int next_conn_id;  /* Receive-side connection ID for new conn. */
   mul_asl_t *ct_src_asl;
   mul_asl_t *src_conn_asl;
 
@@ -445,7 +449,7 @@ struct lbmct_t_stct {
   prt_thread_t ctrlr_thread_id;  /* Thread Id for ctrlr thread. */
   enum lbmct_ctrlr_state ctrlr_state;  /* State of controller. */
   lbm_uint32_t recent_events[LBMCT_MAX_RECENT_EVENTS];
-  lbm_uint32_t num_recent_events;
+  int num_recent_events;
 
   /* The source-side uses a message prop when sending handshake msgs so
    * that the receiver can differentiate between ct handshake and user msgs.
@@ -490,16 +494,18 @@ struct lbmct_src_conn_t_stct {
 
   lbmct_peer_info_t peer_info;
   mul_asl_node_t *src_conn_asl_node; /* node of this conn in ct->src_conn_asl */
-  char src_uim_addr[LBMCT_UIM_ADDR_STR_SZ+1];
-  lbm_uint32_t src_conn_id;
+  lbmct_ctx_uim_addr_t src_uim_addr;
+  char src_uim_addr_str[LBMCT_UIM_ADDR_STR_SZ+1];
+  int src_conn_id;
   void *app_conn_clientd;  /* Per-connection clientd supplied by the app. */
   enum lbmct_conn_state state;
   int app_conn_create_called;
   int app_conn_delete_called;
-  lbm_uint32_t rcv_ct_id;
-  char rcv_uim_addr[LBMCT_UIM_ADDR_STR_SZ+1];
+  int rcv_ct_id;
+  lbmct_ctx_uim_addr_t rcv_uim_addr;
+  char rcv_uim_addr_str[LBMCT_UIM_ADDR_STR_SZ+1];
   char rcv_source_name[LBM_MSG_MAX_SOURCE_LEN];
-  lbm_uint32_t rcv_conn_id;
+  int rcv_conn_id;
   char rcv_conn_id_str[LBMCT_RCV_CONN_ID_STR_SZ+1];
   lbm_uint32_t sig;  /* LBMCT_SIG_SRC_CONN */
 };  /* lbmct_src_conn_t_stct */
@@ -538,14 +544,16 @@ struct lbmct_rcv_conn_t_stct {
   int curr_creq_timeout;   /* In ms. */
 
   lbmct_peer_info_t peer_info;
-  char rcv_uim_addr[LBMCT_UIM_ADDR_STR_SZ+1];
-  lbm_uint32_t rcv_conn_id;
+  lbmct_ctx_uim_addr_t rcv_uim_addr;
+  char rcv_uim_addr_str[LBMCT_UIM_ADDR_STR_SZ+1];
+  int rcv_conn_id;
   void *app_conn_clientd;  /* Per-connection clientd supplied by the app. */
   enum lbmct_conn_state state;
   int app_conn_create_called;
   int app_conn_delete_called;
   unsigned int src_ct_id;
-  char src_uim_addr[LBMCT_UIM_ADDR_STR_SZ+1];
+  lbmct_ctx_uim_addr_t src_uim_addr;
+  char src_uim_addr_str[LBMCT_UIM_ADDR_STR_SZ+1];
   unsigned int src_conn_id;
   char src_dest_addr[LBM_MSG_MAX_SOURCE_LEN+1];
   lbm_uint32_t sig;  /* LBMCT_SIG_RCV_CONN */

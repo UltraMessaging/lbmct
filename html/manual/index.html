@@ -72,7 +72,16 @@ Overview</h1>
 <p>Instead of creating normal topic Sources and Receivers, applications create CT Sources and CT Receivers. The lbmct layer exchanges handshake messages between the CT Source and Receivers to establish shared state. Once state is synchronized, callbacks are made to the applications to deliver connection information and indicate liveness.</p>
 <p>Once the connection is live, the application uses the normal methods for sending and receiving messages. There is almost no overhead added in the message path.</p>
 <p>When the connection is deleted, either gracefully (via API call) or abruptly (e.g. by application or network failure), callbacks are made to the publishing and receiving applications to deliver deletion events.</p>
-<p>The rest of this page provides a high-level description of the CT package. You can also jump to other pages: [Release Notes] C User Guide](doc/Userguide.md) - explains how to write C-language Connected Topic applications. Java User Guide](doc/Java_Userguide.md) - explains how to write Java-language Connected Topic applications. C API Reference](doc/c/index.html) - details on each C API. Java API Reference](doc/java/index.html) - details on each Java API. Internal Design](doc/Internal_Design.md) - details of the CT implementation.</p>
+<p>The rest of this page provides a high-level description of the CT package. You can also jump to other pages: </p><ul>
+<li>
+<a class="el" href="releasenotes.html">Release Notes</a> </li>
+<li>
+<a class="elRef" doxygen="/Users/sford/Documents/GitHub/lbmct/html/c.tag:../c/" href="../c/index.html#capioverview">C API Overview</a> - Details on the C API. </li>
+<li>
+<a class="elRef" doxygen="/Users/sford/Documents/GitHub/lbmct/html/java.tag:../java/" href="../java/index.html#javaapioverview">Java API Overview</a> - Details on the Java API. </li>
+<li>
+Internal Design](doc/Internal_Design.md) - details of the CT implementation. </li>
+</ul>
 <p><br />
  </p>
 <h1><a class="anchor" id="sourcecode"></a>
@@ -86,7 +95,6 @@ Source Code</h1>
 <p>Informatica does not include CT in its QA testing. Note however that CT includes a reasonably extensive automated self-test.</p>
 <p>Informatica does not guarantee that future UM development will be compatible with CT. Note however that CT was developed with knowledge of the current UM roadmap, and every effort has been taken to make it forward compatible with known product evolution directions.</p>
 <p>Naturally, the amount of effort we invest in CT will be proportional to the level of user interest. If you decide to use CT, please let us know through the support organization! We will keep you informed of the package's continued evolution.</p>
-<hr/>
 <p><br />
  </p>
 <h1><a class="anchor" id="features"></a>
@@ -98,7 +106,6 @@ Features</h1>
 <p>CT is compatible with most UM "streaming" features. But see <a href="#limitations">Limitations</a>.</p>
 <p>Since CT uses external interfaces of UM, it is not tied to a specific version of UM. However, it does make use of the <a href="https://ultramessaging.github.io/currdoc/doc/Design/umfeatures.html#sendingtosources">Sending to Sources</a> feature, so CT does require at least UM version 6.10.</p>
 <p>Both normal and Connected Sources and Receivers can share the same UM context, and even the same transport sessions. But see <a href="#interoperability">Interoperability</a>.</p>
-<hr/>
 <p><br />
  </p>
 <h1><a class="anchor" id="opportunitiesandlimitations"></a>
@@ -114,7 +121,6 @@ Opportunities and Limitations</h1>
 <p>CT does not yet have a .NET wrapper.</p>
 <p>Do we need a "Force Quit" flag for connection and CT objects?</p>
 <p>In a DRO environment, you need to configure CT what the domain ID is. CT does not discover the domain ID dynamically. If using DRO, see Domain ID](doc/Domain_ID.md).</p>
-<hr/>
 <p><br />
  </p>
 <h1><a class="anchor" id="caveats"></a>
@@ -127,7 +133,6 @@ Caveats</h1>
 </pre><p> intended for other connections. The user is advised to ignore CT control handshake messages, except that they consume topic-level sequence numbers.</p>
 <p>When connected sources and receivers are deleted by API call, there is a handshake between the source and receiver to do a clean disconnect. The API call to delete a CT source or receiver is a blocking call that does not return until the handshake is complete, or the attempt times out. </p><pre class="fragment"> Attempting to delete the parent CT object will fail if there are still
 </pre><p> connections waiting to be fully disconnected. There is no “force quit” API, although the process can simply exit.</p>
-<hr/>
 <p><br />
  </p>
 <h1><a class="anchor" id="interoperability"></a>

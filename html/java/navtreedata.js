@@ -24,7 +24,9 @@ for the JavaScript code in this file
 var NAVTREE =
 [
   [ "LbmCt Java API", "index.html", [
-    [ "lbmct v0.6 Connected Topics API Reference", "index.html", null ],
+    [ "v0.6 Connected Topics Java API Reference", "index.html", [
+      [ "Java API Overview", "index.html#javaapioverview", null ]
+    ] ],
     [ "Packages", "namespaces.html", [
       [ "Packages", "namespaces.html", "namespaces_dup" ]
     ] ],

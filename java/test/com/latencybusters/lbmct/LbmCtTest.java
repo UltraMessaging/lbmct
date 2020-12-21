@@ -291,7 +291,7 @@ public class LbmCtTest
       msgParser.parse(msgBB);
       fail("Expected exception");
     } catch (Exception e) {
-      assertThat(e.toString(), containsString("Bad topic string len"));
+      assertThat(e.toString(), containsString("BufferUnderflowException"));
     }
 
     msgBB.clear();
@@ -308,7 +308,7 @@ public class LbmCtTest
       msgParser.parse(msgBB);
       fail("Expected exception");
     } catch (Exception e) {
-      assertThat(e.toString(), containsString("Bad topic string len"));
+      assertThat(e.toString(), containsString("Message too long"));
     }
 
     msgBB.clear();

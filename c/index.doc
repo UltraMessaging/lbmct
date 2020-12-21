@@ -1,0 +1,18 @@
+/*!
+\mainpage lbmct v0.6 Connected Topics C API Reference
+
+\n \section capioverview C API Overview
+
+See <a href="https://github.com/UltraMessaging/lbmct">https://github.com/UltraMessaging/lbmct</a> for code and
+documentation.
+
+The "lbmct" package is an API wrapper around the Ultra Messaging library which
+adds the concept of end-to-end connectedness to UM's normal pub/sub messaging
+model.
+These "Connected Topics" (CTs) help Publisher and Subscriber applications
+keep track of each other.
+
+See \ref overview for user manual.
+This API reference assumes familiarity with the information in that documentation.
+
+*/

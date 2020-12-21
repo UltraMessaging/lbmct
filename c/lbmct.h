@@ -2,7 +2,7 @@
  *
  * See https://github.com/UltraMessaging/lbmct
  *
- * Copyright (c) 2005-2018 Informatica Corporation. All Rights Reserved.
+ * Copyright (c) 2005-2019 Informatica Corporation. All Rights Reserved.
  * Permission is granted to licensees to use or alter this software for
  * any purpose, including commercial applications, according to the terms
  * laid out in the Software License Agreement.
@@ -26,7 +26,6 @@
 
 /* This include files uses definitions from these includes. */
 #include <lbm/lbm.h>
-#include "prt.h"
 
 #if defined(_WIN32)
 #  ifdef LBMCT_EXPORTS
@@ -38,6 +37,8 @@
 #  define LBMCT_API
 #endif
 #include "tmr.h"
+#include "prt.h"
+#include "err.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -60,89 +61,31 @@ struct lbmct_rcv_conn_t_stct;
 typedef struct lbmct_rcv_conn_t_stct lbmct_rcv_conn_t;
 
 
+/*! \brief Structure to hold an instance of Connected Topics object.
 
-/* The lbmct_peer_info_t structure contains a "status" field to indicate
- * the health of the connection.  The constants below define the values.
+   A Connected Topics object is an active container for Connected
+   Sources and Connected Receivers.
+   A Connected Topics instance is associated with a UM context,
+   and a UM context must not have more than one Connected Topics
+   instance associated with it.
+   A Connected Topics instance has an independent thread associated with it.
+
+   See \ref lbmct_create().
+
+   All CT receivers and sources associated with the lbmct object must be
+   deleted before the lbmct itself can be deleted.
  */
-#define LBMCT_CONN_STATUS_OK 0
-#define LBMCT_CONN_STATUS_BAD_CLOSE -1
-
-/* The lbmct_peer_info_t structure contains fields which may or may not be
- * defined.  The "defined_flags" field is a bitmap indicating which of the
- * data fields are defined.  The constants below define the bit assignments.
- */
-#define LBMCT_PEER_INFO_FLAGS_SRC_METADATA 0x1
-#define LBMCT_PEER_INFO_FLAGS_SRC_METADATA_LEN 0x2
-#define LBMCT_PEER_INFO_FLAGS_RCV_METADATA 0x4
-#define LBMCT_PEER_INFO_FLAGS_RCV_METADATA_LEN 0x8
-#define LBMCT_PEER_INFO_FLAGS_RCV_SOURCE_NAME 0x10
-#define LBMCT_PEER_INFO_FLAGS_RCV_START_SEQ_NUM 0x20
-#define LBMCT_PEER_INFO_FLAGS_RCV_END_SEQ_NUM 0x40
-
-/* Structure to pass important information to the application during
- * the connection create and delete callbacks.  The "err" field indicates
- * if the connection create/delete was clean and successful.
- * IMPORTANT: to maintain ABI compatibility:
- *   1. Do not remove fields from this structure.  Fields can be renamed
- *      to "unused1", "unused2", etc., but keep their original types.
- *   2. Do not change the data type of a field.  You can change it to "unused"
- *      and add a new one (see next item).
- *   3. Only add fields near the end, above the "lbmct_reserved[]" array.
- *      When a field is added, the equivilent number of bytes must be
- *      subtracted from the reserved array to keep the structure size the same.
- */
-typedef struct {
-  int status;  /* LBMCT_CONN_STATUS_* */
-  lbm_uint32_t flags;  /* Bitmap of LBMCT_PEER_INFO_FLAGS_* */
-  char *src_metadata;
-  size_t src_metadata_len;
-  char *rcv_metadata;
-  size_t rcv_metadata_len;
-  lbm_uint_t rcv_start_seq_num;  /* Receive-side sequence number of CRSP. */
-  lbm_uint_t rcv_end_seq_num;  /* Receive-side sequence number or DRSP. */
-  char rcv_source_name[LBM_MSG_MAX_SOURCE_LEN];  /* Not very useful to app. */
-  char lbmct_reserved[160];  /* Reserved for future growth.  Set to zero. */
-} lbmct_peer_info_t;
+#define HANDSHAKE_TOPIC_STR "LbmCt.h"
+struct lbmct_t_stct {
+  lbm_context_t *ctx;
+};
 
 
-typedef void *(*lbmct_src_conn_create_function_cb)(lbmct_src_conn_t *src_conn,
-  lbmct_peer_info_t *peer_info, void *clientd);
-typedef void (*lbmct_src_conn_delete_function_cb)(lbmct_src_conn_t *src_conn,
-  lbmct_peer_info_t *peer_info, void *clientd, void *conn_clientd);
+/*! \brief Structure to hold an instance of Connected Topics configuration
+           object.
 
-typedef void *(*lbmct_rcv_conn_create_function_cb)(lbmct_rcv_conn_t *rcv_conn,
-  lbmct_peer_info_t *peer_info, void *clientd);
-typedef void (*lbmct_rcv_conn_delete_function_cb)(lbmct_rcv_conn_t *rcv_conn,
-  lbmct_peer_info_t *peer_info, void *clientd, void *conn_clientd);
-
-
-/* When lbmct is started with lbmct_create(), there are some optional
- * configuration options that can be specified.
- * See lbmct_process_config().
- */
-#define LBMCT_CT_CONFIG_FLAGS_TEST_BITS  0x00000001
-#define LBMCT_CT_CONFIG_FLAGS_DOMAIN_ID  0x00000002
-#define LBMCT_CT_CONFIG_FLAGS_DELAY_CREQ 0x00000004
-#define LBMCT_CT_CONFIG_FLAGS_RETRY_IVL  0x00000008
-#define LBMCT_CT_CONFIG_FLAGS_MAX_TRIES  0x00000010
-#define LBMCT_CT_CONFIG_FLAGS_PRE_DELIVERY 0x00000020
-
-/* Default values for config options. */
-#define LBMCT_CT_CONFIG_DEFAULT_TEST_BITS  0x00000000
-#define LBMCT_CT_CONFIG_DEFAULT_DOMAIN_ID  -1
-#define LBMCT_CT_CONFIG_DEFAULT_DELAY_CREQ 10    /* 10 ms */
-#define LBMCT_CT_CONFIG_DEFAULT_RETRY_IVL  1000  /* 1 sec */
-#define LBMCT_CT_CONFIG_DEFAULT_MAX_TRIES  5
-#define LBMCT_CT_CONFIG_DEFAULT_PRE_DELIVERY 0
-
-/* IMPORTANT: to maintain ABI compatibility:
- *   1. Do not remove fields from this structure.  Fields can be renamed
- *      to "unused1", "unused2", etc., but keep their original types.
- *   2. Do not change the data type of a field.  You can change it to "unused"
- *      and add a new one (see next item).
- *   3. Only add fields near the end, above the "lbmct_reserved[]" array.
- *      When a field is added, the equivilent number of bytes must be
- *      subtracted from the reserved array to keep the structure size the same.
+    A configuration object is used by user application to specify operating
+    parameters for a Connected Topics object.
  */
 typedef struct lbmct_config_t_stct {
   lbm_uint32_t flags;  /* LBMCT_CONFIG_FLAGS_... */
@@ -156,20 +99,8 @@ typedef struct lbmct_config_t_stct {
 } lbmct_config_t;
 
 
-/* The "test_bits" config item is not for general application use.  It is
- * used to modify internal behavior for testing purposes.  Do not use for
- * normal operation.
- */
-#define LBMCT_TEST_BITS_NO_CREQ 0x00000001
-#define LBMCT_TEST_BITS_NO_CRSP 0x00000002
-#define LBMCT_TEST_BITS_NO_C_OK 0x00000004
-#define LBMCT_TEST_BITS_NO_DREQ 0x00000008
-#define LBMCT_TEST_BITS_NO_DRSP 0x00000010
-#define LBMCT_TEST_BITS_NO_D_OK 0x00000020
-#define LBMCT_TEST_BITS_SKIP_BREAK 0x00000040
-#define LBMCT_TEST_BITS_LOG_TICKS 0x00000080
-
-
+LBMCT_API int lbmct_create(lbmct_t **ctp, lbm_context_t *ctx);
+/*
 LBMCT_API int lbmct_create(lbmct_t **ctp, lbm_context_t *ctx, lbmct_config_t *config,
   const char *metadata, size_t metadata_sz);
 LBMCT_API int lbmct_delete(lbmct_t *ct);
@@ -188,7 +119,9 @@ LBMCT_API int lbmct_rcv_create(lbmct_rcv_t **ct_rcvp, lbmct_t *ct, const char *t
   lbmct_rcv_conn_delete_function_cb rcv_conn_delete_cb,
   void *clientd);
 LBMCT_API int lbmct_rcv_delete(lbmct_rcv_t *ct_rcv);
+LBMCT_API lbm_rcv_t *lbmct_rcv_get_um_rcv(lbmct_rcv_t *ct_rcv);
 LBMCT_API void lbmct_debug_dump(lbmct_t *ct, const char *msg);
+*/
 
 #if defined(__cplusplus)
 }

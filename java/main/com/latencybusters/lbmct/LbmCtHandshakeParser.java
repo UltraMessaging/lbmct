@@ -151,15 +151,16 @@ class LbmCtHandshakeParser {
     // Get topic string.
     int topicStrLen = (int) inMsg.get();
     topicStrLen &= 0x000000ff;  // Bytes are signed, and therefore you get sign extension.  Isolate unsigned value.
-    if (topicStrLen != inMsg.remaining()) {
-      throw (new LBMException("Bad topic string len " + topicStrLen + " or remaining message len " + inMsg.remaining()));
-    }
     msgStrBuilder.setLength(0);
     while (topicStrLen > 0) {
       msgStrBuilder.append((char) inMsg.get());
       topicStrLen--;
     }
     topicStr = msgStrBuilder.toString();
+
+    if (inMsg.remaining() != 0) {
+      throw (new LBMException("Message too long"));
+    }
 
     // Get the receiver's connection key.
     msgStrBuilder.setLength(0);
@@ -207,11 +208,7 @@ class LbmCtHandshakeParser {
     srcConnId = inMsg.getInt();
 
     int metadataLen = inMsg.getInt();
-    if (metadataLen != inMsg.remaining()) {
-      throw (new LBMException("Bad metadata len " + metadataLen + " or remaining message len " + inMsg.remaining()));
-    }
     if (metadataLen > msgMetadata.capacity()) {
-      LBMPubLog.pubLog(LBM.LOG_INFO, "Expanding srcMetadata " + msgMetadata.capacity() + " to " + ((11*metadataLen)/10) + "\n");
       msgMetadata = ByteBuffer.allocate((11*metadataLen)/10);
     }
     if (metadataLen > 0) {
@@ -221,6 +218,10 @@ class LbmCtHandshakeParser {
       msgMetadata.clear();
     }
     msgMetadata.flip();
+
+    if (inMsg.remaining() != 0) {
+      throw (new LBMException("Message too long"));
+    }
   }
 
   private void parseCok(ByteBuffer inMsg) throws Exception {
@@ -256,11 +257,7 @@ class LbmCtHandshakeParser {
     rcvStartSequenceNum = inMsg.getInt();
 
     int metadataLen = inMsg.getInt();
-    if (metadataLen != inMsg.remaining()) {
-      throw (new LBMException("Bad metadata len " + metadataLen + " or remaining message len " + inMsg.remaining()));
-    }
     if (metadataLen > msgMetadata.capacity()) {
-      LBMPubLog.pubLog(LBM.LOG_INFO, "Expanding srcMetadata " + msgMetadata.capacity() + " to " + ((11*metadataLen)/10) + "\n");
       msgMetadata = ByteBuffer.allocate((11*metadataLen)/10);
     }
     if (metadataLen > 0) {
@@ -270,9 +267,13 @@ class LbmCtHandshakeParser {
       msgMetadata.clear();
     }
     msgMetadata.flip();
+
+    if (inMsg.remaining() != 0) {
+      throw (new LBMException("Message too long"));
+    }
   }
 
-  private void parseDreq(ByteBuffer inMsg) {
+  private void parseDreq(ByteBuffer inMsg) throws Exception {
     rcvCtId = inMsg.getInt();
     rcvDomainId = inMsg.getInt();
     rcvIpAddr = inMsg.getInt();
@@ -301,9 +302,13 @@ class LbmCtHandshakeParser {
     srcIpAddr = inMsg.getInt();
     srcRequestPort = (int) inMsg.getShort();  rcvRequestPort &= 0xffff;  // Make unsigned.
     srcConnId = inMsg.getInt();
+
+    if (inMsg.remaining() != 0) {
+      throw (new LBMException("Message too long"));
+    }
   }
 
-  private void parseDrsp(ByteBuffer inMsg) {
+  private void parseDrsp(ByteBuffer inMsg) throws Exception {
     rcvCtId = inMsg.getInt();
     rcvDomainId = inMsg.getInt();
     rcvIpAddr = inMsg.getInt();
@@ -332,9 +337,13 @@ class LbmCtHandshakeParser {
     srcIpAddr = inMsg.getInt();
     srcRequestPort = (int) inMsg.getShort();  rcvRequestPort &= 0xffff;  // Make unsigned.
     srcConnId = inMsg.getInt();
+
+    if (inMsg.remaining() != 0) {
+      throw (new LBMException("Message too long"));
+    }
   }
 
-  private void parseDok(ByteBuffer inMsg) {
+  private void parseDok(ByteBuffer inMsg) throws Exception {
     rcvCtId = inMsg.getInt();
     rcvDomainId = inMsg.getInt();
     rcvIpAddr = inMsg.getInt();
@@ -365,9 +374,13 @@ class LbmCtHandshakeParser {
     srcConnId = inMsg.getInt();
 
     rcvEndSequenceNum = inMsg.getInt();
+
+    if (inMsg.remaining() != 0) {
+      throw (new LBMException("Message too long"));
+    }
   }
 
-  private void parseDfin(ByteBuffer inMsg) {
+  private void parseDfin(ByteBuffer inMsg) throws Exception {
     rcvCtId = inMsg.getInt();
     rcvDomainId = inMsg.getInt();
     rcvIpAddr = inMsg.getInt();
@@ -396,6 +409,10 @@ class LbmCtHandshakeParser {
     srcIpAddr = inMsg.getInt();
     srcRequestPort = (int) inMsg.getShort();  rcvRequestPort &= 0xffff;  // Make unsigned.
     srcConnId = inMsg.getInt();
+
+    if (inMsg.remaining() != 0) {
+      throw (new LBMException("Message too long"));
+    }
   }
 
   // Static methods for constructing message.
@@ -444,15 +461,15 @@ class LbmCtHandshakeParser {
     outMsg.flip();  // Msg done, ready to be read out.
   }
 
-  // CRSP: connect response (source -> receiver).
+  // CRSP: Connect response (source -> receiver).
   //private final static int CRSP_MIN_LEN =
   // 3+  1+4+   4+   4+   2+ 4+   4+   4+   4+   2+ 4+   4;
   // MMM 2 CCCC DDDD IIII PP iiii CCCC DDDD IIII PP iiii LLLL M...
   // !   ! !    !    !    !  !    !    !    !    !  !    !    +- 0 or more bytes of metadata (pure binary).
-  // !   ! !    !    !    !  !    !    !    !    !  !    +- SRC metadata length as 32-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    !    !  +- SRC Conn ID as 32-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    !    +- SRC Port as 16-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    +- SRC IP address as 32-bit big-endian integer (1st octet is MSB)
+  // !   ! !    !    !    !  !    !    !    !    !  !    +- Src metadata length as 32-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    !    !  +- Src Conn ID as 32-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    !    +- Src Port as 16-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    +- Src IP address as 32-bit big-endian integer (1st octet is MSB)
   // !   ! !    !    !    !  !    !    +- Src Domain ID (binary, big-endian)
   // !   ! !    !    !    !  !    +--- Src CT identifier (binary random number, big-endian)
   // !   ! !    !    !    !  +-------- Rcv Conn ID as 32-bit big-endian integer
@@ -495,16 +512,16 @@ class LbmCtHandshakeParser {
     outMsg.flip();  // message complete, ready to be read out.
   }
 
-  // COK: Connect response (source->receiver).
+  // COK: Connection OK (receiver -> source).
   private final static int COK_MIN_LEN =
      3+  1+4+   4+   4+   2+ 4+   4+   4+   4+   2+ 4+   4+   4;
   // MMM 3 CCCC DDDD IIII PP iiii CCCC DDDD IIII PP iiii SSSS LLLL M...
   // !   ! !    !    !    !  !    !    !    !    !  !    !    !    +- 0 or more bytes of metadata (pure binary).
-  // !   ! !    !    !    !  !    !    !    !    !  !    !    +- SRC metadata length as 32-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    !    !  !    +- Receiver start sequence number as 32-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    !    !  +- SRC Conn ID as 32-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    !    +- SRC Port as 16-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    +- SRC IP address as 32-bit big-endian integer (1st octet is MSB)
+  // !   ! !    !    !    !  !    !    !    !    !  !    !    +- Rcv metadata length as 32-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    !    !  !    +- Rcv start sequence number as 32-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    !    !  +- Src Conn ID as 32-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    !    +- Src Port as 16-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    +- Src IP address as 32-bit big-endian integer (1st octet is MSB)
   // !   ! !    !    !    !  !    !    +- Src Domain ID (binary, big-endian)
   // !   ! !    !    !    !  !    +--- Src CT identifier (binary random number, big-endian)
   // !   ! !    !    !    !  +-------- Rcv Conn ID as 32-bit big-endian integer
@@ -540,19 +557,22 @@ class LbmCtHandshakeParser {
     outMsg.putInt((int)rcvConn.getStartSequenceNum());
 
     ByteBuffer metadata = ct.getMetadata();
-    outMsg.putInt(metadata.remaining());
-    outMsg.put(metadata.array(), 0, metadata.remaining());
+    int metaLen = metadata.remaining();
+    outMsg.putInt(metaLen);
+    if (metaLen > 0){
+      outMsg.put(metadata.array(), 0, metadata.remaining());
+    }
 
     outMsg.flip();  // message complete, ready to be read out.
   }
 
-  // DREQ: Disconnect request (receiver->source).
+  // DREQ: Disconnect request (receiver -> source).
   //private final static int DREQ_MIN_LEN =
   // 3+  1+4+   4+   4+   2+ 4+   4+   4+   4+   2+ 4;
   // MMM 4 CCCC DDDD IIII PP iiii CCCC DDDD IIII PP iiii
-  // !   ! !    !    !    !  !    !    !    !    !  +- SRC Conn ID as 32-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    !    +- SRC Port as 16-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    +- SRC IP address as 32-bit big-endian integer (1st octet is MSB)
+  // !   ! !    !    !    !  !    !    !    !    !  +- Src Conn ID as 32-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    !    +- Src Port as 16-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    +- Src IP address as 32-bit big-endian integer (1st octet is MSB)
   // !   ! !    !    !    !  !    !    +- Src Domain ID (binary, big-endian)
   // !   ! !    !    !    !  !    +--- Src CT identifier (binary random number, big-endian)
   // !   ! !    !    !    !  +-------- Rcv Conn ID as 32-bit big-endian integer
@@ -588,14 +608,13 @@ class LbmCtHandshakeParser {
     outMsg.flip();  // message complete, ready to be read out.
   }
 
-  // DRSP: connect response (source -> receiver).
+  // DRSP: Disconnect response (source -> receiver).
   //private final static int DRSP_MIN_LEN =
-  // 3+  1+4+   4+   4+   2+ 4+   4+   4+   4+   2+ 4+   4;
-  // MMM 5 CCCC DDDD IIII PP iiii CCCC DDDD IIII PP iiii LLLL
-  // !   ! !    !    !    !  !    !    !    !    !  !    +- SRC metadata length as 32-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    !    !  +- SRC Conn ID as 32-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    !    +- SRC Port as 16-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    +- SRC IP address as 32-bit big-endian integer (1st octet is MSB)
+  // 3+  1+4+   4+   4+   2+ 4+   4+   4+   4+   2+ 4;
+  // MMM 5 CCCC DDDD IIII PP iiii CCCC DDDD IIII PP iiii
+  // !   ! !    !    !    !  !    !    !    !    !  +- Src Conn ID as 32-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    !    +- Src Port as 16-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    +- Src IP address as 32-bit big-endian integer (1st octet is MSB)
   // !   ! !    !    !    !  !    !    +- Src Domain ID (binary, big-endian)
   // !   ! !    !    !    !  !    +--- Src CT identifier (binary random number, big-endian)
   // !   ! !    !    !    !  +-------- Rcv Conn ID as 32-bit big-endian integer
@@ -631,14 +650,14 @@ class LbmCtHandshakeParser {
     outMsg.flip();  // message complete, ready to be read out.
   }
 
-  // DOK: Disconnect OK (receiver->source)
+  // DOK: Disconnect OK (receiver -> source).
   //private final static int DOK_MIN_LEN =
   // 3+  1+4+   4+   4+   2+ 4+   4+   4+   4+   2+ 4+   4;
   // MMM 6 CCCC DDDD IIII PP iiii CCCC DDDD IIII PP iiii SSSS
-  // !   ! !    !    !    !  !    !    !    !    !  !    +- Receiver end sequence number as 32-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    !    !  +- SRC Conn ID as 32-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    !    +- SRC Port as 16-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    +- SRC IP address as 32-bit big-endian integer (1st octet is MSB)
+  // !   ! !    !    !    !  !    !    !    !    !  !    +- Rcv end sequence number as 32-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    !    !  +- Src Conn ID as 32-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    !    +- Src Port as 16-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    +- Src IP address as 32-bit big-endian integer (1st octet is MSB)
   // !   ! !    !    !    !  !    !    +- Src Domain ID (binary, big-endian)
   // !   ! !    !    !    !  !    +--- Src CT identifier (binary random number, big-endian)
   // !   ! !    !    !    !  +-------- Rcv Conn ID as 32-bit big-endian integer
@@ -673,21 +692,16 @@ class LbmCtHandshakeParser {
 
     outMsg.putInt((int)rcvConn.getEndSequenceNum());
 
-    ByteBuffer metadata = ct.getMetadata();
-    outMsg.putInt(metadata.remaining());
-    outMsg.put(metadata.array(), 0, metadata.remaining());
-
     outMsg.flip();  // message complete, ready to be read out.
   }
 
-  // DFIN: connect response (source -> receiver).
+  // DFIN: Disconnect finished (source -> receiver).
   //private final static int DFIN_MIN_LEN =
-  // 3+  1+4+   4+   4+   2+ 4+   4+   4+   4+   2+ 4+   4;
-  // MMM 7 CCCC DDDD IIII PP iiii CCCC DDDD IIII PP iiii LLLL
-  // !   ! !    !    !    !  !    !    !    !    !  !    +- SRC metadata length as 32-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    !    !  +- SRC Conn ID as 32-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    !    +- SRC Port as 16-bit big-endian integer
-  // !   ! !    !    !    !  !    !    !    +- SRC IP address as 32-bit big-endian integer (1st octet is MSB)
+  // 3+  1+4+   4+   4+   2+ 4+   4+   4+   4+   2+ 4;
+  // MMM 7 CCCC DDDD IIII PP iiii CCCC DDDD IIII PP iiii
+  // !   ! !    !    !    !  !    !    !    !    !  +- Src Conn ID as 32-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    !    +- Src Port as 16-bit big-endian integer
+  // !   ! !    !    !    !  !    !    !    +- Src IP address as 32-bit big-endian integer (1st octet is MSB)
   // !   ! !    !    !    !  !    !    +- Src Domain ID (binary, big-endian)
   // !   ! !    !    !    !  !    +--- Src CT identifier (binary random number, big-endian)
   // !   ! !    !    !    !  +-------- Rcv Conn ID as 32-bit big-endian integer

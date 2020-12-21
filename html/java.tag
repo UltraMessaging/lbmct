@@ -455,7 +455,8 @@
   </compound>
   <compound kind="page">
     <name>index</name>
-    <title>lbmct v0.6 Connected Topics API Reference</title>
+    <title>v0.6 Connected Topics Java API Reference</title>
     <filename>index</filename>
+    <docanchor file="index" title="Java API Overview">javaapioverview</docanchor>
   </compound>
 </tagfile>

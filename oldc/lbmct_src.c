@@ -93,14 +93,14 @@ int lbmct_handshake_send_crsp(lbmct_src_conn_t *src_conn)
 
   PRT_MALLOC_N(crsp_msg, char, LBMCT_CRSP_MSG_BASE_SZ +
     src_conn->peer_info.src_metadata_len + 1);
-  /* CRSP,field_count,rcv_ct_id,rcv_uim_addr,rcv_ct_id,
-   *   src_ct_id,src_uim_addr,src_conn_id,
+  /* CRSP,field_count,rcv_ct_id,rcv_uim_addr_str,rcv_ct_id,
+   *   src_ct_id,src_uim_addr_str,src_conn_id,
    *   meta_len<nul>metadata
    */
   crsp_msg_len = snprintf(crsp_msg, LBMCT_CRSP_MSG_BASE_SZ,
     "%s,9,%u,%s,%u,%u,%s,%u,%lu", LBMCT_CRSP_MSG_PREFIX,
-    src_conn->rcv_ct_id, src_conn->rcv_uim_addr, src_conn->rcv_conn_id,
-    ct->ct_id, src_conn->src_uim_addr, src_conn->src_conn_id,
+    src_conn->rcv_ct_id, src_conn->rcv_uim_addr_str, src_conn->rcv_conn_id,
+    ct->ct_id, src_conn->src_uim_addr_str, src_conn->src_conn_id,
     src_conn->peer_info.src_metadata_len);
   crsp_msg_len++;  /* Include final NULL. */
   if (crsp_msg_len > LBMCT_CRSP_MSG_BASE_SZ) {
@@ -153,13 +153,13 @@ int lbmct_handshake_send_drsp(lbmct_src_conn_t *src_conn)
 
   um_src = ct_src->um_src;
 
-  /* DRSP,field_count,rcv_ct_id,rcv_uim_addr,rcv_ct_id,
-   *   src_ct_id,src_uim_addr,src_conn_id
+  /* DRSP,field_count,rcv_ct_id,rcv_uim_addr_str,rcv_ct_id,
+   *   src_ct_id,src_uim_addr_str,src_conn_id
    */
   drsp_len = snprintf(drsp_msg, sizeof(drsp_msg),
     "%s,8,%u,%s,%u,%u,%s,%u", LBMCT_DRSP_MSG_PREFIX,
-    src_conn->rcv_ct_id, src_conn->rcv_uim_addr, src_conn->rcv_conn_id,
-    ct->ct_id, src_conn->src_uim_addr, src_conn->src_conn_id);
+    src_conn->rcv_ct_id, src_conn->rcv_uim_addr_str, src_conn->rcv_conn_id,
+    ct->ct_id, src_conn->src_uim_addr_str, src_conn->src_conn_id);
   drsp_len++;  /* Include final NULL. */
 
   if (! (ct->active_config.test_bits & LBMCT_TEST_BITS_NO_DRSP)) {
@@ -314,7 +314,7 @@ int lbmct_src_delete(lbmct_src_t *ct_src)
  * Called from ct controller thread.
  */
 int lbmct_src_conn_create(lbmct_src_conn_t **rtn_src_conn, lbmct_src_t *ct_src,
-  const char *source_name, lbm_uint32_t rcv_ct_id, char *rcv_uim_addr,
+  const char *source_name, lbm_uint32_t rcv_ct_id, char *rcv_uim_addr_str,
   lbm_uint32_t rcv_conn_id, char *rcv_conn_id_str)
 {
   lbmct_src_conn_t *src_conn = NULL;
@@ -361,12 +361,12 @@ int lbmct_src_conn_create(lbmct_src_conn_t **rtn_src_conn, lbmct_src_t *ct_src,
   /* Assemble UIM address for this ct. */
   (void)mul_inet_ntop(ct->local_uim_addr.ip_addr, ip_str, sizeof(ip_str));
   if (ct->local_uim_addr.domain_id > -1) {
-    snprintf(src_conn->src_uim_addr, sizeof(src_conn->src_uim_addr),
+    snprintf(src_conn->src_uim_addr_str, sizeof(src_conn->src_uim_addr_str),
       "TCP:%u:%s:%u",
       ct->local_uim_addr.domain_id, ip_str, ct->local_uim_addr.port);
   }
   else {
-    snprintf(src_conn->src_uim_addr, sizeof(src_conn->src_uim_addr),
+    snprintf(src_conn->src_uim_addr_str, sizeof(src_conn->src_uim_addr_str),
       "TCP:%s:%u",
       ip_str, ct->local_uim_addr.port);
   }
@@ -374,8 +374,8 @@ int lbmct_src_conn_create(lbmct_src_conn_t **rtn_src_conn, lbmct_src_t *ct_src,
   memcpy(src_conn->rcv_source_name, source_name,
     sizeof(src_conn->rcv_source_name));
   src_conn->rcv_ct_id = rcv_ct_id;
-  memcpy(src_conn->rcv_uim_addr, rcv_uim_addr,
-    sizeof(src_conn->rcv_uim_addr));
+  memcpy(src_conn->rcv_uim_addr_str, rcv_uim_addr_str,
+    sizeof(src_conn->rcv_uim_addr_str));
   src_conn->rcv_conn_id = rcv_conn_id;
   memcpy(src_conn->rcv_conn_id_str, rcv_conn_id_str,
     sizeof(src_conn->rcv_conn_id_str));
@@ -403,7 +403,7 @@ int lbmct_src_handle_handshake_creq(lbmct_t *ct,
   char cmd[LBMCT_PREFIX_SZ+1];
   unsigned int field_cnt;
   unsigned int rcv_ct_id;
-  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
+  char rcv_uim_addr_str[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int rcv_conn_id;
   int topic_str_ofs = 0;
   const char *topic_str;
@@ -420,7 +420,7 @@ int lbmct_src_handle_handshake_creq(lbmct_t *ct,
     "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* uim_addr */
     "%u,"  /* conn_id */
     "%n",  /* offset to topic name */
-    cmd, &field_cnt, &rcv_ct_id, rcv_uim_addr, &rcv_conn_id, &topic_str_ofs);
+    cmd, &field_cnt, &rcv_ct_id, rcv_uim_addr_str, &rcv_conn_id, &topic_str_ofs);
 
   /* sscanf will only set the final %n offset if everything before it is OK. */
   if (topic_str_ofs == 0) E_RTN("Conn req msg: parse error", -1);
@@ -431,7 +431,7 @@ int lbmct_src_handle_handshake_creq(lbmct_t *ct,
 
   /* Assemble a unique connection endpoint ID (used as key for asl). */
   snprintf(rcv_conn_id_str, sizeof(rcv_conn_id_str),
-    "%u,%s,%u", rcv_ct_id, rcv_uim_addr, rcv_conn_id);
+    "%u,%s,%u", rcv_ct_id, rcv_uim_addr_str, rcv_conn_id);
 
   /* See if we've already registered this connection. */
   memcpy(tst_src_conn.rcv_conn_id_str, rcv_conn_id_str,
@@ -460,7 +460,7 @@ int lbmct_src_handle_handshake_creq(lbmct_t *ct,
 
     /* Create the connection. */
     err = lbmct_src_conn_create(&src_conn, found_ct_src, source_name,
-      rcv_ct_id, rcv_uim_addr, rcv_conn_id, rcv_conn_id_str);
+      rcv_ct_id, rcv_uim_addr_str, rcv_conn_id, rcv_conn_id_str);
     if (err != LBM_OK) E_RTN(lbm_errmsg(), -1);
 
     is_ok = mul_asl_insert_and_retrieve_node(ct->src_conn_asl, src_conn,
@@ -511,10 +511,10 @@ int lbmct_src_handle_handshake_c_ok(lbmct_t *ct,
   char cmd[LBMCT_PREFIX_SZ+1];
   unsigned int field_cnt;
   unsigned int rcv_ct_id;
-  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
+  char rcv_uim_addr_str[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int rcv_conn_id;
   unsigned int src_ct_id;
-  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
+  char src_uim_addr_str[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int src_conn_id;
   unsigned int start_sqn;
   int metadata_len;
@@ -524,17 +524,17 @@ int lbmct_src_handle_handshake_c_ok(lbmct_t *ct,
     "%" STRDEF(LBMCT_PREFIX_SZ) "[a-zA-Z0-9_],"  /* cmd */
     "%u,"  /* field_cnt */
     "%u,"  /* rcv_ct_id */
-    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* rcv_uim_addr */
+    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* rcv_uim_addr_str */
     "%u,"  /* rcv_conn_id */
     "%u,"  /* src_ct_id */
-    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* src_uim_addr */
+    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* src_uim_addr_str */
     "%u,"  /* src_conn_id */
     "%u,"  /* start_sqn */
     "%u"  /* metadata_len */
     "%n",  /* offset to null */
     cmd, &field_cnt,
-    &rcv_ct_id, rcv_uim_addr, &rcv_conn_id,
-    &src_ct_id, src_uim_addr, &src_conn_id,
+    &rcv_ct_id, rcv_uim_addr_str, &rcv_conn_id,
+    &src_ct_id, src_uim_addr_str, &src_conn_id,
     &start_sqn, &metadata_len, &metadata_ofs);
 
   /* sscanf will only set the final %n offset if everything before is OK. */
@@ -547,7 +547,7 @@ int lbmct_src_handle_handshake_c_ok(lbmct_t *ct,
 
   /* Assemble a unique connection endpoint ID (used as key for asl). */
   snprintf(rcv_conn_id_str, sizeof(rcv_conn_id_str),
-    "%u,%s,%u", rcv_ct_id, rcv_uim_addr, rcv_conn_id);
+    "%u,%s,%u", rcv_ct_id, rcv_uim_addr_str, rcv_conn_id);
 
   memcpy(tst_src_conn.rcv_conn_id_str, rcv_conn_id_str,
     sizeof(tst_src_conn.rcv_conn_id_str));
@@ -568,8 +568,8 @@ int lbmct_src_handle_handshake_c_ok(lbmct_t *ct,
     if (src_conn->state == LBMCT_CONN_STATE_STARTING) {
       /* Save connection info from receiver. */
       src_conn->rcv_ct_id = rcv_ct_id;
-      memcpy(src_conn->rcv_uim_addr, rcv_uim_addr,
-        sizeof(src_conn->rcv_uim_addr));
+      memcpy(src_conn->rcv_uim_addr_str, rcv_uim_addr_str,
+        sizeof(src_conn->rcv_uim_addr_str));
       src_conn->rcv_conn_id = rcv_conn_id;
 
       src_conn->peer_info.rcv_start_seq_num = start_sqn;
@@ -631,10 +631,10 @@ int lbmct_src_handle_handshake_dreq(lbmct_t *ct,
   char cmd[LBMCT_PREFIX_SZ+1];
   unsigned int field_cnt;
   unsigned int rcv_ct_id;
-  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
+  char rcv_uim_addr_str[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int rcv_conn_id;
   unsigned int src_ct_id;
-  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
+  char src_uim_addr_str[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int src_conn_id;
   int null_ofs = 0;
 
@@ -642,15 +642,15 @@ int lbmct_src_handle_handshake_dreq(lbmct_t *ct,
     "%" STRDEF(LBMCT_PREFIX_SZ) "[a-zA-Z0-9_],"  /* cmd */
     "%u,"  /* field_cnt */
     "%u,"  /* rcv_ct_id */
-    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* rcv_uim_addr */
+    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* rcv_uim_addr_str */
     "%u,"  /* rcv_conn_id */
     "%u,"  /* src_ct_id */
-    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* src_uim_addr */
+    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* src_uim_addr_str */
     "%u"  /* src_conn_id */
     "%n",  /* offset to null */
     cmd, &field_cnt,
-    &rcv_ct_id, rcv_uim_addr, &rcv_conn_id,
-    &src_ct_id, src_uim_addr, &src_conn_id,
+    &rcv_ct_id, rcv_uim_addr_str, &rcv_conn_id,
+    &src_ct_id, src_uim_addr_str, &src_conn_id,
     &null_ofs);
 
   /* sscanf will only set the final %n offset if everything before is OK. */
@@ -660,7 +660,7 @@ int lbmct_src_handle_handshake_dreq(lbmct_t *ct,
 
   /* Assemble a unique connection endpoint ID (used as key for asl). */
   snprintf(rcv_conn_id_str, sizeof(rcv_conn_id_str),
-    "%u,%s,%u", rcv_ct_id, rcv_uim_addr, rcv_conn_id);
+    "%u,%s,%u", rcv_ct_id, rcv_uim_addr_str, rcv_conn_id);
 
   memcpy(tst_src_conn.rcv_conn_id_str, rcv_conn_id_str,
     sizeof(tst_src_conn.rcv_conn_id_str));
@@ -721,10 +721,10 @@ int lbmct_src_handle_handshake_d_ok(lbmct_t *ct,
   char cmd[LBMCT_PREFIX_SZ+1];
   unsigned int field_cnt;
   unsigned int rcv_ct_id;
-  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
+  char rcv_uim_addr_str[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int rcv_conn_id;
   unsigned int src_ct_id;
-  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
+  char src_uim_addr_str[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int src_conn_id;
   unsigned int end_sqn;
   int null_ofs = 0;
@@ -733,16 +733,16 @@ int lbmct_src_handle_handshake_d_ok(lbmct_t *ct,
     "%" STRDEF(LBMCT_PREFIX_SZ) "[a-zA-Z0-9_],"  /* cmd */
     "%u,"  /* field_cnt */
     "%u,"  /* rcv_ct_id */
-    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* rcv_uim_addr */
+    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* rcv_uim_addr_str */
     "%u,"  /* rcv_conn_id */
     "%u,"  /* src_ct_id */
-    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* src_uim_addr */
+    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* src_uim_addr_str */
     "%u,"  /* src_conn_id */
     "%u"  /* end_sqn */
     "%n",  /* offset to null */
     cmd, &field_cnt,
-    &rcv_ct_id, rcv_uim_addr, &rcv_conn_id,
-    &src_ct_id, src_uim_addr, &src_conn_id,
+    &rcv_ct_id, rcv_uim_addr_str, &rcv_conn_id,
+    &src_ct_id, src_uim_addr_str, &src_conn_id,
     &end_sqn, &null_ofs);
 
   /* sscanf will only set the final %n offset if everything before is OK. */
@@ -752,7 +752,7 @@ int lbmct_src_handle_handshake_d_ok(lbmct_t *ct,
 
   /* Assemble a unique connection endpoint ID (used as key for asl). */
   snprintf(rcv_conn_id_str, sizeof(rcv_conn_id_str),
-    "%u,%s,%u", rcv_ct_id, rcv_uim_addr, rcv_conn_id);
+    "%u,%s,%u", rcv_ct_id, rcv_uim_addr_str, rcv_conn_id);
 
   memcpy(tst_src_conn.rcv_conn_id_str, rcv_conn_id_str,
     sizeof(tst_src_conn.rcv_conn_id_str));

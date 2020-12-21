@@ -26,7 +26,7 @@ FILE_PATTERNS     = *.cpp *.h *.doc
 RECURSIVE         = NO
 
 GENERATE_TAGFILE  = ../html/manual.tag
-TAGFILES          = ../html/java.tag=../java
+TAGFILES          = ../html/c.tag=../c ../html/java.tag=../java
 ALLEXTERNALS      = NO
 PERL_PATH         = /usr/bin/perl
 SEARCHENGINE      = NO

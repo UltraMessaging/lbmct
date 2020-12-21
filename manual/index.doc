@@ -32,14 +32,12 @@ deliver deletion events.
 
 The rest of this page provides a high-level description of the CT package.
 You can also jump to other pages:
-* [Release Notes]
-* C User Guide](doc/Userguide.md) - explains how to write C-language Connected
-Topic applications.
-* Java User Guide](doc/Java_Userguide.md) - explains how to write Java-language
-Connected Topic applications.
-* C API Reference](doc/c/index.html) - details on each C API.
-* Java API Reference](doc/java/index.html) - details on each Java API.
-* Internal Design](doc/Internal_Design.md) - details of the CT implementation.
+<ul>
+<li> \ref releasenotes
+<li> \ref capioverview - Details on the C API.
+<li> \ref javaapioverview - Details on the Java API.
+<li> Internal Design](doc/Internal_Design.md) - details of the CT implementation.
+</ul>
 
 \n \section sourcecode Source Code
 
@@ -84,7 +82,6 @@ the level of user interest.
 If you decide to use CT, please let us know through the support organization!
 We will keep you informed of the package's continued evolution.
 
----
 
 \n \section features Features
 
@@ -118,7 +115,6 @@ so CT does require at least UM version 6.10.
 UM context, and even the same transport sessions.
 But see [Interoperability](#interoperability).
 
----
 
 \n \section opportunitiesandlimitations Opportunities and Limitations
 
@@ -168,7 +164,6 @@ in the latency-sensitive main message path.)
 CT does not discover the domain ID dynamically.
 If using DRO, see Domain ID](doc/Domain_ID.md).
 
----
 
 \n \section caveats Caveats
 
@@ -209,7 +204,6 @@ not return until the handshake is complete, or the attempt times out.
 connections waiting to be fully disconnected.
 There is no “force quit” API, although the process can simply exit.
 
----
 
 \n \section interoperability Interoperability
 
@@ -239,6 +233,7 @@ the source, but at least the messages from the non-CT Source will be delivered.
 
 * When Smart Source is added, the sender will need to be at least UM 6.10,
 although the Smart Source code could be conditionally compiled.
+
 
 \page releasenotes Release Notes
 

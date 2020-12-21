@@ -28,6 +28,8 @@ import com.latencybusters.lbm.*;
 import com.latencybusters.lbmct.*;
 
 class MinCtRcv {
+  private boolean done = false;
+
   public static void main(String[] args) throws Exception {
     // The body of the program is in the "run" method.
     MinCtRcv application = new MinCtRcv();
@@ -64,9 +66,9 @@ class MinCtRcv {
     LbmCtRcv myCtRcv = new LbmCtRcv();  // This just creates the object.
     myCtRcv.start(myCt, "myTopic", myRcvAttr, myRcvCbObj, myRcvCreateCbObj, myRcvDeleteCbObj, myRcvCbArg);
 
-    for (int i = 0; i < 10; i++) {
+    while (! done) {
       Thread.sleep(1000);
-      System.out.println("Waiting...");
+      System.out.println("MinRcv: Checking for done...");
     }
 
     // Clean up.
@@ -86,6 +88,7 @@ class MinCtRcv {
           ", sequenceNumber=" + msg.sequenceNumber() +
           ", isHandshakeMessage=" + rcvConn.isHandshakeMessage() +
           ", perConnectionStateObj=" + perConnectionStateObj);
+
       return 0;
     }
   }
@@ -123,6 +126,7 @@ class MinCtRcv {
         System.out.println("onRcvConnDelete: rcv ending sequence num=" +
             peerInfo.getRcvEndSequenceNumber());
       } catch (Exception e) { System.out.println("Exception: " + e.toString()); }
+      done = true;
     }
   }
 }

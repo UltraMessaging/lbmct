@@ -150,10 +150,10 @@ int lbmct_rcv_handle_handshake_crsp(lbmct_rcv_conn_t *rcv_conn, lbm_msg_t *msg)
   char cmd[LBMCT_PREFIX_SZ+1];
   unsigned int field_cnt;
   unsigned int rcv_ct_id;
-  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
+  char rcv_uim_addr_str[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int rcv_conn_id;
   unsigned int src_ct_id;
-  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
+  char src_uim_addr_str[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int src_conn_id;
   int metadata_len;
   int metadata_ofs = 0;
@@ -171,16 +171,16 @@ int lbmct_rcv_handle_handshake_crsp(lbmct_rcv_conn_t *rcv_conn, lbm_msg_t *msg)
     "%" STRDEF(LBMCT_PREFIX_SZ) "[a-zA-Z0-9_],"  /* cmd */
     "%u,"  /* field_cnt */
     "%u,"  /* rcv_ct_id */
-    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* rcv_uim_addr */
+    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* rcv_uim_addr_str */
     "%u,"  /* rcv_conn_id */
     "%u,"  /* src_ct_id */
-    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* src_uim_addr */
+    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* src_uim_addr_str */
     "%u,"  /* src_conn_id */
     "%u"  /* metadata_len */
     "%n",  /* offset to null */
     cmd, &field_cnt,
-    &rcv_ct_id, rcv_uim_addr, &rcv_conn_id,
-    &src_ct_id, src_uim_addr, &src_conn_id,
+    &rcv_ct_id, rcv_uim_addr_str, &rcv_conn_id,
+    &src_ct_id, src_uim_addr_str, &src_conn_id,
     &metadata_len, &metadata_ofs);
 
   /* sscanf will only set the final %n offset if everything before is OK. */
@@ -195,7 +195,7 @@ int lbmct_rcv_handle_handshake_crsp(lbmct_rcv_conn_t *rcv_conn, lbm_msg_t *msg)
    * is for *this* connection.
    */
   if (rcv_ct_id == ct->ct_id && rcv_conn_id == rcv_conn->rcv_conn_id &&
-    strcmp(rcv_uim_addr, rcv_conn->rcv_uim_addr) == 0)
+    strcmp(rcv_uim_addr_str, rcv_conn->rcv_uim_addr_str) == 0)
   {
     PRT_MUTEX_LOCK(rcv_conn->conn_lock);
 
@@ -206,20 +206,20 @@ int lbmct_rcv_handle_handshake_crsp(lbmct_rcv_conn_t *rcv_conn, lbm_msg_t *msg)
 
       /* Save connection info from source. */
       rcv_conn->src_ct_id = src_ct_id;
-      memcpy(rcv_conn->src_uim_addr, src_uim_addr,
-        sizeof(rcv_conn->src_uim_addr));
+      memcpy(rcv_conn->src_uim_addr_str, src_uim_addr_str,
+        sizeof(rcv_conn->src_uim_addr_str));
       /* See if should override source dest addr. */
-      switch (strnchr_cnt(src_uim_addr, sizeof(src_uim_addr), ':')) {
-        case 3:  /* src_uim_addr has domain ID; use it. */
-          memcpy(rcv_conn->src_dest_addr, src_uim_addr,
-            sizeof(rcv_conn->src_uim_addr));
+      switch (strnchr_cnt(src_uim_addr_str, sizeof(src_uim_addr_str), ':')) {
+        case 3:  /* src_uim_addr_str has domain ID; use it. */
+          memcpy(rcv_conn->src_dest_addr, src_uim_addr_str,
+            sizeof(rcv_conn->src_uim_addr_str));
           break;
-        case 2:  /* src_uim_addr has NO domain ID; use existing dest addr. */
+        case 2:  /* src_uim_addr_str has NO domain ID; use existing dest addr. */
           break;
         default:
           lbm_logf(LBM_LOG_WARNING,
-            "Warning at %s:%d, suspicious src_uim_addr '%s'\n",
-            BASENAME(__FILE__), __LINE__, src_uim_addr);
+            "Warning at %s:%d, suspicious src_uim_addr_str '%s'\n",
+            BASENAME(__FILE__), __LINE__, src_uim_addr_str);
       }  /* switch */
       rcv_conn->src_conn_id = src_conn_id;
 
@@ -283,10 +283,10 @@ int lbmct_rcv_handle_handshake_drsp(lbmct_rcv_conn_t *rcv_conn, lbm_msg_t *msg)
   char cmd[LBMCT_PREFIX_SZ+1];
   unsigned int field_cnt;
   unsigned int rcv_ct_id;
-  char rcv_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
+  char rcv_uim_addr_str[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int rcv_conn_id;
   unsigned int src_ct_id;
-  char src_uim_addr[LBM_MSG_MAX_SOURCE_LEN];
+  char src_uim_addr_str[LBM_MSG_MAX_SOURCE_LEN];
   unsigned int src_conn_id;
   int null_ofs = 0;
 
@@ -304,15 +304,15 @@ int lbmct_rcv_handle_handshake_drsp(lbmct_rcv_conn_t *rcv_conn, lbm_msg_t *msg)
     "%" STRDEF(LBMCT_PREFIX_SZ) "[a-zA-Z0-9_],"  /* cmd */
     "%u,"  /* field_cnt */
     "%u,"  /* rcv_ct_id */
-    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* rcv_uim_addr */
+    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* rcv_uim_addr_str */
     "%u,"  /* rcv_conn_id */
     "%u,"  /* src_ct_id */
-    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* src_uim_addr */
+    "%" STRDEF(LBMCT_UIM_ADDR_STR_SZ) "[A-Z0-9:.],"  /* src_uim_addr_str */
     "%u"  /* src_conn_id */
     "%n",  /* offset to null */
     cmd, &field_cnt,
-    &rcv_ct_id, rcv_uim_addr, &rcv_conn_id,
-    &src_ct_id, src_uim_addr, &src_conn_id,
+    &rcv_ct_id, rcv_uim_addr_str, &rcv_conn_id,
+    &src_ct_id, src_uim_addr_str, &src_conn_id,
     &null_ofs);
 
   /* sscanf will only set the final %n offset if everything before is OK. */
@@ -326,7 +326,7 @@ int lbmct_rcv_handle_handshake_drsp(lbmct_rcv_conn_t *rcv_conn, lbm_msg_t *msg)
    * is for *this* connection.
    */
   if (rcv_ct_id == ct->ct_id && rcv_conn_id == rcv_conn->rcv_conn_id &&
-    strcmp(rcv_uim_addr, rcv_conn->rcv_uim_addr) == 0)
+    strcmp(rcv_uim_addr_str, rcv_conn->rcv_uim_addr_str) == 0)
   {
     PRT_MUTEX_LOCK(rcv_conn->conn_lock);
 
@@ -654,10 +654,10 @@ int lbmct_handshake_send_creq(lbmct_rcv_conn_t *rcv_conn)
   int creq_len;
   int err;
 
-  /*  CREQ,field_count,ct_id,rcv_uim_addr,conn_id,topic_str */
+  /*  CREQ,field_count,ct_id,rcv_uim_addr_str,conn_id,topic_str */
   creq_len = snprintf(creq_msg, sizeof(creq_msg),
     "%s,6,%u,%s,%u,%s", LBMCT_CREQ_MSG_PREFIX,
-    ct->ct_id, rcv_conn->rcv_uim_addr, rcv_conn->rcv_conn_id,
+    ct->ct_id, rcv_conn->rcv_uim_addr_str, rcv_conn->rcv_conn_id,
     rcv_conn->ct_rcv->topic_str);
   creq_len++;  /* Include final NULL. */
 
@@ -721,13 +721,13 @@ int lbmct_handshake_send_dreq(lbmct_rcv_conn_t *rcv_conn)
 
   um_rcv = ct_rcv->um_rcv;
 
-  /* dreq,field_count,rcv_ct_id,rcv_uim_addr,rcv_ct_id,
-   *   src_ct_id,src_uim_addr,src_conn_id<nul>
+  /* dreq,field_count,rcv_ct_id,rcv_uim_addr_str,rcv_ct_id,
+   *   src_ct_id,src_uim_addr_str,src_conn_id<nul>
    */
   dreq_len = snprintf(dreq_msg, sizeof(dreq_msg),
     "%s,10,%u,%s,%u,%u,%s,%u", LBMCT_DREQ_MSG_PREFIX,
-    ct->ct_id, rcv_conn->rcv_uim_addr, rcv_conn->rcv_conn_id,
-    rcv_conn->src_ct_id, rcv_conn->src_uim_addr, rcv_conn->src_conn_id);
+    ct->ct_id, rcv_conn->rcv_uim_addr_str, rcv_conn->rcv_conn_id,
+    rcv_conn->src_ct_id, rcv_conn->src_uim_addr_str, rcv_conn->src_conn_id);
   dreq_len++;  /* Include final NULL. */
 
   if (! (ct->active_config.test_bits & LBMCT_TEST_BITS_NO_DREQ)) {
@@ -741,7 +741,7 @@ int lbmct_handshake_send_dreq(lbmct_rcv_conn_t *rcv_conn)
   else {
     lbm_logf(LBM_LOG_NOTICE,
       "LBMCT_TEST_BITS_NO_DREQ at %s:%d, skipping send of '%s' to %s\n",
-      BASENAME(__FILE__), __LINE__, dreq_msg, rcv_conn->src_uim_addr);
+      BASENAME(__FILE__), __LINE__, dreq_msg, rcv_conn->src_uim_addr_str);
   }
 
   return LBM_OK;
@@ -1054,7 +1054,7 @@ int lbmct_ctrlr_cmd_rcv_conn_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
 
   rcv_conn->ct_rcv = ct_rcv;
   rcv_conn->state = LBMCT_CONN_STATE_STARTING;
-  rcv_conn->src_uim_addr[0] = '\0';
+  rcv_conn->src_uim_addr_str[0] = '\0';
   rcv_conn->conn_list_next = NULL;
   rcv_conn->conn_list_prev = NULL;
   rcv_conn->app_conn_create_called = 0;
@@ -1078,12 +1078,12 @@ int lbmct_ctrlr_cmd_rcv_conn_create(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
   /* Assemble UIM address for this ct. */
   (void)mul_inet_ntop(ct->local_uim_addr.ip_addr, ip_str, sizeof(ip_str));
   if (ct->local_uim_addr.domain_id > -1) {
-    snprintf(rcv_conn->rcv_uim_addr, sizeof(rcv_conn->rcv_uim_addr),
+    snprintf(rcv_conn->rcv_uim_addr_str, sizeof(rcv_conn->rcv_uim_addr_str),
       "TCP:%u:%s:%u",
       ct->local_uim_addr.domain_id, ip_str, ct->local_uim_addr.port);
   }
   else {
-    snprintf(rcv_conn->rcv_uim_addr, sizeof(rcv_conn->rcv_uim_addr),
+    snprintf(rcv_conn->rcv_uim_addr_str, sizeof(rcv_conn->rcv_uim_addr_str),
       "TCP:%s:%u",
       ip_str, ct->local_uim_addr.port);
   }
@@ -1233,14 +1233,14 @@ int lbmct_ctrlr_cmd_rcv_send_c_ok(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
   um_rcv = ct_rcv->um_rcv;
 
   PRT_MALLOC_N(c_ok_msg, char, LBMCT_C_OK_MSG_BASE_SZ + ct->metadata_len + 1);
-  /* c_ok,field_count,rcv_ct_id,rcv_uim_addr,rcv_ct_id,
-   *   src_ct_id,src_uim_addr,src_conn_id,start_sqn,
+  /* c_ok,field_count,rcv_ct_id,rcv_uim_addr_str,rcv_ct_id,
+   *   src_ct_id,src_uim_addr_str,src_conn_id,start_sqn,
    *   meta_len<nul>metadata
    */
   c_ok_msg_len = snprintf(c_ok_msg, LBMCT_C_OK_MSG_BASE_SZ,
     "%s,10,%u,%s,%u,%u,%s,%u,%u,%lu", LBMCT_C_OK_MSG_PREFIX,
-    ct->ct_id, rcv_conn->rcv_uim_addr, rcv_conn->rcv_conn_id,
-    rcv_conn->src_ct_id, rcv_conn->src_uim_addr, rcv_conn->src_conn_id,
+    ct->ct_id, rcv_conn->rcv_uim_addr_str, rcv_conn->rcv_conn_id,
+    rcv_conn->src_ct_id, rcv_conn->src_uim_addr_str, rcv_conn->src_conn_id,
     rcv_conn->peer_info.rcv_start_seq_num, ct->metadata_len);
   c_ok_msg_len++;  /* Include final NULL. */
   if (ct->metadata != NULL && ct->metadata_len > 0) {
@@ -1259,7 +1259,7 @@ int lbmct_ctrlr_cmd_rcv_send_c_ok(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
   else {
     lbm_logf(LBM_LOG_NOTICE,
       "LBMCT_TEST_BITS_NO_C_OK at %s:%d, skipping send of '%s' to %s\n",
-      BASENAME(__FILE__), __LINE__, c_ok_msg, rcv_conn->src_uim_addr);
+      BASENAME(__FILE__), __LINE__, c_ok_msg, rcv_conn->src_uim_addr_str);
   }
   free(c_ok_msg);
 
@@ -1288,13 +1288,13 @@ int lbmct_ctrlr_cmd_rcv_send_d_ok(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
 
   um_rcv = ct_rcv->um_rcv;
 
-  /* d_ok,field_count,rcv_ct_id,rcv_uim_addr,rcv_ct_id,
-   *   src_ct_id,src_uim_addr,src_conn_id,end_sqn<nul>
+  /* d_ok,field_count,rcv_ct_id,rcv_uim_addr_str,rcv_ct_id,
+   *   src_ct_id,src_uim_addr_str,src_conn_id,end_sqn<nul>
    */
   dreq_len = snprintf(d_ok_msg, sizeof(d_ok_msg),
     "%s,10,%u,%s,%u,%u,%s,%u,%u", LBMCT_D_OK_MSG_PREFIX,
-    ct->ct_id, rcv_conn->rcv_uim_addr, rcv_conn->rcv_conn_id,
-    rcv_conn->src_ct_id, rcv_conn->src_uim_addr, rcv_conn->src_conn_id,
+    ct->ct_id, rcv_conn->rcv_uim_addr_str, rcv_conn->rcv_conn_id,
+    rcv_conn->src_ct_id, rcv_conn->src_uim_addr_str, rcv_conn->src_conn_id,
     rcv_conn->peer_info.rcv_end_seq_num);
   dreq_len++;  /* Include final NULL. */
 
@@ -1309,7 +1309,7 @@ int lbmct_ctrlr_cmd_rcv_send_d_ok(lbmct_t *ct, lbmct_ctrlr_cmd_t *cmd)
   else {
     lbm_logf(LBM_LOG_NOTICE,
       "LBMCT_TEST_BITS_NO_D_OK at %s:%d, skipping send of '%s' to %s\n",
-      BASENAME(__FILE__), __LINE__, d_ok_msg, rcv_conn->src_uim_addr);
+      BASENAME(__FILE__), __LINE__, d_ok_msg, rcv_conn->src_uim_addr_str);
   }
 
   return LBM_OK;
